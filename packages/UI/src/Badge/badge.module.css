@@ -56,7 +56,7 @@
 .facet-count-badges-total {
     background-color: transparent;
     color: var(--secondary-blue);
-    box-shadow: inset 0 0 0 1px var(--secondary-blue);
+    box-shadow: inset 0 0 3px 2px var(--secondary-blue);
     font-weight: 500;
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;

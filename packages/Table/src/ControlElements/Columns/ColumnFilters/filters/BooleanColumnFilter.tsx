@@ -1,4 +1,4 @@
-import { Badge, Checkbox } from "@niagads/ui";
+import { Badge, Checkbox, FacetCountBadges } from "@niagads/ui";
 import { FilterProps, RowValueSummary } from "./types";
 
 import React from "react";
@@ -9,7 +9,8 @@ export const BooleanFilter = ({ column, referenceValues, filteredValues }: Filte
     const trueValue = meta.trueValue ? meta.trueValue.toString() : "true";
     const label = column.columnDef.header!.toString();
     const filterValue = column.getFilterValue();
-    const trueCount = filteredValues.counts[trueValue] || 0;
+    const filteredCount = filteredValues.counts[trueValue] || 0;
+    const referenceCount = referenceValues.counts[trueValue] || 0;
 
     return (
         <div className={styles["filter-boolean-container"]}>
@@ -22,7 +23,7 @@ export const BooleanFilter = ({ column, referenceValues, filteredValues }: Filte
                     }}
                 />
                 <span className={styles["filter-boolean-value"]}>{label}</span>
-                <Badge className={styles["filter-boolean-count"]}>{trueCount}</Badge>
+                <FacetCountBadges count={filteredCount} total={referenceCount} />
             </div>
         </div>
     );
