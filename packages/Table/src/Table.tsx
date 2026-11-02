@@ -34,7 +34,7 @@ import React, { ReactNode, useCallback, useLayoutEffect, useMemo, useState } fro
 import { _get, toTitleCase } from "@niagads/common";
 import { getCellValue, renderCell, resolveCell, validateCellType } from "./Cells/utils";
 import { isValidUniqueKey, limitRowSelection, resolveRowSelectionState } from "./utils/rowSelection";
-import { resolveFilterFn, resolveSortingFn } from "./utils/columnDefs";
+import { resolveFilterFn, resolveFilterType, resolveSortingFn } from "./utils/columnDefs";
 
 import { RowSelectionControls } from "./ControlElements/RowSelectionControls";
 import TableHeader from "./TableHeader";
@@ -131,7 +131,7 @@ const Table = ({ id, columns, data, options, rowSelection, onRowSelectionChange 
                     enableHiding: !col.required, // if required is true, enableHiding is false
                     meta: {
                         type: col.type,
-                        filterType: col.filterOpts?.filterType || undefined,
+                        filterType: col.filterOpts?.filterType || resolveFilterType(col.type),
                         filterGroup: col.filterOpts?.filterGroup || "",
                         filterValueColumn: col.filterOpts?.valueColumn,
                         description: col.description,

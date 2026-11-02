@@ -1,5 +1,19 @@
+import { ColumnFilterType, TableColumn, TableRow } from "../types";
 import { FilterFnOption, SortingFnOption } from "@tanstack/react-table";
-import { TableColumn, TableRow } from "../types";
+
+import { CellType } from "../Cells/types";
+import { NUMERIC_CELL_TYPES } from "../ControlElements/Columns/ColumnFilters/filters";
+
+export const resolveFilterType = (cellType: CellType): ColumnFilterType => {
+    if (NUMERIC_CELL_TYPES.includes(cellType)) {
+        return "histogram";
+    }
+    if (cellType === "boolean") {
+        return "boolean";
+    }
+
+    return "select";
+};
 
 /* assign a sorting function based upon column type or user-specified sortingFn */
 export const resolveSortingFn = (col: TableColumn): SortingFnOption<TableRow> => {
