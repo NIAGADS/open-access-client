@@ -1,9 +1,10 @@
 import {
     BooleanFilter,
+    HistogramFilter,
     MultiSelectPillFilter,
     NUMERIC_CELL_TYPES,
     NoValidValueAlert,
-    NumericFilter,
+    PValueFilter,
     PieChartFilter,
     RichSelectFilter,
 } from ".";
@@ -81,11 +82,14 @@ const _organizeValueCounts = (valueCounts: Map<string, number>, naValue: string)
  */
 const ColumnFilter = ({ column }: FilterColumn) => {
     const meta = column.columnDef.meta!;
-    const naValue = meta.naValue || DEFAULT_NA_VALUE;
 
     if (NUMERIC_CELL_TYPES.includes(meta.type)) {
-        return <NumericFilter column={column} />;
+        if (meta.type === "pvalue") return <PValueFilter column={column} />;
+        // if (column.columnDef.meta?.filterType === "range") return  <RangeFitler column={column} />;
+        return <HistogramFilter column={column} />;
     }
+
+    const naValue = meta.naValue || DEFAULT_NA_VALUE;
 
     // get "reference" unique values -> all possible values in pre-filtered data
     const valueCounts: Map<string, number> = useMemo(() => column.getUniqueValues(), [column.id]);

@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 
 import FilterComponent from "./filters/ColumnFilter";
 import { TrashIcon } from "lucide-react";
+import { fromNegLog10 } from "@niagads/common";
 import styles from "./ColumnFilterControls.module.css";
 
 interface ColumnFilterControlsProps {
@@ -96,14 +97,22 @@ export const ColumnFilterControls = ({
                 }
             >
                 {activeFilters.length > 0 ? (
-                    activeFilters.map((filter) => (
-                        <FilterChip
-                            key={`filter-chip-${filter.id}`}
-                            label={filterableColumns.find((x) => x.id === filter.id)?.columnDef.header as string}
-                            value={`${filter.value}`}
-                            onRemove={() => onRemoveFilter(filter)}
-                        />
-                    ))
+                    activeFilters.map((filter) => {
+                        const col = filterableColumns.find((x) => x.id === filter.id);
+                        const value =
+                            col!.columnDef?.meta?.type === "pvalue"
+                                ? `≤ ${fromNegLog10(filter.value as number)}`
+                                : filter.value;
+
+                        return (
+                            <FilterChip
+                                key={`filter-chip-${filter.id}`}
+                                label={col!.columnDef.header as string}
+                                value={`${value}`}
+                                onRemove={() => onRemoveFilter(filter)}
+                            />
+                        );
+                    })
                 ) : (
                     <FilterChip label="None" disabled />
                 )}

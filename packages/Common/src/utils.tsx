@@ -65,7 +65,7 @@ export const _isEmpty = (value: Record<string, any> | null | undefined) => {
     return value === null || value === undefined || check(value);
 };
 
-export const negLog10 = (
+export const toNegLog10 = (
     value: number | string,
     precision: number = 2,
     cap: number | undefined = undefined
@@ -78,6 +78,14 @@ export const negLog10 = (
     }
     const neglog10p: number = -Math.log10(parseFloat(value + ""));
     return cap && neglog10p > cap ? cap : parseFloat(toFixedWithoutZeros(neglog10p, precision));
+};
+
+export const fromNegLog10 = (value: number): string => {
+    if (value >= 302) {
+        return `1e-${value}`;
+    }
+
+    return String(10 ** -value);
 };
 
 export const toFixedWithoutZeros = (value: number, precision: number = 2) => {

@@ -1,4 +1,4 @@
-import { Range, negLog10 } from "@niagads/common";
+import { Range, toNegLog10 } from "@niagads/common";
 import { RangeSelectHistogram, ThresholdSelectHistogram } from "@niagads/charts";
 import React, { useCallback, useMemo } from "react";
 
@@ -26,7 +26,7 @@ export const PValueFilter = ({ column }: FilterColumn) => {
     const title = column.columnDef.header!.toString();
 
     const referenceData = useMemo(() => {
-        const values = (column.getAllValues(true, naValue) as number[]).map((v) => negLog10(v));
+        const values = (column.getAllValues(true, naValue) as number[]).map((v) => toNegLog10(v));
         return {
             values,
             range: _generateDataRange(values),
@@ -45,13 +45,12 @@ export const PValueFilter = ({ column }: FilterColumn) => {
 
     const handleRangeFilter = useCallback(
         (range: Range) => {
-            const threshold = range.min;
-            column.setFilterValue(threshold);
+            column.setFilterValue(range.min);
         },
         [column]
     );
 
-    const filteredValues: number[] = (column.getFilteredValues(true, naValue) as number[]).map((v) => negLog10(v));
+    const filteredValues: number[] = (column.getFilteredValues(true, naValue) as number[]).map((v) => toNegLog10(v));
 
     return (
         <ThresholdSelectHistogram

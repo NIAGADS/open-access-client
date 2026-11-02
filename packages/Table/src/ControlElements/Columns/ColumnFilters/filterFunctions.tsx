@@ -1,4 +1,4 @@
-import { Range, negLog10 } from "@niagads/common";
+import { Range, toNegLog10 } from "@niagads/common";
 import { rankItem, rankings } from "@tanstack/match-sorter-utils";
 
 import { FilterFn } from "@tanstack/react-table";
@@ -14,10 +14,9 @@ export const neglog10Filter: FilterFn<any> = (row, columnId, filterValue) => {
     const rowValue = row.getValue(columnId) as number;
     const targetValue: number | undefined = filterValue;
 
-    // If filter is empty, don't filter anything out
     if (targetValue === undefined) return true;
 
-    return negLog10(rowValue) >= targetValue;
+    return toNegLog10(rowValue) >= targetValue;
 };
 
 // for handling multi-selects, accounting for list text fields
