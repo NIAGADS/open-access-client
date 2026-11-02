@@ -35,3 +35,14 @@ export const Badge = ({
         </span>
     );
 };
+
+interface FacetCountBadgesProps extends StylingProps {
+    count: number;
+    total: number;
+}
+export const FacetCountBadges = ({ count, total }: FacetCountBadgesProps) => (
+    <span className={styles["facet-count-badges"]} aria-label={`${count} matching current filters, ${total} total`}>
+        <Badge className={styles["facet-count-badges-count"]}>{count}</Badge>
+        <Badge className={styles["facet-count-badges-total"]}>{total}</Badge>
+    </span>
+);
