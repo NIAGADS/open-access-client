@@ -467,6 +467,9 @@ export function histogram(container: HTMLElement, data: number[], opts: Histogra
     g.append("g")
         .attr("class", "histogram-axis")
         .attr("transform", `translate(0,${plotHeight})`)
+        // TODO: add tickFormatFn to AxisConfig
+        // disable default thousandths separator
+        .call(d3.axisBottom(x).tickFormat((value) => d3.format("~g")(Number(value))))
         .call(d3.axisBottom(x))
         .call((axis) => {
             axis.select(".domain").attr("stroke", HISTOGRAM_COLORS.axis).attr("stroke-width", 1);
