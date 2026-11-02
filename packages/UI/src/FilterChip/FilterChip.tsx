@@ -1,6 +1,7 @@
 import React, { ReactNode } from "react";
 
 import { StylingProps } from "../types";
+import { X } from "lucide-react";
 import styles from "./filterchip.module.css";
 
 export interface FilterChipProps extends StylingProps {
@@ -35,7 +36,7 @@ export const FilterChip = ({
                     tabIndex={0}
                     type="button"
                 >
-                    x
+                    <X />
                 </button>
             )}
 
