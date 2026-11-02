@@ -1,6 +1,6 @@
 import * as d3 from "d3";
 
-import { AxisConfig, DisplayProps } from "../d3/types";
+import { AxisConfig, AxisScaleType, DisplayProps } from "../d3/types";
 import { SelectionMode, ThresholdHandle, createSelectionOverlay } from "../d3/selectionOverlay";
 
 import { Range } from "@niagads/common";
@@ -27,7 +27,7 @@ export interface HistogramOptions {
     binDomain?: Range; // minimum bin start, maximum bin end
     xAxis?: AxisConfig;
     displayOpts?: DisplayProps;
-    yAxisScale?: "linear" | "log10";
+    yAxisScale?: AxisScaleType;
     selection?: {
         mode: SelectionMode;
         selectedRange?: Range; // [min, max] for highlighting bins

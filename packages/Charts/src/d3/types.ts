@@ -5,6 +5,8 @@
  * including axis configuration, display properties, and data point information.
  */
 
+export type AxisScaleType = "linear" | "log10";
+
 /**
  * Configuration options for chart axes
  */
@@ -15,6 +17,8 @@ export interface AxisConfig {
     max?: number;
     /** Label text to display for the axis */
     label?: string;
+    /** scale  linear or log10 */
+    scale?: AxisScaleType;
 }
 
 /** Chart width can be specified as a pixel value or CSS string (e.g., "100%") */
