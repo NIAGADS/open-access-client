@@ -8,8 +8,8 @@ import { RichSelect } from "@niagads/ui/client";
 import styles from "./column-filter.module.css";
 
 const _resolveTextFilterValue = (value: string | undefined, otherValues: string[]) => {
-    if (value === undefined) {
-        return value;
+    if (value === undefined || value === "") {
+        return undefined;
     }
 
     if (value === "Other") {
