@@ -3,7 +3,7 @@
     align-items: center;
     gap: 6px;
     max-width: 280px;
-    min-height: 26px;
+    min-height: 2rem;
     background-color: var(--surface);
     border-radius: 90px;
     padding: 3px 7px;
@@ -71,6 +71,7 @@
 .remove-btn:hover {
     background: var(--secondary-blue);
     color: #fff;
+    padding: 2px;
 }
 
 .chip-bar {
