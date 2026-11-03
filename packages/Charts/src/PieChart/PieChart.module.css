@@ -3,6 +3,14 @@
     box-sizing: border-box;
 }
 
+.pie-chart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
 /* Pie Chart Wrapper - Layout Positions */
 .pie-chart-wrapper-bottom,
 .pie-chart-wrapper-top {

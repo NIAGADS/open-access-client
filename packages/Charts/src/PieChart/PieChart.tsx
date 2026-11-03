@@ -5,6 +5,7 @@ import { _isNA } from "@niagads/common";
 import { NA_COLOR, PieChartOptions, destroyPieChart, pieChart, updatePieChartSelection } from "./d3PieChart";
 
 import { DisplayProps } from "../d3/types";
+import VisualizationInfo, { VisualizationInfoContent } from "../d3/VisualizationInfo";
 import chartStyles from "../styles/Charts.module.css";
 import styles from "./PieChart.module.css";
 
@@ -22,6 +23,7 @@ export interface PieChartProps {
     legendPosition?: "right" | "bottom" | "none";
     preserveSliceOrder?: boolean;
     title?: string;
+    visualizationInfo?: VisualizationInfoContent;
 }
 
 const getCombinedData = (data: PieChartDataRow[], referenceData?: PieChartDataRow[]): PieChartDataRow[] => {
@@ -73,6 +75,7 @@ const PieChart = ({
     title,
     legendPosition = "right",
     preserveSliceOrder = false,
+    visualizationInfo,
 }: PieChartProps) => {
     const containerRef = useRef<HTMLDivElement | null>(null);
     const chartRef = useRef<HTMLDivElement | null>(null);
@@ -122,7 +125,12 @@ const PieChart = ({
 
     return (
         <>
-            {title && <div className={chartStyles["chart-title"]}>{title}</div>}
+            {(title || visualizationInfo) && (
+                <div className={styles["pie-chart-header"]}>
+                    {title && <div className={chartStyles["chart-title"]}>{title}</div>}
+                    {visualizationInfo && <VisualizationInfo content={visualizationInfo} />}
+                </div>
+            )}
             <div
                 ref={containerRef}
                 className={`${styles["pie-chart-wrapper"]} ${styles[`pie-chart-wrapper-${legendPosition}`]}`}
