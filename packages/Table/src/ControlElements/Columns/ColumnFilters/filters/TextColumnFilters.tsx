@@ -53,6 +53,26 @@ export const PieChartFilter = ({ column, referenceValues, filteredValues }: Filt
             title={column.columnDef.header!.toString()}
             data={filteredChartData}
             referenceData={referenceChartData}
+            visualizationInfo={{
+                description:
+                    "The inner pie shows counts remaining after current filters; the outer ring shows reference counts.",
+                encodings: [
+                    {
+                        label: "Slice size",
+                        description: "The angle and area of each slice represent the record count for that value.",
+                    },
+                    {
+                        label: "Color",
+                        description: "Each color identifies a value, as shown in the legend.",
+                    },
+                    {
+                        label: "Rings",
+                        description:
+                            "The inner pie shows counts after applying all filters, while the outer ring shows total record counts.",
+                    },
+                ],
+                interactions: ["Select a slice to filter the table by that value."],
+            }}
             legendPosition="right"
             onClick={(v: string) => column.setFilterValue(_resolveTextFilterValue(v, referenceValues.otherValues))}
             displayOpts={{ width: 200 }}
