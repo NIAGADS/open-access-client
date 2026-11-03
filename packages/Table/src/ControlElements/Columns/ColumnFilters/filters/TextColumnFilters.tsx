@@ -1,7 +1,7 @@
+import { Badge, FacetCountBadges } from "@niagads/ui";
 import { PieChart, PieChartDataRow } from "@niagads/charts";
 import React, { ReactNode, useCallback, useMemo } from "react";
 
-import { Badge } from "@niagads/ui";
 import { Column } from "@tanstack/react-table";
 import { FilterProps } from "./types";
 import { RichSelect } from "@niagads/ui/client";
@@ -63,20 +63,32 @@ export const PieChartFilter = ({ column, referenceValues, filteredValues }: Filt
 
 export const RichSelectFilter = ({ column, referenceValues, filteredValues }: FilterProps) => {
     const opts = useMemo(() => {
-        return Object.entries(filteredValues.counts).reduce(
+        return Object.entries(referenceValues.counts).reduce(
             (acc, [value, count]) => {
-                acc[value] = <Badge style={{ fontSize: "0.75rem" }}>{count}</Badge>;
+                acc[value] = (
+                    <FacetCountBadges
+                        style={{ fontSize: "0.75rem" }}
+                        count={filteredValues.counts[value] || 0}
+                        total={count}
+                    />
+                );
                 return acc;
             },
             {} as Record<string, ReactNode>
         );
     }, [filteredValues]);
 
+    const disabledOptions = useMemo(
+        () => Object.keys(referenceValues.counts).filter((value) => (filteredValues.counts[value] ?? 0) === 0),
+        [filteredValues]
+    );
+
     return (
         <RichSelect
             label={column.columnDef.header!.toString()}
             placeholder="Select ..."
             options={opts}
+            disabledOptions={disabledOptions}
             onChange={(v) => column.setFilterValue(_resolveTextFilterValue(v, referenceValues.otherValues))}
         />
     );
