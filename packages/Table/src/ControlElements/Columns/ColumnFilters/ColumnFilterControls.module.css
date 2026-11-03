@@ -93,10 +93,18 @@
 }
 
 .visual-filter-panel {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    justify-items: center;
     min-width: 0;
     min-height: 260px;
     padding: 18px 24px 24px;
     border-right: 1px solid var(--border, #dce4ef);
+}
+
+.visual-filter-panel > div:first-child {
+    width: 100%;
 }
 
 .visual-filter-panel:last-child {

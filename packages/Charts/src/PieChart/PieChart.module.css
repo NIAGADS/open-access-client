@@ -23,7 +23,8 @@
 }
 
 .pie-chart-wrapper-bottom {
-    grid-template-rows: 1fr auto;
+    grid-template-rows: auto auto;
+    align-content: start;
 }
 
 .pie-chart-wrapper-top {
