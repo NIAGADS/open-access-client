@@ -64,6 +64,27 @@ export const PValueFilter = ({ column }: FilterColumn) => {
             xAxis={{ label: "-log10 p-value", max: 50 }}
             displayOpts={HISTOGRAM_DISPLAY_OPTS}
             yAxis={{ scale: "log10" }}
+            visualizationInfo={{
+                compactDisplay: true,
+                description:
+                    "The histogram shows the full p-value distribution with currently filtered values overlaid.",
+                encodings: [
+                    {
+                        label: "X-axis",
+                        description: "Values are shown as -log10(p); larger values correspond to smaller p-values.",
+                    },
+                    {
+                        label: "Y-axis",
+                        description: "The logarithmic scale shows the record count in each bin.",
+                    },
+                    {
+                        label: "Bars",
+                        description: "Muted bars show all records; colored bars show the filtered records.",
+                    },
+                ],
+                interactions: ["Drag the threshold handle to adjust the p-value cutoff."],
+                rules: ["The threshold is applied to -log10(p), so higher values represent more significant p-values."],
+            }}
         />
     );
 };
@@ -110,6 +131,26 @@ export const HistogramFilter = ({ column }: FilterColumn) => {
             title={title}
             overlayData={filteredValues}
             displayOpts={HISTOGRAM_DISPLAY_OPTS}
+            visualizationInfo={{
+                compactDisplay: true,
+                description:
+                    "The histogram shows the full numeric distribution with currently filtered values overlaid.",
+                encodings: [
+                    {
+                        label: "X-axis",
+                        description: "Numeric values are grouped into histogram bins.",
+                    },
+                    {
+                        label: "Y-axis",
+                        description: "Bar height shows the number of records in each bin.",
+                    },
+                    {
+                        label: "Bars",
+                        description: "Muted bars show all records; colored bars show the filtered records.",
+                    },
+                ],
+                interactions: ["Drag across the histogram to select a numeric range and filter the table."],
+            }}
         />
     );
 };

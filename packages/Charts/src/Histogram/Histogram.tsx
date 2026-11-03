@@ -1,6 +1,7 @@
 import { AxisConfig, DisplayProps } from "../d3/types";
 import { HistogramOptions, destroyHistogram, histogram } from "./histogramChart";
 import React, { CSSProperties, useLayoutEffect, useMemo, useRef, useState } from "react";
+import VisualizationInfo, { VisualizationInfoContent } from "../d3/VisualizationInfo";
 
 import { Range } from "@niagads/common";
 import chartStyles from "../styles/Charts.module.css";
@@ -18,7 +19,21 @@ interface HistogramProps {
     displayOpts?: DisplayProps;
     yAxis?: AxisConfig;
     xAxis?: AxisConfig;
+    visualizationInfo?: VisualizationInfoContent;
 }
+
+const HistogramHeader = ({ title, visualizationInfo }: Pick<HistogramProps, "title" | "visualizationInfo">) => {
+    if (!title && !visualizationInfo) {
+        return null;
+    }
+
+    return (
+        <div className={styles["histogram-header"]}>
+            {title && <div className={chartStyles["chart-title"]}>{title}</div>}
+            {visualizationInfo && <VisualizationInfo content={visualizationInfo} />}
+        </div>
+    );
+};
 
 function useHistogramRender(
     containerRef: React.RefObject<HTMLDivElement | null>,
@@ -123,7 +138,16 @@ function useResolvedHistogramLayout(displayOpts: DisplayProps | undefined, defau
     };
 }
 
-const Histogram = ({ data, overlayData, title, numBins, xAxis, yAxis, displayOpts }: HistogramProps) => {
+const Histogram = ({
+    data,
+    overlayData,
+    title,
+    numBins,
+    xAxis,
+    yAxis,
+    displayOpts,
+    visualizationInfo,
+}: HistogramProps) => {
     const containerRef = useRef<HTMLDivElement | null>(null);
 
     const { wrapperRef, wrapperStyle, containerStyle, resolvedDisplayOpts } = useResolvedHistogramLayout(
@@ -151,7 +175,7 @@ const Histogram = ({ data, overlayData, title, numBins, xAxis, yAxis, displayOpt
 
     return (
         <>
-            {title && <div className={chartStyles["chart-title"]}>{title}</div>}
+            <HistogramHeader title={title} visualizationInfo={visualizationInfo} />
             <div ref={wrapperRef} style={wrapperStyle}>
                 <div ref={containerRef} className={styles["histogram-container"]} style={containerStyle} />
             </div>
@@ -176,6 +200,7 @@ export const RangeSelectHistogram = ({
     range,
     title,
     onRangeSelect,
+    visualizationInfo,
 }: RangeSelectHistogramProps) => {
     const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -213,7 +238,7 @@ export const RangeSelectHistogram = ({
 
     return (
         <>
-            {title && <div className={chartStyles["chart-title"]}>{title}</div>}
+            <HistogramHeader title={title} visualizationInfo={visualizationInfo} />
             <div ref={wrapperRef} style={wrapperStyle}>
                 <div ref={containerRef} className={styles["histogram-container"]} style={containerStyle} />
             </div>
@@ -240,6 +265,7 @@ export const ThresholdSelectHistogram = ({
     limitType,
     title,
     onRangeSelect,
+    visualizationInfo,
 }: ThresholdSelectHistogramProps) => {
     const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -283,7 +309,7 @@ export const ThresholdSelectHistogram = ({
 
     return (
         <>
-            {title && <div className={chartStyles["chart-title"]}>{title}</div>}
+            <HistogramHeader title={title} visualizationInfo={visualizationInfo} />
             <div ref={wrapperRef} style={wrapperStyle}>
                 <div ref={containerRef} className={styles["histogram-container"]} style={containerStyle} />
             </div>
