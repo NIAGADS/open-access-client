@@ -3,6 +3,8 @@
     "compilerOptions": {
         "declaration": true,
         "declarationDir": "dist/dts",
+        "declarationMap": true,
+        "sourceMap": true,
         "emitDeclarationOnly": true
     },
     "include": ["src/**/*"],

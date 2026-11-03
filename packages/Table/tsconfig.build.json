@@ -5,6 +5,7 @@
         "declarationMap": true,
         "inlineSources": true,
         "declarationDir": "dist/dts",
+        "sourceMap": true,
         "emitDeclarationOnly": true
     },
     "include": ["src/**/*"],

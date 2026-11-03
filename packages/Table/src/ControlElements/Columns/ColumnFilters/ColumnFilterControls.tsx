@@ -49,9 +49,6 @@ export const ColumnFilterControls = ({
                 case "multiselect":
                     columns.additionalFilterColumns.push(column);
                     break;
-                case "topics":
-                    columns.topicFilterColumns.push(column);
-                    break;
             }
         }
 

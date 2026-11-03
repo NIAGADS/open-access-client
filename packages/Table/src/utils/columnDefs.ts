@@ -33,7 +33,7 @@ export const resolveSortingFn = (col: TableColumn): SortingFnOption<TableRow> =>
 /* assing a filter function based on column type, user-specified filterType, 
 or user-specified filterFn */
 export const resolveFilterFn = (col: TableColumn): FilterFnOption<TableRow> => {
-    if (col.filterOpts?.filterType === "multiselect" || col.filterOpts?.filterType === "topics") {
+    if (col.filterOpts?.filterType === "multiselect") {
         return "includesAny"; // multiselect & text lists
     }
 

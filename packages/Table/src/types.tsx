@@ -43,7 +43,7 @@ export interface TableOptions {
 export type TableRow = Record<string, TableCell | TableCell[]>;
 export type TableData = TableRow[];
 
-export type ColumnFilterType = "histogram" | "pie" | "select" | "multiselect" | "boolean" | "topics" | "range";
+export type ColumnFilterType = "histogram" | "pie" | "select" | "multiselect" | "boolean" | "range";
 
 export interface ColumnFilteringOpts {
     filterType?: ColumnFilterType; // defaults based on data type in column
@@ -51,6 +51,7 @@ export interface ColumnFilteringOpts {
     // valueTransformFn?: (value: BasicType) => BasicType; // for transforming value for filter display
     filterGroup?: string;
     valueColumn?: string; // precomputed filter values; pvalue columns expect -log10(p)
+    isTopic?: boolean; // field contains values that could be used in topic filter; defaults to true for multiselect and select
 }
 
 export interface ColumnStylingOpts {

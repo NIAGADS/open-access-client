@@ -34,7 +34,7 @@ const columns: TableColumn[] = [
     { id: "pmid", header: "PMID", type: "text", disableColumnFilter: true },
     { id: "doi", header: "DOI", type: "text", disableColumnFilter: true },
     { id: "pmcid", header: "PMCID", type: "text", disableColumnFilter: true },
-    { id: "meshTerms", header: "MeSH terms", type: "text", filterOpts: { filterType: "topics" } },
+    { id: "meshTerms", header: "MeSH terms", type: "text" },
     { id: "grants", header: "Grants", type: "text", disableColumnFilter: true },
 ];
 

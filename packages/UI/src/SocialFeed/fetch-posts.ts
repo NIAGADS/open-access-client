@@ -43,6 +43,7 @@ export async function fetchSocialPosts(
         const { feed } = await request<BlueskyFeed>(
             `https://public.api.bsky.app/xrpc/app.bsky.feed.getAuthorFeed?${query}`
         );
+        // FIXME: the number of returned posts should be configurable
         return feed.slice(0, 2).map(({ post }) => ({
             author: post.author.displayName || post.author.handle,
             date: post.record.createdAt,

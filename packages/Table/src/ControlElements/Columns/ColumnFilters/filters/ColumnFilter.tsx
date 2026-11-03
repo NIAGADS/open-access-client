@@ -122,7 +122,7 @@ const ColumnFilter = ({ column }: FilterColumn) => {
             return <PieChartFilter {...FilterProps} />;
         }
 
-        if (meta.filterType === "multiselect" || meta.filterType === "topics") {
+        if (meta.filterType === "multiselect") {
             return <MultiSelectPillFilter {...FilterProps} />;
         }
     }
