@@ -1,3 +1,4 @@
+import { CircleHelp, Info } from "lucide-react";
 import React, { useEffect, useId, useRef, useState } from "react";
 
 import { ActionButton } from "@niagads/ui";
@@ -15,6 +16,8 @@ export interface VisualizationEncoding {
 export interface VisualizationInfoContent {
     /** Brief explanation of what the visualization shows. */
     description: string;
+    /** Render only the information icon instead of the text label. */
+    compactDisplay?: boolean;
     /** Essential visual encodings. These supplement rather than replace inline legends. */
     encodings?: VisualizationEncoding[];
     /** Instructions for interacting with the visualization. */
@@ -28,8 +31,6 @@ export interface VisualizationInfoProps {
     content: VisualizationInfoContent;
 }
 
-const InfoIcon = () => <span aria-hidden="true">ⓘ</span>;
-
 /**
  * Shared React disclosure for chart explanations.
  *
@@ -42,6 +43,7 @@ const VisualizationInfo = ({ content }: VisualizationInfoProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const panelId = useId();
     const infoRef = useRef<HTMLDivElement | null>(null);
+    const compactDisplay = content.compactDisplay ?? false;
 
     useEffect(() => {
         if (!isOpen) return;
@@ -69,13 +71,17 @@ const VisualizationInfo = ({ content }: VisualizationInfoProps) => {
     return (
         <div ref={infoRef} className={styles["visualization-info"]}>
             <ActionButton
-                icon={<InfoIcon />}
+                className={(compactDisplay && styles["visualization-info-compact-button"]) || undefined}
+                icon={
+                    compactDisplay ? <CircleHelp aria-hidden="true" size={16} /> : <Info aria-hidden="true" size={16} />
+                }
                 title="About this visualization"
+                aria-label={compactDisplay ? "About this visualization" : undefined}
                 aria-expanded={isOpen}
                 aria-controls={panelId}
                 onClick={() => setIsOpen((current) => !current)}
             >
-                About this visualization
+                {compactDisplay ? "" : "About this visualization"}
             </ActionButton>
             {isOpen && (
                 <section

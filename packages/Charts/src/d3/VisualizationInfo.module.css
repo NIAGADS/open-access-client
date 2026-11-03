@@ -18,6 +18,10 @@
     line-height: 1.45;
 }
 
+.visualization-info-compact-button {
+    gap: 0px;
+}
+
 .visualization-info-panel p,
 .visualization-info-panel ul,
 .visualization-info-panel dl {

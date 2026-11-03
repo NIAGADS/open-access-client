@@ -1,11 +1,11 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
 import * as d3 from "d3";
 
-import { _isNA } from "@niagads/common";
 import { NA_COLOR, PieChartOptions, destroyPieChart, pieChart, updatePieChartSelection } from "./d3PieChart";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import VisualizationInfo, { VisualizationInfoContent } from "../d3/VisualizationInfo";
 
 import { DisplayProps } from "../d3/types";
-import VisualizationInfo, { VisualizationInfoContent } from "../d3/VisualizationInfo";
+import { _isNA } from "@niagads/common";
 import chartStyles from "../styles/Charts.module.css";
 import styles from "./PieChart.module.css";
 
