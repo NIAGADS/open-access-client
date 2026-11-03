@@ -74,9 +74,9 @@ export const PieChartFilter = ({ column, referenceValues, filteredValues }: Filt
                 ],
                 interactions: ["Select a slice to filter the table by that value."],
             }}
-            legendPosition="right"
+            legendPosition="bottom"
             onClick={(v: string) => column.setFilterValue(_resolveTextFilterValue(v, referenceValues.otherValues))}
-            displayOpts={{ width: 200 }}
+            displayOpts={{ width: "100%" }}
             preserveSliceOrder={true}
         />
     );

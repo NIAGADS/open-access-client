@@ -1,7 +1,7 @@
 import * as d3 from "d3";
 
 import { NA_COLOR, PieChartOptions, destroyPieChart, pieChart, updatePieChartSelection } from "./d3PieChart";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import VisualizationInfo, { VisualizationInfoContent } from "../d3/VisualizationInfo";
 
 import { DisplayProps } from "../d3/types";
@@ -80,9 +80,32 @@ const PieChart = ({
     const containerRef = useRef<HTMLDivElement | null>(null);
     const chartRef = useRef<HTMLDivElement | null>(null);
     const [selectedId, setSelectedId] = useState<string | undefined>();
+    const requestedWidth = displayOpts?.width || 300;
+    const [measuredWidth, setMeasuredWidth] = useState<number | undefined>();
 
-    const chartWidth = displayOpts?.width || 300;
-    const chartHeight = (chartWidth as number) * (displayOpts?.aspectRatio || 1);
+    useLayoutEffect(() => {
+        const chart = chartRef.current;
+        if (!chart) return;
+
+        const updateMeasuredWidth = () => {
+            const nextWidth = chart.clientWidth || undefined;
+            setMeasuredWidth((currentWidth) => (currentWidth === nextWidth ? currentWidth : nextWidth));
+        };
+
+        updateMeasuredWidth();
+
+        if (typeof ResizeObserver === "undefined") {
+            window.addEventListener("resize", updateMeasuredWidth);
+            return () => window.removeEventListener("resize", updateMeasuredWidth);
+        }
+
+        const resizeObserver = new ResizeObserver(updateMeasuredWidth);
+        resizeObserver.observe(chart);
+        return () => resizeObserver.disconnect();
+    }, [requestedWidth]);
+
+    const chartWidth = measuredWidth ?? (typeof requestedWidth === "number" ? requestedWidth : 300);
+    const chartHeight = displayOpts?.height ?? chartWidth * (displayOpts?.aspectRatio || 1);
 
     const updatedDisplayOpts = {
         ...displayOpts,
@@ -114,7 +137,7 @@ const PieChart = ({
                 destroyPieChart(chartRef.current);
             }
         };
-    }, [data, referenceData, displayOpts, preserveSliceOrder]);
+    }, [data, referenceData, displayOpts, preserveSliceOrder, chartWidth, chartHeight]);
 
     // Update selection styling (runs when selectedId changes)
     useEffect(() => {
@@ -134,10 +157,11 @@ const PieChart = ({
             <div
                 ref={containerRef}
                 className={`${styles["pie-chart-wrapper"]} ${styles[`pie-chart-wrapper-${legendPosition}`]}`}
+                style={{ width: requestedWidth }}
             >
                 <div
                     ref={chartRef}
-                    style={{ width: `${chartWidth}px`, height: `${chartHeight}px` }}
+                    style={{ width: "100%", height: `${chartHeight}px` }}
                     className={styles["pie-container"]}
                 />
                 {legendPosition !== "none" && (
