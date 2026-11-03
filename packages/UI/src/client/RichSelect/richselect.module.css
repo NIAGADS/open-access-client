@@ -136,6 +136,14 @@
     font-weight: 600;
 }
 
+.rich-select-option.disabled,
+.rich-select-option.disabled:hover {
+    background-color: transparent;
+    border-left-color: transparent;
+    color: var(--gray-400);
+    cursor: not-allowed;
+}
+
 .rich-select-no-results {
     padding: 1rem;
     color: var(--gray-500);

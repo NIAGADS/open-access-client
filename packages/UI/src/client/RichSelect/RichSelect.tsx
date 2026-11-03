@@ -6,12 +6,13 @@ import styles from "./richselect.module.css";
 interface RichSelectProps {
     options: Record<string, ReactNode>;
     onChange: (selection: string) => void;
+    disabledOptions?: string[];
     placeholder?: string;
     label?: string;
     value?: string;
 }
 
-export const RichSelect = ({ options, onChange, label, placeholder, value }: RichSelectProps) => {
+export const RichSelect = ({ options, onChange, disabledOptions = [], label, placeholder, value }: RichSelectProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const [highlightedIndex, setHighlightedIndex] = useState(-1);
     const [selectedValue, setSelectedValue] = useState(value || "");
@@ -20,6 +21,18 @@ export const RichSelect = ({ options, onChange, label, placeholder, value }: Ric
     const buttonRef = useRef<HTMLButtonElement>(null);
 
     const optionKeys = placeholder ? ["", ...Object.keys(options)] : Object.keys(options);
+    const disabledOptionSet = new Set(disabledOptions);
+
+    const findNextEnabledIndex = (startIndex: number, direction: 1 | -1) => {
+        let index = startIndex;
+        while (index >= 0 && index < optionKeys.length) {
+            if (!disabledOptionSet.has(optionKeys[index])) {
+                return index;
+            }
+            index += direction;
+        }
+        return -1;
+    };
 
     const longestOption = optionKeys.reduce((longest, key) => {
         const text = key || placeholder || "";
@@ -39,11 +52,17 @@ export const RichSelect = ({ options, onChange, label, placeholder, value }: Ric
             switch (e.key) {
                 case "ArrowDown":
                     e.preventDefault();
-                    setHighlightedIndex((prev) => (prev < optionKeys.length - 1 ? prev + 1 : prev));
+                    setHighlightedIndex((prev) => {
+                        const nextIndex = findNextEnabledIndex(prev + 1, 1);
+                        return nextIndex === -1 ? prev : nextIndex;
+                    });
                     break;
                 case "ArrowUp":
                     e.preventDefault();
-                    setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : -1));
+                    setHighlightedIndex((prev) => {
+                        const nextIndex = findNextEnabledIndex(prev - 1, -1);
+                        return nextIndex === -1 ? prev : nextIndex;
+                    });
                     break;
                 case "Enter":
                     e.preventDefault();
@@ -75,9 +94,12 @@ export const RichSelect = ({ options, onChange, label, placeholder, value }: Ric
             document.removeEventListener("keydown", handleKeyDown);
             document.removeEventListener("mousedown", handleClickOutside);
         };
-    }, [isOpen, highlightedIndex, optionKeys]);
+    }, [isOpen, highlightedIndex, optionKeys, disabledOptionSet]);
 
     const handleSelect = (option: string) => {
+        if (disabledOptionSet.has(option)) {
+            return;
+        }
         setSelectedValue(option);
         onChange(option);
         setIsOpen(false);
@@ -117,25 +139,33 @@ export const RichSelect = ({ options, onChange, label, placeholder, value }: Ric
                             </div>
                         ) : (
                             <div>
-                                {optionKeys.map((optionKey: string, index: number) => (
-                                    <div
-                                        key={optionKey || "placeholder"}
-                                        className={`${styles["rich-select-option"]} ${
-                                            index === highlightedIndex ? styles["highlighted"] : ""
-                                        } ${optionKey === selectedValue ? styles["selected"] : ""}`}
-                                        onClick={() => handleSelect(optionKey)}
-                                        onMouseEnter={() => setHighlightedIndex(index)}
-                                        role="option"
-                                        aria-selected={optionKey === selectedValue}
-                                    >
-                                        <span className={styles["rich-select-text"]}>
-                                            {optionKey ? optionKey : placeholder}
-                                        </span>
-                                        {optionKey && (
-                                            <div className={styles["rich-select-component"]}>{options[optionKey]}</div>
-                                        )}
-                                    </div>
-                                ))}
+                                {optionKeys.map((optionKey: string, index: number) => {
+                                    const isDisabled = disabledOptionSet.has(optionKey);
+                                    return (
+                                        <div
+                                            key={optionKey || "placeholder"}
+                                            className={`${styles["rich-select-option"]} ${
+                                                index === highlightedIndex ? styles["highlighted"] : ""
+                                            } ${optionKey === selectedValue ? styles["selected"] : ""} ${
+                                                isDisabled ? styles["disabled"] : ""
+                                            }`}
+                                            onClick={() => handleSelect(optionKey)}
+                                            onMouseEnter={() => !isDisabled && setHighlightedIndex(index)}
+                                            role="option"
+                                            aria-selected={optionKey === selectedValue}
+                                            aria-disabled={isDisabled}
+                                        >
+                                            <span className={styles["rich-select-text"]}>
+                                                {optionKey ? optionKey : placeholder}
+                                            </span>
+                                            {optionKey && (
+                                                <div className={styles["rich-select-component"]}>
+                                                    {options[optionKey]}
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
                             </div>
                         )}
                     </div>
