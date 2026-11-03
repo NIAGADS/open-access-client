@@ -19,6 +19,13 @@ export default meta;
 type Story = StoryObj<typeof Table>;
 
 export const Default: Story = {
+    decorators: [
+        (Story) => (
+            <div style={{ paddingInline: "20rem" }}>
+                <Story />
+            </div>
+        ),
+    ],
     args: {
         id: table.id,
         columns: table.columns,
