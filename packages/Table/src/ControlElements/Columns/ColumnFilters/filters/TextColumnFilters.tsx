@@ -1,8 +1,8 @@
-import { Badge, FacetCountBadges } from "@niagads/ui";
 import { PieChart, PieChartDataRow } from "@niagads/charts";
 import React, { ReactNode, useCallback, useMemo } from "react";
 
 import { Column } from "@tanstack/react-table";
+import { FacetCountBadges } from "@niagads/ui";
 import { FilterProps } from "./types";
 import { RichSelect } from "@niagads/ui/client";
 import styles from "./column-filter.module.css";
@@ -91,17 +91,18 @@ export const RichSelectFilter = ({ column, referenceValues, filteredValues }: Fi
                         style={{ fontSize: "0.75rem" }}
                         count={filteredValues.counts[value] || 0}
                         total={count}
+                        variant="pill"
                     />
                 );
                 return acc;
             },
             {} as Record<string, ReactNode>
         );
-    }, [filteredValues]);
+    }, [referenceValues.counts, filteredValues.counts]);
 
     const disabledOptions = useMemo(
         () => Object.keys(referenceValues.counts).filter((value) => (filteredValues.counts[value] ?? 0) === 0),
-        [filteredValues]
+        [referenceValues.counts, filteredValues.counts]
     );
 
     return (
@@ -134,14 +135,15 @@ export const MultiSelectPillFilter = ({ column, referenceValues, filteredValues,
     );
 
     const opts = useMemo(() => {
-        return Object.entries(filteredValues.counts).reduce(
-            (acc, [value, count]) => {
-                acc[value] = count;
+        return Object.entries(referenceValues.counts).reduce(
+            (acc, [value, total]) => {
+                const count = filteredValues.counts[value] ?? 0;
+                acc[value] = { count, total, disabled: count === 0 };
                 return acc;
             },
-            {} as Record<string, number>
+            {} as Record<string, { count: number; total: number; disabled: boolean }>
         );
-    }, [filteredValues]);
+    }, [referenceValues.counts, filteredValues.counts]);
 
     // determine which options are currently "selected/checked"
     const optionKeys = Object.keys(opts);
@@ -170,15 +172,25 @@ export const MultiSelectPillFilter = ({ column, referenceValues, filteredValues,
                         <button
                             key={optionKey}
                             type="button"
-                            className={[styles["filter-pill"], isSelected && styles["filter-pill-selected"]]
+                            className={[
+                                styles["filter-pill"],
+                                isSelected && styles["filter-pill-selected"],
+                                opts[optionKey].disabled && styles["filter-pill-disabled"],
+                            ]
                                 .filter(Boolean)
                                 .join(" ")}
                             aria-pressed={isSelected}
                             onClick={() => column.setFilterValue(resolveFilterValue(newValues))}
+                            disabled={opts[optionKey].disabled}
                         >
                             <span className={styles["filter-pill-icon"]}>{isSelected ? "✓" : "+"}</span>
                             <span className={styles["filter-pill-label"]}>{optionKey}</span>
-                            <span className={styles["filter-pill-count"]}>{opts[optionKey]}</span>
+                            <FacetCountBadges
+                                variant="pill"
+                                size="small"
+                                count={opts[optionKey].count}
+                                total={opts[optionKey].total}
+                            />
                         </button>
                     );
                 })}
@@ -188,6 +200,6 @@ export const MultiSelectPillFilter = ({ column, referenceValues, filteredValues,
 };
 
 // topic filters may combine values across multiple columns
-export interface TopicFilterProps extends Omit<FilterProps, "column"> {
+interface TopicFilterProps extends Omit<FilterProps, "column"> {
     columns: Column<any, unknown>[];
 }

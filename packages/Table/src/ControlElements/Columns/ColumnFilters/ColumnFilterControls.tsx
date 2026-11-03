@@ -7,6 +7,9 @@ import { TrashIcon } from "lucide-react";
 import { fromNegLog10 } from "@niagads/common";
 import styles from "./ColumnFilterControls.module.css";
 
+// TODO: hover effect on multiselect pills.
+// TODO: rich text selects not resetting on clear
+
 interface ColumnFilterControlsProps {
     filterableColumns: Column<any, unknown>[];
     activeFilters: ColumnFiltersState;

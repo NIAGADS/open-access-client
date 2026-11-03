@@ -8,6 +8,7 @@ interface BadgeProps extends StylingProps {
     children: ReactNode;
     icon?: ReactNode;
     iconPosition?: "start" | "end";
+    size?: "default" | "small";
     variant?: "badge" | "pill";
 }
 
@@ -15,11 +16,14 @@ export const Badge = ({
     children,
     icon,
     iconPosition = "start",
+    size = "default",
     variant = "badge",
     className = "",
     style = {},
 }: BadgeProps) => {
-    const variantClass = variant === "pill" ? `${styles.badge} ${styles.pill}` : styles.badge;
+    const variantClass = [styles.badge, variant === "pill" && styles.pill, size === "small" && styles.small]
+        .filter(Boolean)
+        .join(" ");
 
     if (icon) {
         return (
@@ -39,13 +43,31 @@ export const Badge = ({
 interface FacetCountBadgesProps extends StylingProps {
     count: number;
     total: number;
+    variant?: "default" | "pill";
+    size?: "small" | "default";
 }
-export const FacetCountBadges = ({ count, total }: FacetCountBadgesProps) => {
+export const FacetCountBadges = ({
+    count,
+    total,
+    variant = "default",
+    className = "",
+    style = {},
+    size = "default",
+}: FacetCountBadgesProps) => {
     const isDisabled = count === 0 ? "-disabled" : "";
+    const badgeVariant = variant === "pill" ? "pill" : "badge";
     return (
-        <span className={styles["facet-count-badges"]} aria-label={`${count} matching current filters, ${total} total`}>
-            <Badge className={styles[`facet-count-badges-count${isDisabled}`]}>{count}</Badge>
-            <Badge className={styles[`facet-count-badges-total${isDisabled}`]}>{total}</Badge>
+        <span
+            className={`${styles["facet-count-badges"]} ${className}`}
+            style={style}
+            aria-label={`${count} matching current filters, ${total} total`}
+        >
+            <Badge size={size} variant={badgeVariant} className={styles[`facet-count-badges-count${isDisabled}`]}>
+                {count}
+            </Badge>
+            <Badge size={size} variant={badgeVariant} className={styles[`facet-count-badges-total${isDisabled}`]}>
+                {total}
+            </Badge>
         </span>
     );
 };

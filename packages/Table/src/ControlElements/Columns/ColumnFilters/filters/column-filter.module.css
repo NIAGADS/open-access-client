@@ -46,15 +46,24 @@
 }
 
 .filter-pill:hover {
-    border-color: var(--secondary-blue, #5f8db8);
+    border-color: var(--secondary-blue);
     background: #f8fbff;
 }
 
 .filter-pill-selected {
-    border-color: var(--secondary-blue, #5f8db8);
-    background: var(--secondary-blue, #5f8db8);
-    color: var(--text-inverse, #fff);
+    border-color: var(--secondary-blue);
+    background: var(--secondary-blue);
+    color: var(--text-inverse);
     box-shadow: 0 2px 6px rgba(60, 100, 140, 0.22);
+}
+
+.filter-pill-disabled,
+.filter-pill-disabled:hover {
+    border-color: var(--gray-200, #e2e8f0);
+    background: var(--gray-100, #f1f5f9);
+    color: var(--gray-500, #64748b);
+    cursor: not-allowed;
+    box-shadow: none;
 }
 
 .filter-pill-icon {
@@ -62,6 +71,7 @@
     align-items: center;
     justify-content: center;
     width: 1em;
+    color: inherit;
     font-weight: 800;
     line-height: 1;
 }
@@ -71,26 +81,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-}
-
-.filter-pill-count {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 20px;
-    height: 18px;
-    padding: 0 6px;
-    border-radius: 999px;
-    background: rgba(95, 141, 184, 0.15);
-    color: var(--secondary-blue, #5f8db8);
-    font-size: 0.65rem;
-    font-weight: 800;
-    line-height: 1;
-}
-
-.filter-pill-selected .filter-pill-count {
-    background: rgba(255, 255, 255, 0.22);
-    color: #fff;
+    margin-right: 0.5rem;
 }
 
 /* ── BOOLEAN FILTERS ── */

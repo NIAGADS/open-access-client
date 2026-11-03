@@ -23,7 +23,7 @@ export const BooleanFilter = ({ column, referenceValues, filteredValues }: Filte
                     }}
                 />
                 <span className={styles["filter-boolean-value"]}>{label}</span>
-                <FacetCountBadges count={filteredCount} total={referenceCount} />
+                <FacetCountBadges count={filteredCount} total={referenceCount} variant="pill" />
             </div>
         </div>
     );
