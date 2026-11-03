@@ -54,6 +54,7 @@ export const PieChartFilter = ({ column, referenceValues, filteredValues }: Filt
             data={filteredChartData}
             referenceData={referenceChartData}
             visualizationInfo={{
+                compactDisplay: true,
                 description:
                     "The inner pie shows counts remaining after current filters; the outer ring shows reference counts.",
                 encodings: [
