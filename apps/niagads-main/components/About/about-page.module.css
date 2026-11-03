@@ -1,0 +1,133 @@
+
+/* Introduction */
+
+.about-intro {
+    padding-bottom: 3rem;
+}
+
+
+
+.about-intro :global(p) {
+    margin-block: 0.75rem;
+}
+
+.about-intro :global(p:first-of-type) {
+    line-height: 1.65;
+}
+
+/* Two-column layout */
+
+.about-layout {
+    display: grid;
+    grid-template-columns: 230px minmax(0, 1fr);
+    gap: 3.5rem;
+    align-items: start;
+}
+
+/* Sidebar navigation */
+
+.about-sidebar {
+    position: sticky;
+    top: 6rem;
+    max-height: calc(100vh - 7rem);
+    overflow-y: auto;
+    border-right: 1px solid var(--gray-200);
+    padding-right: 1.5rem;
+}
+
+.about-sidebar :global(h2) {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin: 0 0 1rem;
+}
+
+.about-sidebar :global(ul) {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.about-sidebar :global(li) {
+    margin: 0;
+}
+
+.about-sidebar :global(a) {
+    display: block;
+    padding: 0.65rem 0.75rem;
+    border-left: 3px solid transparent;
+    color: var(--gray-700);
+    text-decoration: none;
+    font-size: 0.9375rem;
+    line-height: 1.4;
+    border-radius: 0 0.25rem 0.25rem 0;
+}
+
+.about-sidebar :global(a:hover) {
+    color: var(--primary-blue);
+    background: var(--gray-100);
+}
+
+.about-sidebar :global(a[aria-current="location"]) {
+    color: var(--primary-blue);
+    background: var(--gray-100);
+    border-left-color: var(--primary-blue);
+    font-weight: 600;
+}
+
+/* Article */
+
+.about-article {
+    min-width: 0;
+    max-width: 800px;
+}
+
+.about-article :global(h2) {
+    font-size: 1.75rem;
+    margin-block: 2.5rem 1rem;
+    scroll-margin-top: 6rem;
+}
+
+.about-article :global(h2:first-child) {
+    margin-top: 0;
+}
+
+.about-article :global(h2:not(:first-child)) {
+    padding-top: 2rem;
+    border-top: 1px solid var(--gray-200);
+}
+
+/* Responsive layout */
+
+@media (max-width: 768px) {
+    .about-page {
+        padding: 2rem 1.25rem 4rem;
+    }
+
+    .about-intro {
+        padding-bottom: 2rem;
+    }
+
+    .about-layout {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 2rem;
+    }
+
+    .about-sidebar {
+        position: static;
+        max-height: none;
+        overflow: visible;
+        border-right: none;
+        border-bottom: 1px solid var(--gray-200);
+        padding: 0 0 1.5rem;
+    }
+
+    .about-article {
+        max-width: 100%;
+    }
+
+    .about-article :global(h2) {
+        font-size: 1.5rem;
+    }
+}
