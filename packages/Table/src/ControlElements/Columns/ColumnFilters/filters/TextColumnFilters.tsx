@@ -1,22 +1,71 @@
+import { BooleanFilter, NoValidValueAlert } from ".";
+import { FilterColumn, RowValueSummary } from "./types";
 import { PieChart, PieChartDataRow } from "@niagads/charts";
-import React, { ReactNode, useCallback, useMemo } from "react";
+import React, { ReactNode, useMemo } from "react";
 
-import { Column } from "@tanstack/react-table";
+import { DEFAULT_NA_VALUE } from "../../../../types";
 import { FacetCountBadges } from "@niagads/ui";
 import { FilterProps } from "./types";
 import { RichSelect } from "@niagads/ui/client";
 import styles from "./column-filter.module.css";
 
-const _resolveTextFilterValue = (value: string | undefined, otherValues: string[]) => {
-    if (value === undefined || value === "") {
-        return undefined;
+// limits for categorical filters; excess aggregated into "Other"
+// note for selects & pies max is actually value + 2 (n/a + Other)
+const MAX_SELECT_OPTS = 2; // maximum unique opts for select / multiselect
+const MAX_TOPICS = 15; // maximum number of terms (topics) for topic filter
+const MAX_PIE_SLICES = 5; // maximum unique pie slices
+
+export const TextColumnFilter = ({ column }: FilterColumn) => {
+    const meta = column.columnDef.meta!;
+    const naValue = meta.naValue || DEFAULT_NA_VALUE;
+
+    // get "reference" unique values -> all possible values in pre-filtered data
+    const valueCounts: Map<string, number> = useMemo(() => column.getUniqueValues(), [column.id]);
+    const naCount = valueCounts.get(naValue) || 0;
+
+    // return No Valid Values if every value in the unfiltered column is NA
+    if (naCount && valueCounts.size === 1) {
+        return <NoValidValueAlert columnName={column.columnDef.header!.toString()} />;
     }
 
-    if (value === "Other") {
-        return otherValues;
+    const categoryLimit =
+        meta.filterType === "pie"
+            ? MAX_PIE_SLICES
+            : column.columnDef.id === "agregate-topics-col"
+              ? MAX_TOPICS
+              : MAX_SELECT_OPTS;
+
+    // otherwise, sort and consolidate the value map
+    const referenceValues = useMemo(() => {
+        return _organizeValueCounts(valueCounts, naValue, categoryLimit);
+    }, [column.id]);
+
+    // get faceted values and do the same
+    const filteredValueCount = column.getFacetedUniqueValues();
+    const filteredValues = useMemo(() => {
+        return _organizeValueCounts(filteredValueCount, naValue, categoryLimit);
+    }, [Array.from(filteredValueCount.entries())]);
+
+    const FilterProps = { column, referenceValues, filteredValues };
+
+    if (meta.type === "boolean") {
+        return <BooleanFilter {...FilterProps} />;
     }
 
-    return [value];
+    /*if (column.columnDef.id == "aggregate-topics-col") {
+        return <TopicFilter {...FilterProps} />;
+    }*/
+    if (meta.filterType) {
+        if (meta.filterType === "pie") {
+            return <PieChartFilter {...FilterProps} />;
+        }
+
+        if (meta.filterType === "multiselect") {
+            return <MultiSelectPillFilter {...FilterProps} />;
+        }
+    }
+
+    return <RichSelectFilter {...FilterProps} />;
 };
 
 export const PieChartFilter = ({ column, referenceValues, filteredValues }: FilterProps) => {
@@ -117,23 +166,7 @@ export const RichSelectFilter = ({ column, referenceValues, filteredValues }: Fi
 };
 
 export const MultiSelectPillFilter = ({ column, referenceValues, filteredValues, showLabel = true }: FilterProps) => {
-    const otherValues = useMemo(() => referenceValues.otherValues, [column.id]);
-    const resolveFilterValue = useCallback(
-        (newFilterValues: string[]) => {
-            if (newFilterValues.length > 0) {
-                if (newFilterValues.includes("Other")) {
-                    const adjustedFilterValues = newFilterValues.filter((v) => v !== "Other");
-                    return [...adjustedFilterValues, ...otherValues];
-                }
-
-                return newFilterValues;
-            }
-
-            return undefined;
-        },
-        [column.id]
-    );
-
+    // FIXME: count pills not updating correctly
     const opts = useMemo(() => {
         return Object.entries(referenceValues.counts).reduce(
             (acc, [value, total]) => {
@@ -145,18 +178,17 @@ export const MultiSelectPillFilter = ({ column, referenceValues, filteredValues,
         );
     }, [referenceValues.counts, filteredValues.counts]);
 
-    // determine which options are currently "selected/checked"
-    const optionKeys = Object.keys(opts);
-    const filterValues = (column.getFilterValue() as string[]) || [];
-    const filterValuesIncludeOther = filterValues.some((item) => otherValues.includes(item));
+    // determine which options are currently "selected/checked", including anything under "Other"
+    const activeFilters = (column.getFilterValue() as string[]) || [];
+    const activeFiltersIncludeOther = activeFilters.some((item) => referenceValues.otherValues.includes(item));
 
-    let selectedValues = filterValues.filter((item) => !otherValues.includes(item)) || [];
-    if (filterValuesIncludeOther) {
+    let selectedValues = activeFilters.filter((item) => !referenceValues.otherValues.includes(item)) || [];
+    if (activeFiltersIncludeOther) {
         selectedValues.push("Other");
     }
 
     const label = column.columnDef.header!.toString();
-
+    const optionKeys = Object.keys(opts);
     return (
         <div className={styles["filter-pill-container"]}>
             {showLabel && <div className={styles["filter-field-label"]}>{label}</div>}
@@ -180,7 +212,9 @@ export const MultiSelectPillFilter = ({ column, referenceValues, filteredValues,
                                 .filter(Boolean)
                                 .join(" ")}
                             aria-pressed={isSelected}
-                            onClick={() => column.setFilterValue(resolveFilterValue(newValues))}
+                            onClick={() =>
+                                column.setFilterValue(_resolveTextFilterValue(newValues, referenceValues.otherValues))
+                            }
                             disabled={opts[optionKey].disabled}
                         >
                             <span className={styles["filter-pill-icon"]}>{isSelected ? "✓" : "+"}</span>
@@ -199,7 +233,77 @@ export const MultiSelectPillFilter = ({ column, referenceValues, filteredValues,
     );
 };
 
-// topic filters may combine values across multiple columns
-interface TopicFilterProps extends Omit<FilterProps, "column"> {
-    columns: Column<any, unknown>[];
-}
+export const TopicFilter = ({ column, referenceValues, filteredValues }: FilterProps) => {};
+
+/**
+ * Sorts and organizes unique values for filter display, handling overflow by grouping into "Other"
+ *
+ * @param naValue - The N/A value representation
+ * @param valueCounts - Map of unique values and their counts
+ * @param limit - max number of unique values before aggregating remainder into "Other"
+ * @returns Object with sorted value/count map and list of values grouped as "Other"
+ */
+const _organizeValueCounts = (valueCounts: Map<string, number>, naValue: string, limit: number): RowValueSummary => {
+    let filteredValueCounts: Record<string, number> = {};
+    let otherValues: string[] = [];
+
+    // consolidate values if there are too many into "Other"
+    if (valueCounts.size > limit) {
+        // sort by most frequent to least frequent values; filtering for n/as
+        const sortedEntries = [...valueCounts.entries()]
+            .filter(([value]) => value !== naValue)
+            .sort((a, b) => b[1] - a[1]);
+
+        const topEntries = sortedEntries.slice(0, limit);
+        const otherEntries = sortedEntries.slice(limit).reduce(
+            (acc, [value, count]) => ({
+                values: [...acc.values, value],
+                count: acc.count + count,
+            }),
+            { values: [] as string[], count: 0 }
+        );
+
+        filteredValueCounts = Object.fromEntries(topEntries);
+        filteredValueCounts.Other = otherEntries.count;
+        otherValues = otherEntries.values;
+    } else {
+        const sortedEntries = [...valueCounts.entries()]
+            .filter(([value]) => value !== naValue)
+            .sort((a, b) => b[1] - a[1]);
+
+        filteredValueCounts = Object.fromEntries(sortedEntries);
+    }
+
+    // add NAs back in if relevant
+    const naCount = valueCounts.get(naValue) || 0;
+    if (naCount > 0) {
+        filteredValueCounts[naValue] = naCount;
+    }
+
+    return { counts: filteredValueCounts, otherValues: otherValues };
+};
+
+const _resolveTextFilterValue = (value: string | string[] | undefined, otherValues: string[]) => {
+    if (value === undefined || value === "") {
+        return undefined;
+    }
+
+    if (Array.isArray(value)) {
+        return _resolveMultiselectFilterValue(value, otherValues);
+    }
+
+    if (value === "Other") {
+        return otherValues;
+    }
+
+    return [value];
+};
+
+const _resolveMultiselectFilterValue = (values: string[], otherValues: string[]) => {
+    if (values.includes("Other")) {
+        const adjustedFilterValues = values.filter((v) => v !== "Other");
+        return [...adjustedFilterValues, ...otherValues];
+    }
+
+    return values;
+};
