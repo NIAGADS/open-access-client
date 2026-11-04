@@ -83,7 +83,7 @@
 /* ── AT A GLANCE SECTION ── */
 .glance-section {
     border-bottom: 1px solid var(--border, #dce4ef);
-    overflow: hidden;
+    overflow: visible;
 }
 
 /* ── VISUAL FILTER PANELS ── */
