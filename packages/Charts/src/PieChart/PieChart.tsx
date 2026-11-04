@@ -20,6 +20,7 @@ export interface PieChartProps {
     referenceData?: PieChartDataRow[];
     onClick?: (key: string) => void;
     displayOpts?: DisplayProps;
+    maxChartWidth?: number;
     legendPosition?: "right" | "bottom" | "none";
     preserveSliceOrder?: boolean;
     title?: string;
@@ -72,6 +73,7 @@ const PieChart = ({
     referenceData,
     onClick,
     displayOpts,
+    maxChartWidth,
     title,
     legendPosition = "right",
     preserveSliceOrder = false,
@@ -161,7 +163,7 @@ const PieChart = ({
             >
                 <div
                     ref={chartRef}
-                    style={{ width: "100%", height: `${chartHeight}px` }}
+                    style={{ width: "100%", maxWidth: maxChartWidth, height: `${chartHeight}px`,}}
                     className={styles["pie-container"]}
                 />
                 {legendPosition !== "none" && (

@@ -48,6 +48,8 @@
 .filter-pill:hover {
     border-color: var(--secondary-blue);
     background: #f8fbff;
+    color: var(--text-primary, #1a2636);
+
 }
 
 .filter-pill-selected {

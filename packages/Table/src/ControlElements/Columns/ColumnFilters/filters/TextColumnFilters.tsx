@@ -128,7 +128,8 @@ export const PieChartFilter = ({ column, referenceValues, filteredValues }: Filt
             onClick={(v: string) =>
                 column.setFilterValue((v && { values: [v], otherValues: referenceValues.otherValues }) || undefined)
             }
-            displayOpts={{ width: 280 }}
+            displayOpts={{ width: 400 }}
+            maxChartWidth={200}
             preserveSliceOrder={true}
         />
     );
