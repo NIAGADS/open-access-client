@@ -99,10 +99,13 @@ export const ColumnFilterControls = ({
                 {activeFilters.length > 0 ? (
                     activeFilters.map((filter) => {
                         const col = filterableColumns.find((x) => x.id === filter.id);
-                        const value =
+                        let value: any =
                             col!.columnDef?.meta?.type === "pvalue"
                                 ? `≤ ${fromNegLog10(filter.value as number)}`
                                 : filter.value;
+                        if (typeof value === "object") {
+                            value = value.values;
+                        }
 
                         return (
                             <FilterChip

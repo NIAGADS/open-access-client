@@ -3,6 +3,7 @@ import { FilterColumn, RowValueSummary } from "./types";
 import { PieChart, PieChartDataRow } from "@niagads/charts";
 import React, { ReactNode, useMemo } from "react";
 
+import { CategoryFilterValue } from "../filterFunctions";
 import { DEFAULT_NA_VALUE } from "../../../../types";
 import { FacetCountBadges } from "@niagads/ui";
 import { FilterProps } from "./types";
@@ -124,7 +125,9 @@ export const PieChartFilter = ({ column, referenceValues, filteredValues }: Filt
                 interactions: ["Select a slice to filter the table by that value."],
             }}
             legendPosition="right"
-            onClick={(v: string) => column.setFilterValue(_resolveTextFilterValue(v, referenceValues.otherValues))}
+            onClick={(v: string) =>
+                column.setFilterValue((v && { values: [v], otherValues: referenceValues.otherValues }) || undefined)
+            }
             displayOpts={{ width: 280 }}
             preserveSliceOrder={true}
         />
@@ -160,13 +163,16 @@ export const RichSelectFilter = ({ column, referenceValues, filteredValues }: Fi
             placeholder="Select ..."
             options={opts}
             disabledOptions={disabledOptions}
-            onChange={(v) => column.setFilterValue(_resolveTextFilterValue(v, referenceValues.otherValues))}
+            onChange={(v) =>
+                column.setFilterValue((v && { values: [v], otherValues: referenceValues.otherValues }) || undefined)
+            }
         />
     );
 };
 
 export const MultiSelectPillFilter = ({ column, referenceValues, filteredValues, showLabel = true }: FilterProps) => {
-    // FIXME: count pills not updating correctly
+    const currentValueCounts = column.getFilteredValues();
+
     const opts = useMemo(() => {
         return Object.entries(referenceValues.counts).reduce(
             (acc, [value, total]) => {
@@ -178,14 +184,9 @@ export const MultiSelectPillFilter = ({ column, referenceValues, filteredValues,
         );
     }, [referenceValues.counts, filteredValues.counts]);
 
-    // determine which options are currently "selected/checked", including anything under "Other"
-    const activeFilters = (column.getFilterValue() as string[]) || [];
-    const activeFiltersIncludeOther = activeFilters.some((item) => referenceValues.otherValues.includes(item));
-
-    let selectedValues = activeFilters.filter((item) => !referenceValues.otherValues.includes(item)) || [];
-    if (activeFiltersIncludeOther) {
-        selectedValues.push("Other");
-    }
+    // necessary b/c filteredValues is table state after filtering which does not reflect selection state
+    const activeFilters = column.getFilterValue() as CategoryFilterValue;
+    let selectedValues = (activeFilters && activeFilters.values) || [];
 
     const label = column.columnDef.header!.toString();
     const optionKeys = Object.keys(opts);
@@ -213,7 +214,13 @@ export const MultiSelectPillFilter = ({ column, referenceValues, filteredValues,
                                 .join(" ")}
                             aria-pressed={isSelected}
                             onClick={() =>
-                                column.setFilterValue(_resolveTextFilterValue(newValues, referenceValues.otherValues))
+                                column.setFilterValue(
+                                    (newValues && {
+                                        values: newValues || [],
+                                        otherValues: referenceValues.otherValues,
+                                    }) ||
+                                        undefined
+                                )
                             }
                             disabled={opts[optionKey].disabled}
                         >
@@ -264,8 +271,10 @@ const _organizeValueCounts = (valueCounts: Map<string, number>, naValue: string,
         );
 
         filteredValueCounts = Object.fromEntries(topEntries);
-        filteredValueCounts.Other = otherEntries.count;
-        otherValues = otherEntries.values;
+        if (otherEntries.count > 0) {
+            filteredValueCounts.Other = otherEntries.count;
+            otherValues = otherEntries.values;
+        }
     } else {
         const sortedEntries = [...valueCounts.entries()]
             .filter(([value]) => value !== naValue)
@@ -281,29 +290,4 @@ const _organizeValueCounts = (valueCounts: Map<string, number>, naValue: string,
     }
 
     return { counts: filteredValueCounts, otherValues: otherValues };
-};
-
-const _resolveTextFilterValue = (value: string | string[] | undefined, otherValues: string[]) => {
-    if (value === undefined || value === "") {
-        return undefined;
-    }
-
-    if (Array.isArray(value)) {
-        return _resolveMultiselectFilterValue(value, otherValues);
-    }
-
-    if (value === "Other") {
-        return otherValues;
-    }
-
-    return [value];
-};
-
-const _resolveMultiselectFilterValue = (values: string[], otherValues: string[]) => {
-    if (values.includes("Other")) {
-        const adjustedFilterValues = values.filter((v) => v !== "Other");
-        return [...adjustedFilterValues, ...otherValues];
-    }
-
-    return values;
 };

@@ -19,14 +19,26 @@ export const neglog10Filter: FilterFn<any> = (row, columnId, filterValue) => {
     return toNegLog10(rowValue) >= targetValue;
 };
 
+export type CategoryFilterValue = {
+    values: string[]; // values on which to filter
+    otherValues: string[]; // substitution for other
+};
+
 // for handling multi-selects, accounting for list text fields
 // and anything that might have "Other", so basically, all text fields
-export const includesAnyFilter: FilterFn<any> = (row, columnId, filterValue: string[]) => {
-    const rowValue = row.getValue(columnId) as string;
+export const includesAnyFilter: FilterFn<any> = (row, columnId, filterValue: CategoryFilterValue) => {
+    let filterValues = filterValue.values;
+    if (filterValues.length === 0) return true;
 
-    if (!filterValue || filterValue.length === 0) return true;
-    const values = rowValue.includes("//") ? rowValue.split(" // ") : [rowValue];
-    return filterValue.some((val) => values.includes(val));
+    const rvalue = row.getValue(columnId) as string;
+    const rowValues = rvalue.includes("//") ? rvalue.split(" // ") : [rvalue];
+
+    if (filterValues.includes("Other")) {
+        filterValues = filterValues.filter((v) => v !== "Other");
+        filterValues = [...filterValues, ...filterValue.otherValues];
+    }
+
+    return filterValues.some((val) => rowValues.includes(val));
 };
 
 /* for handling user choice of `all` v `any` matches for the topics filter */
@@ -36,6 +48,7 @@ export type TopicFilterValue = {
 };
 
 export const topicFilter: FilterFn<any> = (row, columnId, filterValue: TopicFilterValue) => {
+    if (!filterValue.values || (filterValue && filterValue.values.length === 0)) return true;
     const topics = (row.getValue(columnId) as string).split(" // ");
 
     return filterValue.mode === "all"

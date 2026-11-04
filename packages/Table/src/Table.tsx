@@ -440,6 +440,8 @@ const getFacetedUniqueValues = (table: ReactTable<TableRow>, columnId: string): 
         // Access the rows that have passed through previous filters
         const facetedRows = table.getColumn(columnId)!.getFacetedRowModel().flatRows;
 
+        //  table.getFilteredRowModel().flatRows
+
         facetedRows.forEach((row: any) => {
             const value = row.getValue(columnId);
             if (typeof value === "string") {
