@@ -28,3 +28,17 @@ export const includesAnyFilter: FilterFn<any> = (row, columnId, filterValue: str
     const values = rowValue.includes("//") ? rowValue.split(" // ") : [rowValue];
     return filterValue.some((val) => values.includes(val));
 };
+
+/* for handling user choice of `all` v `any` matches for the topics filter */
+export type TopicFilterValue = {
+    values: string[];
+    mode: "any" | "all";
+};
+
+export const topicFilter: FilterFn<any> = (row, columnId, filterValue: TopicFilterValue) => {
+    const topics = (row.getValue(columnId) as string).split(" // ");
+
+    return filterValue.mode === "all"
+        ? filterValue.values.every((value) => topics.includes(value))
+        : filterValue.values.some((value) => topics.includes(value));
+};
