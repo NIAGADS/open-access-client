@@ -4,6 +4,9 @@ import { FilterFnOption, SortingFnOption } from "@tanstack/react-table";
 import { CellType } from "../Cells/types";
 import { NUMERIC_CELL_TYPES } from "../ControlElements/Columns/ColumnFilters/filters";
 
+export const resolveIsTopic = (filterType: ColumnFilterType): boolean =>
+    filterType === "select" || filterType === "multiselect";
+
 export const resolveFilterType = (cellType: CellType): ColumnFilterType => {
     if (NUMERIC_CELL_TYPES.includes(cellType)) {
         return "histogram";

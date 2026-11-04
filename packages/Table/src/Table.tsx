@@ -31,14 +31,14 @@ import {
 import { DEFAULT_NA_VALUE, TableColumn, TableData, TableOptions, TableRow } from "./types";
 import { PaginationControls, TableToolbar } from "./ControlElements";
 import React, { ReactNode, useCallback, useLayoutEffect, useMemo, useState } from "react";
-import { _get, toTitleCase } from "@niagads/common";
 import { getCellValue, renderCell, resolveCell, validateCellType } from "./Cells/utils";
 import { isValidUniqueKey, limitRowSelection, resolveRowSelectionState } from "./utils/rowSelection";
-import { resolveFilterFn, resolveFilterType, resolveSortingFn } from "./utils/columnDefs";
+import { resolveFilterFn, resolveFilterType, resolveIsTopic, resolveSortingFn } from "./utils/columnDefs";
 
 import { RowSelectionControls } from "./ControlElements/RowSelectionControls";
 import TableHeader from "./TableHeader";
 import styles from "./styles/table.module.css";
+import { toTitleCase } from "@niagads/common";
 
 export interface TableProps {
     id: string;
@@ -119,10 +119,12 @@ const Table = ({ id, columns, data, options, rowSelection, onRowSelectionChange 
             } catch (e: any) {
                 throw Error("Error processing column definition for `" + col.id + "`.\n" + e.message);
             }
+
+            const filterType = col.filterOpts?.filterType || resolveFilterType(col.type);
             columnDefs.push(
                 columnHelper.accessor((row) => getCellValue(row[col.id as keyof typeof row] as Cell), {
                     id: col.id,
-                    header: _get("header", col, toTitleCase(col.id)),
+                    header: col.header || toTitleCase(col.id),
                     enableColumnFilter: !col.disableColumnFilter,
                     enableGlobalFilter: !col.disableGlobalFilter,
                     enableSorting: !col.disableSorting,
@@ -131,12 +133,13 @@ const Table = ({ id, columns, data, options, rowSelection, onRowSelectionChange 
                     enableHiding: !col.required, // if required is true, enableHiding is false
                     meta: {
                         type: col.type,
-                        filterType: col.filterOpts?.filterType || resolveFilterType(col.type),
+                        filterType: filterType,
                         filterGroup: col.filterOpts?.filterGroup || "",
                         filterValueColumn: col.filterOpts?.valueColumn,
                         description: col.description,
                         naValue: col.valueDisplayOpts?.naValue || DEFAULT_NA_VALUE,
                         trueValue: col.valueDisplayOpts?.trueValue || "true",
+                        isTopic: col.filterOpts?.isTopic || resolveIsTopic(filterType),
                     },
                     cell: (props) => renderCell(props.cell.row.original[col.id] as Cell),
                 })
