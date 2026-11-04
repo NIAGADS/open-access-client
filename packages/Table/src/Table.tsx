@@ -27,7 +27,8 @@ import {
     includesAnyFilter,
     neglog10Filter,
     scientificNotationSort,
-} from "./ControlElements/Columns/ColumnFilters";
+    topicFilter,
+} from "./ControlElements/Columns";
 import { DEFAULT_NA_VALUE, TableColumn, TableData, TableOptions, TableRow } from "./types";
 import { PaginationControls, TableToolbar } from "./ControlElements";
 import React, { ReactNode, useCallback, useLayoutEffect, useMemo, useState } from "react";
@@ -62,6 +63,7 @@ const Table = ({ id, columns, data, options, rowSelection, onRowSelectionChange 
 
     const enableRowSelect = !!options?.enableRowSelect;
     const maxSelectedRows = options?.rowSelectOpts?.maxSelectedRows;
+
     if (maxSelectedRows !== undefined && (!Number.isInteger(maxSelectedRows) || maxSelectedRows < 1)) {
         throw new Error("maxSelectedRows must be a positive integer");
     }
@@ -82,6 +84,7 @@ const Table = ({ id, columns, data, options, rowSelection, onRowSelectionChange 
     const resolvedColumns = useMemo<ColumnDef<TableRow>[]>(() => {
         const columnHelper = createColumnHelper<TableRow>();
         const columnDefs: ColumnDef<TableRow>[] = [];
+
         if (enableRowSelect) {
             const multiSelect: boolean = !!options?.rowSelectOpts?.enableMultiSelect;
             columnDefs.push({
@@ -113,6 +116,8 @@ const Table = ({ id, columns, data, options, rowSelection, onRowSelectionChange 
             });
         }
 
+        /* track columns that contribute to topics */
+        const topicSources: string[] = [];
         columns.forEach((col: TableColumn) => {
             try {
                 col.type = validateCellType(col.type as string);
@@ -120,7 +125,12 @@ const Table = ({ id, columns, data, options, rowSelection, onRowSelectionChange 
                 throw Error("Error processing column definition for `" + col.id + "`.\n" + e.message);
             }
 
-            const filterType = col.filterOpts?.filterType || resolveFilterType(col.type);
+            const filterType = col.filterOpts?.filterType || resolveFilterType(col);
+            const isTopic = col.filterOpts?.isTopic || (filterType && resolveIsTopic(filterType));
+            if (isTopic) {
+                topicSources.push(col.id);
+            }
+
             columnDefs.push(
                 columnHelper.accessor((row) => getCellValue(row[col.id as keyof typeof row] as Cell), {
                     id: col.id,
@@ -139,11 +149,24 @@ const Table = ({ id, columns, data, options, rowSelection, onRowSelectionChange 
                         description: col.description,
                         naValue: col.valueDisplayOpts?.naValue || DEFAULT_NA_VALUE,
                         trueValue: col.valueDisplayOpts?.trueValue || "true",
-                        isTopic: col.filterOpts?.isTopic || resolveIsTopic(filterType),
                     },
                     cell: (props) => renderCell(props.cell.row.original[col.id] as Cell),
                 })
             );
+        });
+
+        // assemble aggregate internal topic filter column
+        columnDefs.push({
+            id: "aggregate-topics-col",
+            accessorFn: (row) =>
+                topicSources
+                    .map((id) => getCellValue(row[id] as Cell))
+                    .filter((value): value is string => value != null && value !== DEFAULT_NA_VALUE)
+                    .join(" // "),
+            filterFn: topicFilter,
+            meta: {
+                type: "text_list",
+            },
         });
         return columnDefs;
     }, [

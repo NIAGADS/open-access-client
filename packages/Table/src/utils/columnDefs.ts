@@ -5,9 +5,12 @@ import { CellType } from "../Cells/types";
 import { NUMERIC_CELL_TYPES } from "../ControlElements/Columns/ColumnFilters/filters";
 
 export const resolveIsTopic = (filterType: ColumnFilterType): boolean =>
-    filterType === "select" || filterType === "multiselect";
+    ["select", "multiselect", "pie"].includes(filterType);
 
-export const resolveFilterType = (cellType: CellType): ColumnFilterType => {
+export const resolveFilterType = (col: TableColumn): ColumnFilterType | undefined => {
+    if (col.disableColumnFilter) return undefined;
+
+    const cellType: CellType = col.type!;
     if (NUMERIC_CELL_TYPES.includes(cellType)) {
         return "histogram";
     }
