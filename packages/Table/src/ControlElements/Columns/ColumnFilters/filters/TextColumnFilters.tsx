@@ -12,7 +12,7 @@ import styles from "./column-filter.module.css";
 
 // limits for categorical filters; excess aggregated into "Other"
 // note for selects & pies max is actually value + 2 (n/a + Other)
-const MAX_SELECT_OPTS = 2; // maximum unique opts for select / multiselect
+const MAX_SELECT_OPTS = 7; // maximum unique opts for select / multiselect
 const MAX_TOPICS = 15; // maximum number of terms (topics) for topic filter
 const MAX_PIE_SLICES = 5; // maximum unique pie slices
 
