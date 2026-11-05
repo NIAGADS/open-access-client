@@ -21,6 +21,7 @@ export interface PieChartProps {
     onClick?: (key: string) => void;
     displayOpts?: DisplayProps;
     maxChartWidth?: number;
+    compactLegend?: boolean;
     legendPosition?: "right" | "bottom" | "none";
     preserveSliceOrder?: boolean;
     title?: string;
@@ -40,7 +41,15 @@ const getCombinedData = (data: PieChartDataRow[], referenceData?: PieChartDataRo
     return Array.from(combinedData.values());
 };
 
-const Legend = ({ data, referenceData }: { data: PieChartDataRow[]; referenceData?: PieChartDataRow[] }) => {
+const Legend = ({
+    data,
+    referenceData,
+    compact,
+}: {
+    data: PieChartDataRow[];
+    referenceData?: PieChartDataRow[];
+    compact?: boolean;
+}) => {
     const legendData = useMemo(() => getCombinedData(data, referenceData), [data, referenceData]);
 
     const colorScale = useMemo(() => {
@@ -52,7 +61,7 @@ const Legend = ({ data, referenceData }: { data: PieChartDataRow[]; referenceDat
     }, [legendData]);
 
     return (
-        <div className={styles.legend}>
+        <div className={`${styles.legend} ${compact ? styles["legend-compact"] : ""}`}>
             {legendData.map((item) => (
                 <div key={item.id} className={styles["legend-item"]}>
                     <div
@@ -74,6 +83,7 @@ const PieChart = ({
     onClick,
     displayOpts,
     maxChartWidth,
+    compactLegend = false,
     title,
     legendPosition = "right",
     preserveSliceOrder = false,
@@ -86,6 +96,11 @@ const PieChart = ({
     const [measuredWidth, setMeasuredWidth] = useState<number | undefined>();
 
     useLayoutEffect(() => {
+        if (maxChartWidth) {
+            setMeasuredWidth(undefined);
+            return;
+        }
+
         const chart = chartRef.current;
         if (!chart) return;
 
@@ -104,10 +119,10 @@ const PieChart = ({
         const resizeObserver = new ResizeObserver(updateMeasuredWidth);
         resizeObserver.observe(chart);
         return () => resizeObserver.disconnect();
-    }, [requestedWidth]);
+    }, [maxChartWidth, requestedWidth]);
 
-    const chartWidth = measuredWidth ?? (typeof requestedWidth === "number" ? requestedWidth : 300);
-    const chartHeight = displayOpts?.height ?? chartWidth * (displayOpts?.aspectRatio || 1);
+    const chartWidth = maxChartWidth ?? measuredWidth ?? (typeof requestedWidth === "number" ? requestedWidth : 300);
+    const chartHeight = maxChartWidth ?? displayOpts?.height ?? chartWidth * (displayOpts?.aspectRatio || 1);
 
     const updatedDisplayOpts = {
         ...displayOpts,
@@ -158,17 +173,23 @@ const PieChart = ({
             )}
             <div
                 ref={containerRef}
-                className={`${styles["pie-chart-wrapper"]} ${styles[`pie-chart-wrapper-${legendPosition}`]}`}
+                className={`${styles["pie-chart-wrapper"]} ${styles[`pie-chart-wrapper-${legendPosition}`]} ${
+                    maxChartWidth ? styles["pie-chart-wrapper-fixed-chart-size"] : ""
+                }`}
                 style={{ width: requestedWidth }}
             >
                 <div
                     ref={chartRef}
-                    style={{ width: "100%", maxWidth: maxChartWidth, height: `${chartHeight}px`,}}
+                    style={{ width: "100%", maxWidth: maxChartWidth, height: `${chartHeight}px` }}
                     className={styles["pie-container"]}
                 />
                 {legendPosition !== "none" && (
-                    <div className={styles["legend-wrapper"]}>
-                        <Legend data={data} referenceData={referenceData} />
+                    <div
+                        className={`${styles["legend-wrapper"]} ${
+                            compactLegend ? styles["legend-wrapper-compact"] : ""
+                        }`}
+                    >
+                        <Legend data={data} referenceData={referenceData} compact={compactLegend} />
                     </div>
                 )}
             </div>
