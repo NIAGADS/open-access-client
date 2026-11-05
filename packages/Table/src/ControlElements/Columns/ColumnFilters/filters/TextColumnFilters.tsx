@@ -1,11 +1,11 @@
 import { BooleanFilter, NoValidValueAlert } from ".";
+import { FacetCountBadges, PillOption, PillSelect } from "@niagads/ui";
 import { FilterColumn, RowValueSummary } from "./types";
 import { PieChart, PieChartDataRow } from "@niagads/charts";
 import React, { ReactNode, useMemo } from "react";
 
 import { CategoryFilterValue } from "../filterFunctions";
 import { DEFAULT_NA_VALUE } from "../../../../types";
-import { FacetCountBadges } from "@niagads/ui";
 import { FilterProps } from "./types";
 import { RichSelect } from "@niagads/ui/client";
 import styles from "./column-filter.module.css";
@@ -125,11 +125,12 @@ export const PieChartFilter = ({ column, referenceValues, filteredValues }: Filt
                 interactions: ["Select a slice to filter the table by that value."],
             }}
             legendPosition="right"
+            maxChartWidth={200}
+            compactLegend
             onClick={(v: string) =>
                 column.setFilterValue((v && { values: [v], otherValues: referenceValues.otherValues }) || undefined)
             }
-            displayOpts={{ width: 400 }}
-            maxChartWidth={200}
+            displayOpts={{ width: "100%" }}
             preserveSliceOrder={true}
         />
     );
@@ -172,72 +173,32 @@ export const RichSelectFilter = ({ column, referenceValues, filteredValues }: Fi
 };
 
 export const MultiSelectPillFilter = ({ column, referenceValues, filteredValues, showLabel = true }: FilterProps) => {
-    const currentValueCounts = column.getFilteredValues();
+    // const currentValueCounts = column.getFilteredValues();
 
-    const opts = useMemo(() => {
-        return Object.entries(referenceValues.counts).reduce(
-            (acc, [value, total]) => {
+    const opts: PillOption[] = useMemo(
+        () =>
+            Object.entries(referenceValues.counts).map(([value, total]) => {
                 const count = filteredValues.counts[value] ?? 0;
-                acc[value] = { count, total, disabled: count === 0 };
-                return acc;
-            },
-            {} as Record<string, { count: number; total: number; disabled: boolean }>
-        );
-    }, [referenceValues.counts, filteredValues.counts]);
+                return { value, count, total, disabled: count === 0 };
+            }),
+        [referenceValues.counts, filteredValues.counts]
+    );
 
     // necessary b/c filteredValues is table state after filtering which does not reflect selection state
     const activeFilters = column.getFilterValue() as CategoryFilterValue;
     let selectedValues = (activeFilters && activeFilters.values) || [];
 
-    const label = column.columnDef.header!.toString();
-    const optionKeys = Object.keys(opts);
+    const label = showLabel ? column.columnDef.header!.toString() : undefined;
     return (
-        <div className={styles["filter-pill-container"]}>
-            {showLabel && <div className={styles["filter-field-label"]}>{label}</div>}
-
-            <div className={styles["filter-pill-grid"]}>
-                {optionKeys.map((optionKey) => {
-                    const isSelected = selectedValues.includes(optionKey);
-                    const newValues = isSelected
-                        ? selectedValues.filter((v) => v !== optionKey)
-                        : [...selectedValues, optionKey];
-
-                    return (
-                        <button
-                            key={optionKey}
-                            type="button"
-                            className={[
-                                styles["filter-pill"],
-                                isSelected && styles["filter-pill-selected"],
-                                opts[optionKey].disabled && styles["filter-pill-disabled"],
-                            ]
-                                .filter(Boolean)
-                                .join(" ")}
-                            aria-pressed={isSelected}
-                            onClick={() =>
-                                column.setFilterValue(
-                                    (newValues && {
-                                        values: newValues || [],
-                                        otherValues: referenceValues.otherValues,
-                                    }) ||
-                                        undefined
-                                )
-                            }
-                            disabled={opts[optionKey].disabled}
-                        >
-                            <span className={styles["filter-pill-icon"]}>{isSelected ? "✓" : "+"}</span>
-                            <span className={styles["filter-pill-label"]}>{optionKey}</span>
-                            <FacetCountBadges
-                                variant="pill"
-                                size="small"
-                                count={opts[optionKey].count}
-                                total={opts[optionKey].total}
-                            />
-                        </button>
-                    );
-                })}
-            </div>
-        </div>
+        <PillSelect
+            label={label}
+            options={opts}
+            selectedValues={selectedValues}
+            variant="faceted-counts"
+            onChange={(v) =>
+                column.setFilterValue((v && { values: v, otherValues: referenceValues.otherValues }) || undefined)
+            }
+        ></PillSelect>
     );
 };
 

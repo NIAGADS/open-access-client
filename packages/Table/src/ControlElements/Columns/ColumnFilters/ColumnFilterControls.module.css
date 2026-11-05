@@ -159,10 +159,7 @@
 
 /* ── RESPONSIVE ── */
 @media (max-width: 1200px) {
-    .visual-filter-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
+    .visual-filter-grid,
     .additional-filter-grid {
         grid-template-columns: 1fr;
     }
@@ -172,27 +169,7 @@
         border-bottom: 1px solid var(--border, #dce4ef);
     }
 
-    .visual-filter-panel:nth-child(odd) {
-        border-right: 1px solid var(--border, #dce4ef);
-    }
-
     .visual-filter-panel:last-child {
-        grid-column: 1 / -1;
-        border-right: none;
         border-bottom: none;
-    }
-}
-
-@media (max-width: 900px) {
-    .visual-filter-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .visual-filter-panel {
-        border-right: none !important;
-    }
-
-    .visual-filter-panel:last-child {
-        grid-column: auto;
     }
 }
