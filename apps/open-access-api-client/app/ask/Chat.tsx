@@ -46,11 +46,22 @@ export default function Chat() {
             <Alert variant="info" message="Prototype — Limited Availability">
                 <p>
                     ASK NIAGADS is under active development and is still brittle. This prototype supports a select range
-                    of NIAGADS Open Access resources and query capabilities on a reduced data snapshot. \ Additional
-                    data access and functionality will roll out throughout November 2026.
+                    of NIAGADS Open Access resources and query capabilities on a reduced data snapshot. Additional data
+                    access and functionality will roll out throughout November 2026.
                     {"  "} <a href="/open-access">More information.</a>
                 </p>
             </Alert>
+            <Alert variant="construction" message="Check Back Soon">
+                <p>
+                    Prototype under revision. Thank you to everyone who helped us out by providing initial feedback.
+                    Please check back! NIAGADS Open Access API still available.
+                </p>
+            </Alert>
+        </div>
+    );
+}
+
+/* 
             {!messages.length && (
                 <section aria-label="Example questions" className={styles.examples}>
                     <h2>Start with a question</h2>
@@ -195,3 +206,4 @@ export default function Chat() {
         </div>
     );
 }
+*/
