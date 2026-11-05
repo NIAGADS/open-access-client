@@ -1,25 +1,30 @@
-import { FacetCountBadges } from "../Badge";
+import { Badge, FacetCountBadges } from "../Badge";
+
 import React from "react";
 import styles from "./pill-select.module.css";
 
 export interface PillOption {
     value: string;
-    count: number;
-    total: number;
-    disabled: boolean;
+    count?: number;
+    total?: number;
+    disabled?: boolean;
 }
 
 interface PillSelectProps {
     options: PillOption[];
     label?: string;
     selectedValues: string[];
+    variant: PillButtonVariant;
     onChange: (values: string[]) => void;
 }
 
-export const PillSelect = ({ options, label, selectedValues, onChange }: PillSelectProps) => {
+type PillButtonVariant = "default" | "counts" | "faceted-counts";
+
+export const PillSelect = ({ options, label, selectedValues, variant = "default", onChange }: PillSelectProps) => {
+    console.log(selectedValues);
     return (
         <div className={styles["pill-select-container"]}>
-            {label && <div className={styles["filter-field-label"]}>{label}</div>}
+            {label && <div className={styles["pill-select-field-label"]}>{label}</div>}
 
             <div className={styles["pill-select-grid"]}>
                 {options.map((opt, index) => {
@@ -45,7 +50,14 @@ export const PillSelect = ({ options, label, selectedValues, onChange }: PillSel
                         >
                             <span className={styles["pill-select-button-icon"]}>{isSelected ? "✓" : "+"}</span>
                             <span className={styles["pill-select-button-label"]}>{opt.value}</span>
-                            <FacetCountBadges variant="pill" size="small" count={opt.count} total={opt.total} />
+                            {variant === "faceted-counts" && (
+                                <FacetCountBadges variant="pill" size="small" count={opt.count!} total={opt.total!} />
+                            )}
+                            {variant === "counts" && (
+                                <Badge variant="pill" size="small">
+                                    {opt.count!}
+                                </Badge>
+                            )}
                         </button>
                     );
                 })}
