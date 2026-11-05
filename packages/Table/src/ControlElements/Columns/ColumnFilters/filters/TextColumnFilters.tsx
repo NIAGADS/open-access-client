@@ -173,15 +173,24 @@ export const RichSelectFilter = ({ column, referenceValues, filteredValues }: Fi
 };
 
 export const MultiSelectPillFilter = ({ column, referenceValues, filteredValues, showLabel = true }: FilterProps) => {
-    // const currentValueCounts = column.getFilteredValues();
+    /* To clarify "fitlered counts" here.  `filteredValues` are calculated from tanstack `facetedRowModel`. 
+     This reflects current table state for all but the requesting column.  For `counts` to update in the display
+     when we select a pill, we need to get counts based on current state of the current column from the
+     `filteredRowModel`.  Hence call to `getFilteredUniqueValues` and saving organized counts to `internalFilterValues.
+     `counts` are updated from here.  But `disabled` state is based on the faceted filter model (`filteredValues`)
+     so that buttons are only disabled if an external column removes that option.  Internally, its a multiselect so even
+     if choosing one button reduces to zero choices, can add them back in.
+    */
+    const naValue = column.columnDef?.meta?.naValue || DEFAULT_NA_VALUE;
+    const internalFilterValues = _organizeValueCounts(column.getFilteredUniqueValues(), naValue, MAX_SELECT_OPTS);
 
     const opts: PillOption[] = useMemo(
         () =>
             Object.entries(referenceValues.counts).map(([value, total]) => {
-                const count = filteredValues.counts[value] ?? 0;
-                return { value, count, total, disabled: count === 0 };
+                const count = internalFilterValues.counts[value] ?? 0;
+                return { value, count, total, disabled: (filteredValues.counts[value] ?? 0) === 0 };
             }),
-        [referenceValues.counts, filteredValues.counts]
+        [referenceValues.counts, filteredValues.counts, internalFilterValues.counts]
     );
 
     // necessary b/c filteredValues is table state after filtering which does not reflect selection state

@@ -166,6 +166,7 @@ const Table = ({ id, columns, data, options, rowSelection, onRowSelectionChange 
             filterFn: topicFilter,
             meta: {
                 type: "text_list",
+                filterType: "multiselect",
             },
         });
         return columnDefs;
@@ -280,6 +281,22 @@ const Table = ({ id, columns, data, options, rowSelection, onRowSelectionChange 
                             values = values.filter((v) => v != null && v !== naValue);
                         }
                         return values;
+                    };
+
+                    /* tanstack getFacetedUniqueValues uses the facetedRowModel which responds to
+                    changes in state for all columns except the current.  So when the multi-select filter
+                    state changes, even though the table updates, its faceted rows won't.  This is to
+                    by pass that by counting the FilteredRowModel directly */
+                    column.getFilteredUniqueValues = () => {
+                        const values = column.getFilteredValues();
+                        const uniqueValues = new Map<any, number>();
+
+                        values.forEach((value) => {
+                            const count = uniqueValues.get(value) ?? 0;
+                            uniqueValues.set(value, count + 1);
+                        });
+
+                        return uniqueValues;
                     };
 
                     column.getUniqueValues = () => {
@@ -439,8 +456,6 @@ const getFacetedUniqueValues = (table: ReactTable<TableRow>, columnId: string): 
 
         // Access the rows that have passed through previous filters
         const facetedRows = table.getColumn(columnId)!.getFacetedRowModel().flatRows;
-
-        //  table.getFilteredRowModel().flatRows
 
         facetedRows.forEach((row: any) => {
             const value = row.getValue(columnId);

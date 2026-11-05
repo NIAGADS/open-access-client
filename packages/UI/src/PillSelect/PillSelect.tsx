@@ -21,7 +21,6 @@ interface PillSelectProps {
 type PillButtonVariant = "default" | "counts" | "faceted-counts";
 
 export const PillSelect = ({ options, label, selectedValues, variant = "default", onChange }: PillSelectProps) => {
-    console.log(selectedValues);
     return (
         <div className={styles["pill-select-container"]}>
             {label && <div className={styles["pill-select-field-label"]}>{label}</div>}
