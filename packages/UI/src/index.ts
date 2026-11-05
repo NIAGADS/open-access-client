@@ -20,3 +20,4 @@ export * from "./PageSections";
 export * from "./Icons";
 export * from "./Logos";
 export * from "./SocialFeed";
+export * from "./PillSelect";

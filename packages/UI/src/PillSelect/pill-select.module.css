@@ -1,0 +1,77 @@
+/* ── pill-select MULTISELECT FILTERS ── */
+
+.pill-select-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+}
+
+.pill-select-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+.pill-select-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-height: 30px;
+    max-width: 100%;
+    padding: 5px 8px;
+    border: 1px solid var(--border, #d0dbe8);
+    border-radius: 999px;
+    background: var(--surface, #fff);
+    color: var(--text-primary, #1a2636);
+    font: inherit;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(30, 42, 58, 0.04);
+    transition:
+        background 0.12s ease,
+        border-color 0.12s ease,
+        color 0.12s ease,
+        box-shadow 0.12s ease;
+}
+
+.pill-select-button:hover {
+    border-color: var(--secondary-blue);
+    background: #f8fbff;
+    color: var(--text-primary, #1a2636);
+}
+
+.pill-select-button-selected {
+    border-color: var(--secondary-blue);
+    background: var(--secondary-blue);
+    color: var(--text-inverse);
+    box-shadow: 0 2px 6px rgba(60, 100, 140, 0.22);
+}
+
+.pill-select-button-disabled,
+.pill-select-button-disabled:hover {
+    border-color: var(--gray-200, #e2e8f0);
+    background: var(--gray-100, #f1f5f9);
+    color: var(--gray-500, #64748b);
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.pill-select-button-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1em;
+    color: inherit;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.pill-select-button-label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-right: 0.5rem;
+}
