@@ -9,8 +9,8 @@ import styles from "./column-filter.module.css";
 
 export const NUMERIC_CELL_TYPES = ["float", "integer", "pvalue", "percentage_cell"];
 const HISTOGRAM_DISPLAY_OPTS = {
-    width: 400,
-    aspectRatio: 0.7,
+    width: 300,
+    height: 200,
 } as const;
 
 const _generateDataRange = (values: number[]) =>
