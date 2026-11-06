@@ -67,7 +67,7 @@ jobs:
             --instance-ids "$INSTANCE_ID" \
             --document-name AWS-RunShellScript \
             --comment "deploy adsp staging site" \
-            --parameters commands="sudo /opt/niagads-sites/deploy.sh adsp" \
+            --parameters commands="sudo /opt/oa-deploy/deploy.sh adsp "staging-v$GITHUB_RUN_NUMBER" \
             --query Command.CommandId --output text)
           echo "SSM CommandId: $CMD_ID"
 
