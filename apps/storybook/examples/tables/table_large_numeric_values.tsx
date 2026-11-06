@@ -1,7 +1,6 @@
-// import "../../examples/tables/custom_table_cell_styles.css";
 import "./custom_table_cell_styles.css";
 
-import { getPvalueStyle, getRelativePositionClassName, getImpactClassName } from "./styling_functions";
+import { getImpactClassName, getPvalueStyle, getRelativePositionClassName } from "./styling_functions";
 
 import { TableConfig as Table } from "@niagads/table";
 
@@ -29,7 +28,7 @@ export const TABLE_DEFINITION: Table = {
             type: "badge",
             header: "Relative Position",
             styling: { getClassName: getRelativePositionClassName },
-            filterOpts: { filterType: "pie" },
+            filterOpts: { filterType: "pie", isTopic: false },
         },
         {
             id: "variant_link",
@@ -70,6 +69,7 @@ export const TABLE_DEFINITION: Table = {
             styling: { getClassName: getImpactClassName },
             filterOpts: {
                 filterGroup: "Functional Annotation",
+                isTopic: false,
             },
         },
         {
