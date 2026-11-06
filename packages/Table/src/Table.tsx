@@ -37,6 +37,7 @@ import { getCellValue, renderCell, resolveCell, validateCellType } from "./Cells
 import { isValidUniqueKey, limitRowSelection, resolveRowSelectionState } from "./utils/rowSelection";
 import { resolveFilterFn, resolveFilterType, resolveIsTopic, resolveSortingFn } from "./utils/columnDefs";
 
+import { AGGEGRATE_TOPICS_COLUMN_ID } from "./ControlElements/Columns/ColumnFilters/filters/types";
 import { RowSelectionControls } from "./ControlElements/RowSelectionControls";
 import TableHeader from "./TableHeader";
 import styles from "./styles/table.module.css";
@@ -117,7 +118,7 @@ const Table = ({ id, columns, data, options, rowSelection, onRowSelectionChange 
             });
         }
 
-        /* track columns that contribute to topics */
+        // track columns that contribute to topics
         const topicSources: string[] = [];
         columns.forEach((col: TableColumn) => {
             try {
@@ -127,7 +128,7 @@ const Table = ({ id, columns, data, options, rowSelection, onRowSelectionChange 
             }
 
             const filterType = col.filterOpts?.filterType || resolveFilterType(col);
-            const isTopic = col.filterOpts?.isTopic || (filterType && resolveIsTopic(filterType));
+            const isTopic = col.filterOpts?.isTopic ?? (filterType && resolveIsTopic(filterType));
             if (isTopic) {
                 topicSources.push(col.id);
             }
@@ -157,14 +158,17 @@ const Table = ({ id, columns, data, options, rowSelection, onRowSelectionChange 
         });
 
         // assemble aggregate internal topic filter column
+        /* TODO: use extracted topics and `keyword-extractor` (https://www.npmjs.com/package/keyword-extractor)
+        to extract and add topics from long text fields with isTopic set to true */
         columnDefs.push({
-            id: "aggregate-topics-col",
+            id: AGGEGRATE_TOPICS_COLUMN_ID,
             accessorFn: (row) =>
                 topicSources
                     .map((id) => getCellValue(row[id] as Cell))
                     .filter((value): value is string => value != null && value !== DEFAULT_NA_VALUE)
                     .join(" // "),
             filterFn: includesAnyOrAllFilter,
+            enableColumnFilter: true,
             meta: {
                 type: "text_list",
                 filterType: "multiselect",

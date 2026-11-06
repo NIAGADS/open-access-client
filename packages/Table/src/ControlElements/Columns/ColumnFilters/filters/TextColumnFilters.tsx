@@ -1,6 +1,6 @@
+import { AGGEGRATE_TOPICS_COLUMN_ID, FilterColumn, RowValueSummary } from "./types";
 import { BooleanFilter, NoValidValueAlert } from ".";
 import { FacetCountBadges, PillOption, PillSelect } from "@niagads/ui";
-import { FilterColumn, RowValueSummary } from "./types";
 import { PieChart, PieChartDataRow } from "@niagads/charts";
 import React, { ReactNode, useMemo } from "react";
 
@@ -9,6 +9,8 @@ import { DEFAULT_NA_VALUE } from "../../../../types";
 import { FilterProps } from "./types";
 import { RichSelect } from "@niagads/ui/client";
 import styles from "./column-filter.module.css";
+
+// FIXME: assignment of terms grouped in `Other` is being altered as counts change
 
 // limits for categorical filters; excess aggregated into "Other"
 // note for selects & pies max is actually value + 2 (n/a + Other)
@@ -32,19 +34,21 @@ export const TextColumnFilter = ({ column }: FilterColumn) => {
     const categoryLimit =
         meta.filterType === "pie"
             ? MAX_PIE_SLICES
-            : column.columnDef.id === "agregate-topics-col"
+            : column.columnDef.id === AGGEGRATE_TOPICS_COLUMN_ID
               ? MAX_TOPICS
               : MAX_SELECT_OPTS;
 
+    const ignoreOther = column.columnDef.id === AGGEGRATE_TOPICS_COLUMN_ID;
+
     // otherwise, sort and consolidate the value map
     const referenceValues = useMemo(() => {
-        return _organizeValueCounts(valueCounts, naValue, categoryLimit);
+        return _organizeValueCounts(valueCounts, naValue, categoryLimit, ignoreOther);
     }, [column.id]);
 
     // get faceted values and do the same
     const filteredValueCount = column.getFacetedUniqueValues();
     const filteredValues = useMemo(() => {
-        return _organizeValueCounts(filteredValueCount, naValue, categoryLimit);
+        return _organizeValueCounts(filteredValueCount, naValue, categoryLimit, ignoreOther);
     }, [Array.from(filteredValueCount.entries())]);
 
     const FilterProps = { column, referenceValues, filteredValues };
@@ -53,9 +57,16 @@ export const TextColumnFilter = ({ column }: FilterColumn) => {
         return <BooleanFilter {...FilterProps} />;
     }
 
-    /*if (column.columnDef.id == "aggregate-topics-col") {
-        return <TopicFilter {...FilterProps} />;
-    }*/
+    if (column.columnDef.id === AGGEGRATE_TOPICS_COLUMN_ID) {
+        return (
+            <MultiSelectPillFilter
+                {...FilterProps}
+                showMatchTypeControl={true}
+                filterFieldLabel="Explore Topics"
+                ignoreOther={true}
+            />
+        );
+    }
     if (meta.filterType) {
         if (meta.filterType === "pie") {
             return <PieChartFilter {...FilterProps} />;
@@ -172,7 +183,14 @@ export const RichSelectFilter = ({ column, referenceValues, filteredValues }: Fi
     );
 };
 
-export const MultiSelectPillFilter = ({ column, referenceValues, filteredValues, showLabel = true }: FilterProps) => {
+export const MultiSelectPillFilter = ({
+    column,
+    referenceValues,
+    filteredValues,
+    showMatchTypeControl = false,
+    filterFieldLabel,
+    ignoreOther = false,
+}: FilterProps & { showMatchTypeControl?: boolean; filterFieldLabel?: string; ignoreOther?: boolean }) => {
     /* To clarify "fitlered counts" here.  `filteredValues` are calculated from tanstack `facetedRowModel`. 
      This reflects current table state for all but the requesting column.  For `counts` to update in the display
      when we select a pill, we need to get counts based on current state of the current column from the
@@ -182,7 +200,12 @@ export const MultiSelectPillFilter = ({ column, referenceValues, filteredValues,
      if choosing one button reduces to zero choices, can add them back in.
     */
     const naValue = column.columnDef?.meta?.naValue || DEFAULT_NA_VALUE;
-    const internalFilterValues = _organizeValueCounts(column.getFilteredUniqueValues(), naValue, MAX_SELECT_OPTS);
+    const internalFilterValues = _organizeValueCounts(
+        column.getFilteredUniqueValues(),
+        naValue,
+        MAX_SELECT_OPTS,
+        ignoreOther
+    );
 
     const opts: PillOption[] = useMemo(
         () =>
@@ -197,21 +220,45 @@ export const MultiSelectPillFilter = ({ column, referenceValues, filteredValues,
     const activeFilters = column.getFilterValue() as CategoryFilterValue;
     let selectedValues = (activeFilters && activeFilters.values) || [];
 
-    const label = showLabel ? column.columnDef.header!.toString() : undefined;
+    const label = filterFieldLabel || column.columnDef.header!.toString();
     return (
-        <PillSelect
-            label={label}
-            options={opts}
-            selectedValues={selectedValues}
-            variant="faceted-counts"
-            onChange={(v) =>
-                column.setFilterValue((v && { values: v, otherValues: referenceValues.otherValues }) || undefined)
-            }
-        ></PillSelect>
+        <div className={styles["filter-pill-select-container"]}>
+            {showMatchTypeControl && (
+                <div className={styles["filter-topic-header"]}>
+                    {label && <div className={styles["filter-field-label"]}>{label}</div>}
+
+                    <div className={styles["filter-topic-match-mode"]} aria-label="match mode">
+                        <button
+                            type="button"
+                            className={[
+                                styles["filter-topic-match-mode-button"],
+                                styles["filter-topic-match-mode-button-selected"],
+                            ]
+                                .filter(Boolean)
+                                .join(" ")}
+                            aria-pressed={true}
+                        >
+                            Match all
+                        </button>
+                        <button type="button" className={styles["filter-topic-match-mode-button"]} aria-pressed={false}>
+                            Match any
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            <PillSelect
+                label={showMatchTypeControl ? undefined : label}
+                options={opts}
+                selectedValues={selectedValues}
+                variant="faceted-counts"
+                onChange={(v) =>
+                    column.setFilterValue((v && { values: v, otherValues: referenceValues.otherValues }) || undefined)
+                }
+            ></PillSelect>
+        </div>
     );
 };
-
-export const TopicFilter = ({ column, referenceValues, filteredValues }: FilterProps) => {};
 
 /**
  * Sorts and organizes unique values for filter display, handling overflow by grouping into "Other"
@@ -219,9 +266,15 @@ export const TopicFilter = ({ column, referenceValues, filteredValues }: FilterP
  * @param naValue - The N/A value representation
  * @param valueCounts - Map of unique values and their counts
  * @param limit - max number of unique values before aggregating remainder into "Other"
+ * @param ignoreOther - drop Other
  * @returns Object with sorted value/count map and list of values grouped as "Other"
  */
-const _organizeValueCounts = (valueCounts: Map<string, number>, naValue: string, limit: number): RowValueSummary => {
+const _organizeValueCounts = (
+    valueCounts: Map<string, number>,
+    naValue: string,
+    limit: number,
+    ignoreOther: boolean = false
+): RowValueSummary => {
     let filteredValueCounts: Record<string, number> = {};
     let otherValues: string[] = [];
 
@@ -242,7 +295,7 @@ const _organizeValueCounts = (valueCounts: Map<string, number>, naValue: string,
         );
 
         filteredValueCounts = Object.fromEntries(topEntries);
-        if (otherEntries.count > 0) {
+        if (otherEntries.count > 0 && !ignoreOther) {
             filteredValueCounts.Other = otherEntries.count;
             otherValues = otherEntries.values;
         }

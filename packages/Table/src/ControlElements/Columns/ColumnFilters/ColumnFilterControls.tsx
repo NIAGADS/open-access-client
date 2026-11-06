@@ -2,13 +2,11 @@ import { Button, FilterChip, FilterChipBar, InlineIcon, StylingProps } from "@ni
 import { Column, ColumnFilter, ColumnFiltersState } from "@tanstack/react-table";
 import React, { useEffect, useMemo, useState } from "react";
 
+import { AGGEGRATE_TOPICS_COLUMN_ID } from "./filters/types";
 import FilterComponent from "./filters/ColumnFilter";
 import { TrashIcon } from "lucide-react";
 import { fromNegLog10 } from "@niagads/common";
-import styles from "./ColumnFilterControls.module.css";
-
-// TODO: hover effect on multiselect pills.
-// TODO: rich text selects not resetting on clear
+import styles from "./column-filter-controls.module.css";
 
 interface ColumnFilterControlsProps {
     filterableColumns: Column<any, unknown>[];
@@ -29,13 +27,15 @@ export const ColumnFilterControls = ({
 }: ColumnFilterControlsProps) => {
     const [showAtAGlanceFilters, setShowAtAGlanceFilters] = useState(true);
     const [showAdditionalFilters, setShowAdditionalFilters] = useState(false);
-    const [showTopicFilter, setShowTopicFilter] = useState(true);
 
-    const { visualFilterColumns, additionalFilterColumns, topicFilterColumns } = useMemo(() => {
-        const columns = {
-            visualFilterColumns: [] as Column<any, unknown>[],
-            additionalFilterColumns: [] as Column<any, unknown>[],
-            topicFilterColumns: [] as Column<any, unknown>[],
+    const { visualFilterColumns, additionalFilterColumns, topicFilterColumn } = useMemo(() => {
+        const columns: {
+            visualFilterColumns: Column<any, unknown>[];
+            additionalFilterColumns: Column<any, unknown>[];
+            topicFilterColumn?: Column<any, unknown>;
+        } = {
+            visualFilterColumns: [],
+            additionalFilterColumns: [],
         };
 
         for (const column of filterableColumns) {
@@ -44,11 +44,12 @@ export const ColumnFilterControls = ({
                 case "pie":
                     columns.visualFilterColumns.push(column);
                     break;
-                case "boolean":
-                case "select":
                 case "multiselect":
-                    columns.additionalFilterColumns.push(column);
+                    if (column.columnDef.id === AGGEGRATE_TOPICS_COLUMN_ID) columns.topicFilterColumn = column;
+                    else columns.additionalFilterColumns.push(column);
                     break;
+                default:
+                    columns.additionalFilterColumns.push(column);
             }
         }
 
@@ -121,7 +122,7 @@ export const ColumnFilterControls = ({
                 )}
             </FilterChipBar>
 
-            {hasVisualFilters && (
+            {(hasVisualFilters || topicFilterColumn) && (
                 <section className={styles["glance-section"]}>
                     <header className={styles["section-header"]}>
                         <span>At a Glance</span>
@@ -134,13 +135,18 @@ export const ColumnFilterControls = ({
                         />
                     </header>
 
-                    {showAtAGlanceFilters && (
+                    {hasVisualFilters && (
                         <div className={styles["visual-filter-grid"]}>
                             {visualFilterColumns.map((column) => (
                                 <div className={styles["visual-filter-panel"]} key={`visual-filter-panel-${column.id}`}>
                                     <FilterComponent key={`visual-filter-${column.id}`} column={column} />
                                 </div>
                             ))}
+                        </div>
+                    )}
+                    {topicFilterColumn && (
+                        <div>
+                            <FilterComponent key={`topic-filter`} column={topicFilterColumn} />
                         </div>
                     )}
                 </section>

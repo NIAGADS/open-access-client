@@ -14,3 +14,5 @@ export interface FilterProps extends FilterColumn {
     filteredValues: RowValueSummary;
     showLabel?: boolean;
 }
+
+export const AGGEGRATE_TOPICS_COLUMN_ID = "aggregate-topics-col";
