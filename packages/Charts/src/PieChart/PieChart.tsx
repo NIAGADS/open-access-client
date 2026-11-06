@@ -7,7 +7,7 @@ import VisualizationInfo, { VisualizationInfoContent } from "../d3/Visualization
 import { DisplayProps } from "../d3/types";
 import { _isNA } from "@niagads/common";
 import chartStyles from "../styles/Charts.module.css";
-import styles from "./PieChart.module.css";
+import styles from "./pie-chart.module.css";
 
 export interface PieChartDataRow {
     id: string;
