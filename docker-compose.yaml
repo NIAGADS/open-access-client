@@ -82,7 +82,6 @@ services:
         <<: *build-arg-defaults
         APP_NAME: adsp
         APP_DIR: adsp
-      context: ./apps/adsp
     ports:
       - "${ADSP_CLIENT_PORT}:3000"
 
