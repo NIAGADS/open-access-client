@@ -28,30 +28,7 @@ export interface PieChartProps {
     visualizationInfo?: VisualizationInfoContent;
 }
 
-const getCombinedData = (data: PieChartDataRow[], referenceData?: PieChartDataRow[]): PieChartDataRow[] => {
-    const combinedData = new Map<string, PieChartDataRow>();
-
-    referenceData?.forEach((d) => combinedData.set(d.id, d));
-    data.forEach((d) => {
-        if (!combinedData.has(d.id)) {
-            combinedData.set(d.id, d);
-        }
-    });
-
-    return Array.from(combinedData.values());
-};
-
-const Legend = ({
-    data,
-    referenceData,
-    compact,
-}: {
-    data: PieChartDataRow[];
-    referenceData?: PieChartDataRow[];
-    compact?: boolean;
-}) => {
-    const legendData = useMemo(() => getCombinedData(data, referenceData), [data, referenceData]);
-
+const Legend = ({ legendData, compact }: { legendData: PieChartDataRow[]; compact?: boolean }) => {
     const colorScale = useMemo(() => {
         const scale: Record<string, string> = {};
         legendData.forEach((d, i) => {
@@ -189,7 +166,7 @@ const PieChart = ({
                             compactLegend ? styles["legend-wrapper-compact"] : ""
                         }`}
                     >
-                        <Legend data={data} referenceData={referenceData} compact={compactLegend} />
+                        <Legend legendData={referenceData ? referenceData : data} compact={compactLegend} />
                     </div>
                 )}
             </div>
