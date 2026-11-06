@@ -19,39 +19,50 @@ export const neglog10Filter: FilterFn<any> = (row, columnId, filterValue) => {
     return toNegLog10(rowValue) >= targetValue;
 };
 
-export type CategoryFilterValue = {
-    values: string[]; // values on which to filter
-    otherValues: string[]; // substitution for other
-};
-
 // for handling multi-selects, accounting for list text fields
 // and anything that might have "Other", so basically, all text fields
+
+export type CategoryFilterValue = {
+    values: string[]; // values on which to filter
+    otherValues?: string[]; // substitution for `Other` in values; optional for Topics Filter
+    mode?: "any" | "all"; // optional for Topics Filter
+};
+
+export const includesAnyOrAllFilter: FilterFn<any> = (row, columnId, filterValue: CategoryFilterValue) => {
+    if (filterValue && !filterValue.mode) {
+        filterValue.mode = "any"; // default is match any
+    }
+    // No-op callback required by FilterFn's TypeScript signature which expects
+    // an additional `addMeta` field
+    if (filterValue.mode === "any") {
+        return includesAnyFilter(row, columnId, filterValue, () => {});
+    } else return includesAllFilter(row, columnId, filterValue, () => {});
+};
+
 export const includesAnyFilter: FilterFn<any> = (row, columnId, filterValue: CategoryFilterValue) => {
     let filterValues = filterValue.values;
     if (filterValues.length === 0) return true;
 
-    const rvalue = row.getValue(columnId) as string;
-    const rowValues = rvalue.includes("//") ? rvalue.split(" // ") : [rvalue];
+    const rowValues = (row.getValue(columnId) as string).split(" // ");
 
-    if (filterValues.includes("Other")) {
+    if (filterValue.otherValues && filterValues.includes("Other")) {
         filterValues = filterValues.filter((v) => v !== "Other");
         filterValues = [...filterValues, ...filterValue.otherValues];
     }
 
-    return filterValues.some((val) => rowValues.includes(val));
+    return filterValue.values.some((value) => rowValues.includes(value));
 };
 
-/* for handling user choice of `all` v `any` matches for the topics filter */
-export type TopicFilterValue = {
-    values: string[];
-    mode: "any" | "all";
-};
+export const includesAllFilter: FilterFn<any> = (row, columnId, filterValue: CategoryFilterValue) => {
+    let filterValues = filterValue.values;
+    if (filterValues.length === 0) return true;
 
-export const topicFilter: FilterFn<any> = (row, columnId, filterValue: TopicFilterValue) => {
-    if (!filterValue.values || (filterValue && filterValue.values.length === 0)) return true;
-    const topics = (row.getValue(columnId) as string).split(" // ");
+    const rowValues = (row.getValue(columnId) as string).split(" // ");
 
-    return filterValue.mode === "all"
-        ? filterValue.values.every((value) => topics.includes(value))
-        : filterValue.values.some((value) => topics.includes(value));
+    if (filterValue.otherValues && filterValues.includes("Other")) {
+        filterValues = filterValues.filter((v) => v !== "Other");
+        filterValues = [...filterValues, ...filterValue.otherValues];
+    }
+
+    return filterValue.values.every((value) => rowValues.includes(value));
 };
