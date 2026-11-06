@@ -57,15 +57,6 @@ jobs:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
-      - name: setup node
-        uses: actions/setup-node@v6
-        with:
-          node-version: 24
-          cache: 'npm'
-      - name: update to latest npm for oidc support
-        run: npm install -g npm@latest
-      - name: Install dependencies
-        run: npm ci 
       - name: build image and push to ECR
         run: ./scripts/build-docker.sh adsp staging
       - name: Pull and run image on staging server via SSM
@@ -75,8 +66,8 @@ jobs:
             --region "$AWS_REGION" \
             --instance-ids "$INSTANCE_ID" \
             --document-name AWS-RunShellScript \
-            --comment "deploy $ARTIFACT @ ${GITHUB_SHA::8}" \
-            --parameters commands="sudo /opt/dss-deploy/deploy.sh $ARTIFACT" \
+            --comment "deploy adsp staging site" \
+            --parameters commands="sudo /opt/niagads-sites/deploy.sh adsp" \
             --query Command.CommandId --output text)
           echo "SSM CommandId: $CMD_ID"
 
