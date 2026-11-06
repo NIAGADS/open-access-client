@@ -65,7 +65,7 @@ jobs:
       - name: Install dependencies
         run: npm ci 
       - name: build image and push to ECR
-        run: ./scripts/build-docker adsp staging
+        run: ./scripts/build-docker.sh adsp staging
       - name: Pull and run image on staging server via SSM
         run: |
           set -euo pipefail
