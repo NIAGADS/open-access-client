@@ -1,11 +1,13 @@
 #!/bin/bash
 # script for automatically building a docker service
-# usage: ./build-docker.sh <service-name>
+# usage: ./build-docker.sh <service-name> <environment>
 # see DOCKER_DEPLOYMENT.md for more information
 
 DOCKER_SERVICES="genomicsdb adsp niagads-main genome-browser";
+ENVIRONMENTS="staging production"
 
 APP="$1";
+ENVIRONMENT="$2";
 
 if [[ !($DOCKER_SERVICES =~ $APP) ]]; then
     echo "ERROR: Unknown service";
@@ -13,8 +15,14 @@ if [[ !($DOCKER_SERVICES =~ $APP) ]]; then
     exit 1;
 fi
 
-TAG="beta-v"
-echo "Using tag: $TAG"
+if [[ !($ENVIRONMENTS =~ $ENVIRONMENT) ]]; then
+    echo "ERROR: Unknown environment";
+    echo "$APP must be one of '$ENVIRONMENTS'";
+    exit 1;
+fi
+
+TAG="$ENVIRONMENT-v$GITHUB_RUN_NUMBER";
+echo "Using tag: $TAG";
 
 if [ -f "./.env" ]; then
     echo ".env already exists";
@@ -36,12 +44,12 @@ echo "Building image for $APP";
 docker compose build $APP;
 
 if [ $? -ne 0 ]; then
-    echo "ERROR: building image for $APP failed!"
+    echo "ERROR: building image for $APP failed!";
     exit 1
 fi
 
 echo "Tagging image";
-docker tag client-app-$APP:staging $ECR_REGISTRY/$APP-beta:$TAG
+docker tag client-app-$APP:$ENVIRONMENT $ECR_REGISTRY/$APP-$ENVIRONMENT:$TAG;
 
 if [ $? -ne 0 ]; then
     echo "ERROR: tagging image failed!"
@@ -49,7 +57,17 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "Logging in to docker using aws";
-aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin  $ECR_REGISTRY
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $ECR_REGISTRY
+
+if [ $? -ne 0 ]; then
+    echo "ERROR: logging into docker using aws credentials failed!"
+    exit 1
+fi
 
 echo "Pushing image to ECR";
 docker push $ECR_REGISTRY/$APP-beta:$TAG
+
+if [ $? -ne 0 ]; then
+    echo "ERROR: pushing image to ECR failed!"
+    exit 1
+fi

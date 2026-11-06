@@ -1,5 +1,7 @@
 # Builds storybook and deploys it to github pages
 
+name: Publish Storybook
+
 on:
   push:
     branches:
