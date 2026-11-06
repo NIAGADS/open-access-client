@@ -24,10 +24,11 @@ import {
     ColumnFilterControls,
     booleanSort,
     globalFuzzyFilter,
+    includesAllFilter,
     includesAnyFilter,
+    includesAnyOrAllFilter,
     neglog10Filter,
     scientificNotationSort,
-    topicFilter,
 } from "./ControlElements/Columns";
 import { DEFAULT_NA_VALUE, TableColumn, TableData, TableOptions, TableRow } from "./types";
 import { PaginationControls, TableToolbar } from "./ControlElements";
@@ -163,7 +164,7 @@ const Table = ({ id, columns, data, options, rowSelection, onRowSelectionChange 
                     .map((id) => getCellValue(row[id] as Cell))
                     .filter((value): value is string => value != null && value !== DEFAULT_NA_VALUE)
                     .join(" // "),
-            filterFn: topicFilter,
+            filterFn: includesAnyOrAllFilter,
             meta: {
                 type: "text_list",
                 filterType: "multiselect",
