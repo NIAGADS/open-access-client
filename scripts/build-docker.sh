@@ -65,7 +65,7 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "Pushing image to ECR";
-docker push $ECR_REGISTRY/$APP-beta:$TAG
+docker push $ECR_REGISTRY/$APP-$ENVIRONMENT:$TAG
 
 if [ $? -ne 0 ]; then
     echo "ERROR: pushing image to ECR failed!"
