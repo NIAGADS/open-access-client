@@ -5,6 +5,7 @@
 #  - stdin/out is captured and piped to a <app_name>.log file.  for now one single mounted log dir for all apps, host target directory must 1) exist, 2) belong to webmaster group, 3) have g+rw permissions
 
 x-defaults: &defaults
+  platform: linux/amd64
   restart: unless-stopped
   volumes:
     - ${LOG_DIR}:/var/log/app
@@ -24,14 +25,15 @@ x-build-arg-defaults: &build-arg-defaults
 networks:
   default:
     name: oa-network
-services:
 
+services:
   genomicsdb:
     <<: *defaults
     container_name: genomicsdb-client
     image: client-app-genomics:${BUILD}
     env_file:
-      - ./apps/genomicsdb/runtime.env
+      - path: ./apps/genomicsdb/runtime.env
+        required: false
     build:
       <<: *build-defaults
       args:
@@ -59,7 +61,8 @@ services:
     container_name: genome-browser-client
     image: client-app-genome-browser:${BUILD}
     env_file:
-      - ./apps/igvbrowser/runtime.env
+      - path: ./apps/igvbrowser/runtime.env
+        required: false
     build:
       <<: *build-defaults
       args:
@@ -69,18 +72,18 @@ services:
     ports:
       - "${IGVBROWSER_CLIENT_PORT}:3000"
 
-  adsp-data:
+  adsp:
     <<: *defaults
-    container_name: adsp-data-client
-    image: client-app-adsp-data:${BUILD}
+    container_name: adsp-client
+    image: client-app-adsp:${BUILD}
     build:
       <<: *build-defaults
       args:
         <<: *build-arg-defaults
-        APP_NAME: adsp-data
+        APP_NAME: adsp
         APP_DIR: adsp
     ports:
-      - "${ADSPDATA_CLIENT_PORT}:3000"
+      - "${ADSP_CLIENT_PORT}:3000"
 
   open-access-api-client:
     <<: *defaults
