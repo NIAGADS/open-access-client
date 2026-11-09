@@ -1,3 +1,4 @@
+
 import React, { ReactNode } from "react";
 
 import { StylingProps } from "../types";
@@ -29,21 +30,22 @@ export const Toggle = ({
     className = "",
     style = {},
 }: ToggleProps) => {
-    const displayLabel = truncateLabel ? truncate(label) : label;
-    const isTruncated = label !== displayLabel;
     return (
-        <label className={`${styles.toggleSwitch} ${className}`} style={style}>
+        <label className={`${styles["toggle-switch"]} ${className}`} style={style}>
             <input
                 type="checkbox"
                 checked={checked}
                 onChange={(e) => onChange(e.target.checked)}
                 disabled={disabled}
-                className={styles.toggleInput}
+                className={styles["toggle-input"]}
             />
-            <span className={`${styles.toggleSlider} ${variant !== "default" ? styles[variant] : ""}`} />
-            {label && (
-                <span className={styles.toggleLabel} title={isTruncated ? label : undefined}>
-                    {displayLabel}
+            <span className={`${styles["toggle-slider"]} ${variant !== "default" ? styles[variant] : ""}`} />
+           {label && (
+                <span
+                    className={`${styles["toggle-label"]} ${truncateLabel ? styles["toggle-label-truncated"] : ""}`}
+                    title={truncateLabel ? label : undefined}
+                >
+                    {label}
                 </span>
             )}
         </label>
@@ -58,7 +60,7 @@ export interface ToggleGroupProps extends StylingProps {
 export const ToggleGroup = ({ children, asGrid = false, className = "", style = {} }: ToggleGroupProps) => {
     return (
         <div
-            className={`${styles.toggleGroup} ${asGrid ? styles.toggleGroupGrid : styles.toggleGroupColumn} ${className}`}
+            className={`${styles["toggle-group"]} ${asGrid ? styles["toggle-group-grid"] : styles["toggle-group-column"]} ${className}`}
             style={style}
         >
             {children}

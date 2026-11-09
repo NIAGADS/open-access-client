@@ -168,7 +168,7 @@ const Table = ({ id, columns, data, options, rowSelection }: TableProps) => {
                 id: AGGEGRATE_TOPICS_COLUMN_ID,
                 accessorFn: (row) =>
                     topicSources
-                        .map((id) => getCellValue(row[id] as Cell))
+                        .map((id) => extractTopics(getCellValue(row[id] as Cell)))
                         .filter((value): value is string => value != null && value !== DEFAULT_NA_VALUE)
                         .join(" // "),
                 filterFn: includesAnyOrAllFilter,

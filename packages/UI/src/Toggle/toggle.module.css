@@ -1,14 +1,24 @@
-.toggleSwitch {
+
+.toggle-switch {
     display: inline-flex;
     align-items: center;
+    max-width: 100%;
     cursor: pointer;
 }
 
-.toggleInput {
-    display: none;
+.toggle-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
 }
 
-.toggleSlider {
+.toggle-slider {
     width: 30px;
     height: 15px;
     background: #ccc;
@@ -16,17 +26,22 @@
     position: relative;
     transition: background 0.2s;
     display: inline-block;
+    flex-shrink: 0;
 }
 
-.toggleInput:checked + .toggleSlider {
+.toggle-input:checked + .toggle-slider {
     background: #4ade80;
 }
+.toggle-input:focus-visible + .toggle-slider {
+    outline: 2px solid var(--secondary-blue, #3d5a80);
+    outline-offset: 3px;
+}
 
-.toggleInput:checked + .toggleSlider.primary {
+.toggle-input:checked + .toggle-slider.primary {
     background: var(--secondary-blue);
 }
 
-.toggleSlider:before {
+.toggle-slider:before {
     content: "";
     position: absolute;
     left: 2px;
@@ -38,27 +53,36 @@
     transition: transform 0.2s;
 }
 
-.toggleInput:checked + .toggleSlider:before {
+.toggle-input:checked + .toggle-slider:before {
     transform: translateX(14px);
 }
 
-.toggleLabel {
-    font-size: 0.8em;
+.toggle-label {
+    font-size: 0.875em;
+    font-weight: 400;
+    line-height: 1.4;
     margin-left: 0.5rem;
 }
 
-.toggleGroup {
+.toggle-label-truncated {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.toggle-group {
     width: 100%;
     gap: 12px;
 }
 
-.toggleGroupColumn {
+.toggle-group-column {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
 }
 
-.toggleGroupGrid {
+.toggle-group-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     grid-auto-rows: minmax(40px, auto);

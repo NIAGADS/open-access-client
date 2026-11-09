@@ -61,6 +61,7 @@ export interface ColumnFilteringOpts {
     filterGroup?: string;
     valueColumn?: string; // precomputed filter values; pvalue columns expect -log10(p)
     isTopic?: boolean; // field contains values that could be used in topic filter; defaults to true for multiselect and select
+    modelPath?: string; // path the LLM model for text-extraction based topic filter. If not provide, defaults to keyword extraction
 }
 
 export interface ColumnStylingOpts {

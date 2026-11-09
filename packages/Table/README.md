@@ -61,6 +61,7 @@ Pass options through the `options` prop.
 | `enableColumnFilters` | Shows column-filter controls when `true`. Defaults to `false`. |
 | `enableExport` | Shows the export menu when `true`. Defaults to `false`. Exports visible columns as CSV, TSV, JSON, or XLS. |
 | `enableRowSelect` | Adds a selection column and selected-row controls when `true`. Defaults to `false`. |
+| `enableTopicFilter` | Adds a `topic` filtter when `true`. Defaults to `false`; see [Topic Filter](#topic-filters) |
 | `rowSelectOpts` | Configuration required for useful row selection; see [Row selection](#row-selection). |
 | `defaultColumns` | IDs of the columns initially visible. Columns omitted from this list start hidden. Required columns remain visible. |
 | `onTableLoad` | Called with the TanStack Table instance after layout. See [Accessing the table instance](#accessing-the-table-instance). |
@@ -150,7 +151,90 @@ Set `enableColumnFilters: true` to show the filter UI. By default, numeric colum
 }
 ```
 
-Columns marked as topics contribute their values to an internal aggregate `Topics` multiselect filter. This internal column is hidden from the table itself. Set `isTopic: false` for categorical columns that should not contribute to it.
+### Topic Filters
+
+Topic filters are a "word-cloud" like filter based on selected text fields in the table.  Set `enableTopicFilter` to `true` in the table options
+to enable.
+
+By default all text columns are included in the Topics Filter unless they are explicitly excluded from column filtering by disabling the column filter in the column configuration options (`{disableColumnFilter: true}`).  You can set the `isTopic` flag in the column filtering options to add or exclude a column from the Topic Filter regardless of whether a column filter is enabled.  To clarify, if `disableColumnFilter && isTopic`, no column specific filter will be generated, but values from that column will still be counted toward the topic filter.  Similarily if  `!disableColumnFilter && !isTopic`, a column filter will be generated, but the column values will **not** be counted toward the topic filter.
+
+> Categorical fields are summarized by counting each value. Free-text fields are processed to extract keywords or phrases before counting; if no keyphrase LLM is provided, basic keyword extraction is used.
+
+#### Keyphrase Extraction Model
+
+The Table keyphrase filter uses a locally hosted ONNX model. Inference runs in the browser on the CPU.
+
+##### Choose a model
+
+We use [Transformers.js](https://huggingface.co/docs/transformers.js/) to run an optional keyphrase extraction model locally in the browser.
+Text is processed on the user’s device without being sent to an external inference service.  
+
+The `@niagads/Table` package does not provide any LLMs out of the box.  Applications must supply a compatible ONNX model for model-based keyphrase extraction to work.
+
+[Hugging Face](https://huggingface.co/) is one possible source for keyphrase extraction models. Search for “keyphrase extraction” and
+check the model’s domain, license, ONNX availability, size, and output compatibility before use. Verify that its labels and output are compatible with the Table’s extraction logic.
+
+- If it contains `onnx/model.onnx`, it is already in the format needed for
+  full-precision inference. Download the model files; no conversion is needed.
+- If it contains only PyTorch or Safetensors weights, convert it to ONNX as
+  described below.
+
+> In-house applications use `ml6team/keyphrase-extraction-distilbert-inspec`, which was selected because it is designed to extract keyphrases from scientific abstracts and is based on DistilBERT, a smaller transformer model.
+
+##### Convert a model to ONNX format if needed
+
+Install the conversion tools:
+
+```bash
+pip install "optimum[onnxruntime]" torch
+```
+
+Download and convert the model:
+
+```bash
+optimum-cli export onnx \
+  --model <model-id> \
+  --task token-classification \
+  ./keyphrase-model
+```
+
+##### Make the model available
+
+In the consuming application, place the downloaded or converted files where they can be served as static assets.
+
+For example, in a Next.js app, place them under public/models. The model directory should look like this:
+
+```text
+apps/my-app/public/models/keyphrase-model/
+├── config.json
+├── tokenizer.json
+├── tokenizer_config.json
+├── ...other model and tokenizer files
+└── onnx/
+    └── model.onnx
+```
+
+For a converted model, move the exported `model.onnx` into the `onnx`
+subdirectory. For a model already in ONNX format, preserve its directory
+structure and include its configuration and tokenizer files.
+
+> The model’s config.json must define labels that identify the beginning and continuation of a keyphrase. The current extractor expects B-KEY, I-KEY, and O. For a model with different labels, you must update the extraction logic to recognize its labels and combine the corresponding tokens into complete phrases. Test the model on sample text to verify the results.
+
+##### Configure the Table
+
+Pass the model URL through the filter options:
+
+```tsx
+<Table
+  filterOpts={{
+    modelPath: "/models/keyphrase-model/",
+  }}
+/>
+```
+
+The browser downloads the model from the application when needed; text is
+processed locally. To avoid external requests for the WebAssembly runtime,
+host its files locally as well.
 
 ## Row selection
 
