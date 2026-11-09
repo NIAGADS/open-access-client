@@ -40,29 +40,32 @@ export const includesAnyOrAllFilter: FilterFn<any> = (row, columnId, filterValue
 };
 
 export const includesAnyFilter: FilterFn<any> = (row, columnId, filterValue: CategoryFilterValue) => {
-    let filterValues = filterValue.values;
-    if (filterValues.length === 0) return true;
+    let effectiveFilterValues = filterValue.values;
+    if (effectiveFilterValues.length === 0) return true;
 
     const rowValues = (row.getValue(columnId) as string).split(" // ");
 
-    if (filterValue.otherValues && filterValues.includes("Other")) {
-        filterValues = filterValues.filter((v) => v !== "Other");
-        filterValues = [...filterValues, ...filterValue.otherValues];
+    if (filterValue.otherValues && effectiveFilterValues.includes("Other")) {
+        console.log("Applying other filter");
+        effectiveFilterValues = effectiveFilterValues.filter((v) => v !== "Other");
+        console.log(`removed 'Other': ${effectiveFilterValues}`);
+        effectiveFilterValues = [...effectiveFilterValues, ...filterValue.otherValues];
+        console.log(`new values: ${effectiveFilterValues}`);
     }
 
-    return filterValue.values.some((value) => rowValues.includes(value));
+    return effectiveFilterValues.some((value) => rowValues.includes(value));
 };
 
 export const includesAllFilter: FilterFn<any> = (row, columnId, filterValue: CategoryFilterValue) => {
-    let filterValues = filterValue.values;
-    if (filterValues.length === 0) return true;
+    let effectiveFilterValues = filterValue.values;
+    if (effectiveFilterValues.length === 0) return true;
 
     const rowValues = (row.getValue(columnId) as string).split(" // ");
 
-    if (filterValue.otherValues && filterValues.includes("Other")) {
-        filterValues = filterValues.filter((v) => v !== "Other");
-        filterValues = [...filterValues, ...filterValue.otherValues];
+    if (filterValue.otherValues && effectiveFilterValues.includes("Other")) {
+        effectiveFilterValues = effectiveFilterValues.filter((v) => v !== "Other");
+        effectiveFilterValues = [...effectiveFilterValues, ...filterValue.otherValues];
     }
 
-    return filterValue.values.every((value) => rowValues.includes(value));
+    return effectiveFilterValues.every((value) => rowValues.includes(value));
 };
