@@ -46,11 +46,8 @@ export const includesAnyFilter: FilterFn<any> = (row, columnId, filterValue: Cat
     const rowValues = (row.getValue(columnId) as string).split(" // ");
 
     if (filterValue.otherValues && effectiveFilterValues.includes("Other")) {
-        console.log("Applying other filter");
         effectiveFilterValues = effectiveFilterValues.filter((v) => v !== "Other");
-        console.log(`removed 'Other': ${effectiveFilterValues}`);
         effectiveFilterValues = [...effectiveFilterValues, ...filterValue.otherValues];
-        console.log(`new values: ${effectiveFilterValues}`);
     }
 
     return effectiveFilterValues.some((value) => rowValues.includes(value));
