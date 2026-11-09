@@ -1,12 +1,14 @@
 import { HelpIconWrapper, StylingProps } from "@niagads/ui";
-import React, { useId, useState } from "react";
+import React, { useState } from "react";
 import { TextRenderer, renderNullValue } from ".";
 import { _deepCopy, _get, _hasOwnProperty, _isJSON, _isNA, _isNull } from "@niagads/common";
 
 import { DEFAULT_NA_VALUE } from "../../types";
+import { __values } from "tslib";
 import styles from "./cell.module.css";
 
 const DEFAULT_MAX_LENGTH = 100;
+const DEFAULT_VISIBLE_LIST_ITEMS = 3;
 
 interface StyledTextProps extends StylingProps {
     value: string;
@@ -21,22 +23,35 @@ export const StyledText = ({ value, className = "", style = {} }: StyledTextProp
 };
 
 export const TextList = <T,>({ props }: TextRenderer<T>) => {
-    const id = useId();
+    const [isExpanded, setIsExpanded] = useState(false);
     const items = _get("items", props);
     if (items) {
-        const numItems = items.length - 1;
-        return items.map((iProps: any, index: number) => (
-            <div key={`item-${id}-${index}`}>
-                <Text key={`text-${id}-${index}`} props={iProps}></Text>
-                {index < numItems ? ` // ` : ""}
+        const remainingItemCount = items.length - DEFAULT_VISIBLE_LIST_ITEMS;
+        const visibleItems = isExpanded ? items : items.slice(0, DEFAULT_VISIBLE_LIST_ITEMS);
+        return (
+            <div className={styles["truncated-text"]}>
+                {visibleItems.map((item: string, index: number) => (
+                    <React.Fragment key={`item-${index}`}>
+                        <Text props={{ ...props, value: item, items: null }} />
+                        {index < visibleItems.length - 1 ? " · " : ""}
+                    </React.Fragment>
+                ))}
+                {remainingItemCount > 0 && (
+                    <>
+                        {" "}
+                        <a className={`text-xs ${styles["info-link"]}`} onClick={() => setIsExpanded(!isExpanded)}>
+                            {isExpanded ? "Show Less" : `+${remainingItemCount} more`}
+                        </a>
+                    </>
+                )}
             </div>
-        ));
+        );
     }
     return renderNullValue(_get("nullValue", props, DEFAULT_NA_VALUE));
 };
 
 export const Text = <T,>({ props }: TextRenderer<T>) => {
-    const value = _get("value", props);
+    const value: string | null = _get("value", props);
 
     // handle NAs
     if (_isNull(value)) {
@@ -45,6 +60,13 @@ export const Text = <T,>({ props }: TextRenderer<T>) => {
 
     if (_isNA(value)) {
         return renderNullValue(_get("naValue", props, DEFAULT_NA_VALUE));
+    }
+
+    if (value.includes("//")) {
+        // b/c of how values are resolved in table generation for sort/filter
+        // some lists are already transformed to delimited strings, need
+        // to transform back
+        return <TextList props={{ ...props, items: value.split("//") }} />;
     }
 
     // handle large text
