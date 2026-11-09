@@ -38,18 +38,22 @@ export const ColumnFilterControls = ({
             additionalFilterColumns: [],
         };
 
-        for (const column of filterableColumns) {
-            switch (column.columnDef.meta?.filterType) {
-                case "histogram":
-                case "pie":
-                    columns.visualFilterColumns.push(column);
-                    break;
-                case "multiselect":
-                    if (column.columnDef.id === AGGEGRATE_TOPICS_COLUMN_ID) columns.topicFilterColumn = column;
-                    else columns.additionalFilterColumns.push(column);
-                    break;
-                default:
-                    columns.additionalFilterColumns.push(column);
+        for (const col of filterableColumns) {
+            const faceted = new Set(col.getAllValues()).size > 1;
+            if (faceted) {
+                // need to apply this logic here, in case visual filters yield no value added
+                switch (col.columnDef.meta?.filterType) {
+                    case "histogram":
+                    case "pie":
+                        columns.visualFilterColumns.push(col);
+                        break;
+                    case "multiselect":
+                        if (col.columnDef.id === AGGEGRATE_TOPICS_COLUMN_ID) columns.topicFilterColumn = col;
+                        else columns.additionalFilterColumns.push(col);
+                        break;
+                    default:
+                        columns.additionalFilterColumns.push(col);
+                }
             }
         }
 
@@ -80,10 +84,7 @@ export const ColumnFilterControls = ({
     );
 
     const hasVisualFilters = visualFilterColumns.length > 0;
-    const hasAdditionalFilters = useMemo(
-        () => additionalFilterColumns.some((column) => new Set(column.getAllValues()).size > 1),
-        [additionalFilterColumns]
-    );
+    const hasAdditionalFilters = additionalFilterColumns.length > 0;
 
     return (
         <div className={styles["filter-controls-container"]}>
@@ -218,27 +219,12 @@ interface FilterGroupProps extends StylingProps {
 }
 
 const FilterGroup = ({ title, columns, className, style }: FilterGroupProps) => {
-    const [redundantFilters, setRedundantFilters] = useState<string[]>([]);
-
-    useEffect(() => {
-        const redundantColumnIds = columns
-            .filter((column) => {
-                const allValues = column.getAllValues();
-                return new Set(allValues).size === 1;
-            })
-            .map((column) => column.id);
-
-        setRedundantFilters(redundantColumnIds);
-    }, [columns]);
-
     const renderedFilters = useMemo(
         () =>
-            columns
-                .filter((column) => !redundantFilters.includes(column.id))
-                .map((column) => (
-                    <FilterComponent key={`${column.columnDef.meta?.filterType}-filter-${column.id}`} column={column} />
-                )),
-        [columns, redundantFilters]
+            columns.map((column) => (
+                <FilterComponent key={`${column.columnDef.meta?.filterType}-filter-${column.id}`} column={column} />
+            )),
+        [columns]
     );
 
     const hasFilters = renderedFilters.length > 0;
