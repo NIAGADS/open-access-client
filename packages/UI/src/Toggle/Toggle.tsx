@@ -29,8 +29,6 @@ export const Toggle = ({
     className = "",
     style = {},
 }: ToggleProps) => {
-    const displayLabel = truncateLabel ? truncate(label) : label;
-    const isTruncated = label !== displayLabel;
     return (
         <label className={`${styles.toggleSwitch} ${className}`} style={style}>
             <input
@@ -41,9 +39,12 @@ export const Toggle = ({
                 className={styles.toggleInput}
             />
             <span className={`${styles.toggleSlider} ${variant !== "default" ? styles[variant] : ""}`} />
-            {label && (
-                <span className={styles.toggleLabel} title={isTruncated ? label : undefined}>
-                    {displayLabel}
+           {label && (
+                <span
+                    className={`${styles.toggleLabel} ${truncateLabel ? styles.toggleLabelTruncated : ""}`}
+                    title={truncateLabel ? label : undefined}
+                >
+                    {label}
                 </span>
             )}
         </label>

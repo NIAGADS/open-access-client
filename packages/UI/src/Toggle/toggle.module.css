@@ -1,11 +1,20 @@
 .toggleSwitch {
     display: inline-flex;
     align-items: center;
+    max-width: 100%;
     cursor: pointer;
 }
 
 .toggleInput {
-    display: none;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
 }
 
 .toggleSlider {
@@ -16,10 +25,15 @@
     position: relative;
     transition: background 0.2s;
     display: inline-block;
+    flex-shrink: 0;
 }
 
 .toggleInput:checked + .toggleSlider {
     background: #4ade80;
+}
+.toggleInput:focus-visible + .toggleSlider {
+    outline: 2px solid var(--secondary-blue, #3d5a80);
+    outline-offset: 3px;
 }
 
 .toggleInput:checked + .toggleSlider.primary {
@@ -43,8 +57,17 @@
 }
 
 .toggleLabel {
-    font-size: 0.8em;
+    font-size: 0.875em;
+    font-weight: 400;
+    line-height: 1.4;
     margin-left: 0.5rem;
+}
+
+.toggleLabelTruncated {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .toggleGroup {
