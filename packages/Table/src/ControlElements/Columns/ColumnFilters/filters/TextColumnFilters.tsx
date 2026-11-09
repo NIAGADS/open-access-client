@@ -2,12 +2,13 @@ import { AGGEGRATE_TOPICS_COLUMN_ID, FilterColumn, RowValueSummary } from "./typ
 import { BooleanFilter, NoValidValueAlert } from ".";
 import { FacetCountBadges, PillOption, PillSelect } from "@niagads/ui";
 import { PieChart, PieChartDataRow } from "@niagads/charts";
-import React, { ReactNode, useMemo } from "react";
+import React, { ReactNode, useMemo, useState } from "react";
 
 import { CategoryFilterValue } from "../filterFunctions";
 import { DEFAULT_NA_VALUE } from "../../../../types";
 import { FilterProps } from "./types";
 import { RichSelect } from "@niagads/ui/client";
+import { couldStartTrivia } from "typescript";
 import styles from "./column-filter.module.css";
 
 // FIXME: assignment of terms grouped in `Other` is being altered as counts change
@@ -170,15 +171,18 @@ export const RichSelectFilter = ({ column, referenceValues, filteredValues }: Fi
         [referenceValues.counts, filteredValues.counts]
     );
 
+    const currentFilterValue = column.getFilterValue() as CategoryFilterValue;
+
     return (
         <RichSelect
             label={column.columnDef.header!.toString()}
             placeholder="Select ..."
             options={opts}
             disabledOptions={disabledOptions}
-            onChange={(v) =>
-                column.setFilterValue((v && { values: [v], otherValues: referenceValues.otherValues }) || undefined)
-            }
+            onChange={(v) => {
+                column.setFilterValue((v && { values: [v], otherValues: referenceValues.otherValues }) || undefined);
+            }}
+            value={currentFilterValue?.values[0]}
         />
     );
 };

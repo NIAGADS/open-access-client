@@ -34,6 +34,10 @@ export const RichSelect = ({ options, onChange, disabledOptions = [], label, pla
         return -1;
     };
 
+    useEffect(() => {
+        setSelectedValue(value ?? "");
+    }, [value]);
+
     const longestOption = optionKeys.reduce((longest, key) => {
         const text = key || placeholder || "";
         return text.length > longest.length ? text : longest;
