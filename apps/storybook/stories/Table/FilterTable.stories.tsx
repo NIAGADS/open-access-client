@@ -22,7 +22,7 @@ export const Default: Story = {
     args: {
         id: table.id,
         columns: table.columns,
-        options: table.options,
+        options: { ...table.options, ...{ enableTopicFilter: true } },
         data: table.data,
     },
 };
