@@ -62,7 +62,7 @@ export const Text = <T,>({ props }: TextRenderer<T>) => {
         return renderNullValue(_get("naValue", props, DEFAULT_NA_VALUE));
     }
 
-    if (value.includes("//")) {
+    if (typeof value === "string" && value.includes("//")) {
         // b/c of how values are resolved in table generation for sort/filter
         // some lists are already transformed to delimited strings, need
         // to transform back
