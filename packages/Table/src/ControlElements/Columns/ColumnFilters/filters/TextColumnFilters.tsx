@@ -240,10 +240,14 @@ export const MultiSelectPillFilter = ({
 
     const handleMatchModeChange = (mode: "any" | "all") => {
         setMatchMode(mode);
-        column.setFilterValue(
-            (selectedValues && { values: selectedValues, otherValues: referenceValues.otherValues, mode: mode }) ||
-                undefined
-        );
+
+        // rerun filter with new mode
+        selectedValues.length > 0 &&
+            column.setFilterValue({
+                values: selectedValues,
+                otherValues: referenceValues.otherValues,
+                mode: mode,
+            });
     };
 
     const label = filterFieldLabel || column.columnDef.header!.toString();
@@ -291,7 +295,9 @@ export const MultiSelectPillFilter = ({
                 variant="faceted-counts"
                 onChange={(v) =>
                     column.setFilterValue(
-                        (v && { values: v, otherValues: referenceValues.otherValues, mode: matchMode }) || undefined
+                        (v &&
+                            v.length > 0 && { values: v, otherValues: referenceValues.otherValues, mode: matchMode }) ||
+                            undefined
                     )
                 }
             ></PillSelect>
