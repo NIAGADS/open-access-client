@@ -41,6 +41,7 @@ export interface TableOptions {
     initialize?: InitialTableState; // optional: set initial sort and/or filter state for the table
     enableColumnFilters?: boolean; // optional: disables all filtering on table columns when FALSE; defaults to FALSE
     enableExport?: boolean; // optional: disables exporting when FALSE; defaults to FALSE
+    enableTopicFilter?: boolean; //optional; enables Topic Filter when TRUE: defaults to FALSE
     enableRowSelect?: boolean; // optional; enables row selection when TRUE; defaults to FALSE
     rowSelectOpts?: RowSelectOptions; // optional: enables row selection and related state change options
     defaultColumns?: string[]; // optional: any column ids not listed will be hidden by default

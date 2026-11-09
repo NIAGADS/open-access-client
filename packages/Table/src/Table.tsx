@@ -65,6 +65,7 @@ const Table = ({ id, columns, data, options, rowSelection }: TableProps) => {
 
     const enableRowSelect = !!options?.enableRowSelect;
     const maxSelectedRows = options?.rowSelectOpts?.maxSelectedRows;
+    const enableTopicFilter = options?.enableTopicFilter;
 
     if (maxSelectedRows !== undefined && (!Number.isInteger(maxSelectedRows) || maxSelectedRows < 1)) {
         throw new Error("maxSelectedRows must be a positive integer");
@@ -128,9 +129,11 @@ const Table = ({ id, columns, data, options, rowSelection }: TableProps) => {
             }
 
             const filterType = col.filterOpts?.filterType || resolveFilterType(col);
-            const isTopic = col.filterOpts?.isTopic ?? (filterType && resolveIsTopic(filterType));
-            if (isTopic) {
-                topicSources.push(col.id);
+            if (enableTopicFilter) {
+                const isTopic = col.filterOpts?.isTopic ?? (filterType && resolveIsTopic(filterType));
+                if (isTopic) {
+                    topicSources.push(col.id);
+                }
             }
 
             columnDefs.push(
@@ -160,23 +163,25 @@ const Table = ({ id, columns, data, options, rowSelection }: TableProps) => {
         // assemble aggregate internal topic filter column
         /* TODO: use extracted topics and `keyword-extractor` (https://www.npmjs.com/package/keyword-extractor)
         to extract and add topics from long text fields with isTopic set to true */
-        columnDefs.push({
-            id: AGGEGRATE_TOPICS_COLUMN_ID,
-            accessorFn: (row) =>
-                topicSources
-                    .map((id) => getCellValue(row[id] as Cell))
-                    .filter((value): value is string => value != null && value !== DEFAULT_NA_VALUE)
-                    .join(" // "),
-            filterFn: includesAnyOrAllFilter,
-            enableColumnFilter: true,
-            enableHiding: false,
-            header: "Topics",
-            meta: {
-                type: "text_list",
-                filterType: "multiselect",
-                internal: true,
-            },
-        });
+        if (enableTopicFilter) {
+            columnDefs.push({
+                id: AGGEGRATE_TOPICS_COLUMN_ID,
+                accessorFn: (row) =>
+                    topicSources
+                        .map((id) => getCellValue(row[id] as Cell))
+                        .filter((value): value is string => value != null && value !== DEFAULT_NA_VALUE)
+                        .join(" // "),
+                filterFn: includesAnyOrAllFilter,
+                enableColumnFilter: true,
+                enableHiding: false,
+                header: "Topics",
+                meta: {
+                    type: "text_list",
+                    filterType: "multiselect",
+                    internal: true,
+                },
+            });
+        }
         return columnDefs;
     }, [
         columns,
