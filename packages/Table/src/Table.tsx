@@ -169,6 +169,7 @@ const Table = ({ id, columns, data, options, rowSelection, onRowSelectionChange 
                     .join(" // "),
             filterFn: includesAnyOrAllFilter,
             enableColumnFilter: true,
+            header: "Topics",
             meta: {
                 type: "text_list",
                 filterType: "multiselect",

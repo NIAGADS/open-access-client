@@ -2,9 +2,10 @@ import { AGGEGRATE_TOPICS_COLUMN_ID, FilterColumn, RowValueSummary } from "./typ
 import { BooleanFilter, NoValidValueAlert } from ".";
 import { FacetCountBadges, PillOption, PillSelect } from "@niagads/ui";
 import { PieChart, PieChartDataRow } from "@niagads/charts";
-import React, { ReactNode, useMemo } from "react";
+import React, { ReactNode, useEffect, useMemo, useState } from "react";
 
 import { CategoryFilterValue } from "../filterFunctions";
+import { Column } from "@tanstack/react-table";
 import { DEFAULT_NA_VALUE } from "../../../../types";
 import { FilterProps } from "./types";
 import { RichSelect } from "@niagads/ui/client";
@@ -193,6 +194,12 @@ export const RichSelectFilter = ({ column, referenceValues, filteredValues }: Fi
     );
 };
 
+const _getActiveFilters = (column: Column<any, unknown>, otherValues: string[]) => {
+    const values = (column.getFilterValue() as CategoryFilterValue)?.values || [];
+    const activeFilters = values.filter((value) => !otherValues.includes(value));
+    return values.length > activeFilters.length ? [...activeFilters, "Other"] : activeFilters;
+};
+
 export const MultiSelectPillFilter = ({
     column,
     referenceValues,
@@ -209,6 +216,8 @@ export const MultiSelectPillFilter = ({
      so that buttons are only disabled if an external column removes that option.  Internally, its a multiselect so even
      if choosing one button reduces to zero choices, can add them back in.
     */
+    const [matchMode, setMatchMode] = useState<string>("any");
+
     const naValue = column.columnDef?.meta?.naValue || DEFAULT_NA_VALUE;
     const internalFilterValues = _organizeValueCounts(
         column.getFilteredUniqueValues(),
@@ -227,9 +236,15 @@ export const MultiSelectPillFilter = ({
         [referenceValues.counts, filteredValues.counts, internalFilterValues.counts]
     );
 
-    // necessary b/c filteredValues is table state after filtering which does not reflect selection state
-    const activeFilters = column.getFilterValue() as CategoryFilterValue;
-    let selectedValues = (activeFilters && activeFilters.values) || [];
+    let selectedValues = _getActiveFilters(column, referenceValues.otherValues);
+
+    const handleMatchModeChange = (mode: "any" | "all") => {
+        setMatchMode(mode);
+        column.setFilterValue(
+            (selectedValues && { values: selectedValues, otherValues: referenceValues.otherValues, mode: mode }) ||
+                undefined
+        );
+    };
 
     const label = filterFieldLabel || column.columnDef.header!.toString();
     return (
@@ -243,15 +258,26 @@ export const MultiSelectPillFilter = ({
                             type="button"
                             className={[
                                 styles["filter-topic-match-mode-button"],
-                                styles["filter-topic-match-mode-button-selected"],
+                                matchMode === "all" && styles["filter-topic-match-mode-button-selected"],
                             ]
                                 .filter(Boolean)
                                 .join(" ")}
-                            aria-pressed={true}
+                            aria-pressed={matchMode === "all"}
+                            onClick={() => handleMatchModeChange("all")}
                         >
                             Match all
                         </button>
-                        <button type="button" className={styles["filter-topic-match-mode-button"]} aria-pressed={false}>
+                        <button
+                            type="button"
+                            className={[
+                                styles["filter-topic-match-mode-button"],
+                                matchMode === "any" && styles["filter-topic-match-mode-button-selected"],
+                            ]
+                                .filter(Boolean)
+                                .join(" ")}
+                            aria-pressed={matchMode === "any"}
+                            onClick={() => handleMatchModeChange("any")}
+                        >
                             Match any
                         </button>
                     </div>
@@ -264,7 +290,9 @@ export const MultiSelectPillFilter = ({
                 selectedValues={selectedValues}
                 variant="faceted-counts"
                 onChange={(v) =>
-                    column.setFilterValue((v && { values: v, otherValues: referenceValues.otherValues }) || undefined)
+                    column.setFilterValue(
+                        (v && { values: v, otherValues: referenceValues.otherValues, mode: matchMode }) || undefined
+                    )
                 }
             ></PillSelect>
         </div>
