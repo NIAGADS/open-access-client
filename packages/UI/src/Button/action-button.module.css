@@ -17,3 +17,24 @@
     border-color: var(--viz-accent, #4e79a7);
     color: var(--viz-text, #1f2937);
 }
+/* Ghost variant for lightweight contextual actions (e.g., help icons).
+   Removes the default button border and background while preserving
+   hover feedback and keyboard focus visibility. */
+.action-button-ghost {
+    border-color: transparent;
+    background: transparent;
+    box-shadow: none;
+    padding: 4px;
+}
+
+.action-button-ghost:hover {
+    border-color: transparent;
+    background: var(--hover-bg, #f1f5f9);
+    color: var(--viz-text, #1f2937);
+}
+
+.action-button-ghost:focus-visible {
+    outline: 2px solid var(--viz-accent, #4e79a7);
+    outline-offset: 2px;
+    border-color: transparent;
+}

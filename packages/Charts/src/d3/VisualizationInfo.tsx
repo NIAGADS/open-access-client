@@ -71,6 +71,7 @@ const VisualizationInfo = ({ content }: VisualizationInfoProps) => {
     return (
         <div ref={infoRef} className={styles["visualization-info"]}>
             <ActionButton
+                variant={compactDisplay ? "ghost" : "default"}
                 className={(compactDisplay && styles["visualization-info-compact-button"]) || undefined}
                 icon={
                     compactDisplay ? <CircleHelp aria-hidden="true" size={16} /> : <Info aria-hidden="true" size={16} />
