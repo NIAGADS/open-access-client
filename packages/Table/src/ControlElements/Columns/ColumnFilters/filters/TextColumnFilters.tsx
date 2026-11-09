@@ -2,16 +2,13 @@ import { AGGEGRATE_TOPICS_COLUMN_ID, FilterColumn, RowValueSummary } from "./typ
 import { BooleanFilter, NoValidValueAlert } from ".";
 import { FacetCountBadges, PillOption, PillSelect } from "@niagads/ui";
 import { PieChart, PieChartDataRow } from "@niagads/charts";
-import React, { ReactNode, useMemo, useState } from "react";
+import React, { ReactNode, useMemo } from "react";
 
 import { CategoryFilterValue } from "../filterFunctions";
 import { DEFAULT_NA_VALUE } from "../../../../types";
 import { FilterProps } from "./types";
 import { RichSelect } from "@niagads/ui/client";
-import { couldStartTrivia } from "typescript";
 import styles from "./column-filter.module.css";
-
-// FIXME: assignment of terms grouped in `Other` is being altered as counts change
 
 // limits for categorical filters; excess aggregated into "Other"
 // note for selects & pies max is actually value + 2 (n/a + Other)
@@ -49,7 +46,13 @@ export const TextColumnFilter = ({ column }: FilterColumn) => {
     // get faceted values and do the same
     const filteredValueCount = column.getFacetedUniqueValues();
     const filteredValues = useMemo(() => {
-        return _organizeValueCounts(filteredValueCount, naValue, categoryLimit, ignoreOther);
+        return _organizeValueCounts(
+            filteredValueCount,
+            naValue,
+            categoryLimit,
+            ignoreOther,
+            referenceValues.otherValues
+        );
     }, [Array.from(filteredValueCount.entries())]);
 
     const FilterProps = { column, referenceValues, filteredValues };
@@ -211,7 +214,8 @@ export const MultiSelectPillFilter = ({
         column.getFilteredUniqueValues(),
         naValue,
         MAX_SELECT_OPTS,
-        ignoreOther
+        ignoreOther,
+        referenceValues.otherValues
     );
 
     const opts: PillOption[] = useMemo(
@@ -271,54 +275,67 @@ export const MultiSelectPillFilter = ({
  * Sorts and organizes unique values for filter display, handling overflow by grouping into "Other"
  *
  * @param naValue - The N/A value representation
- * @param valueCounts - Map of unique values and their counts
+ * @param facetedValues - Map of unique values and their counts
  * @param limit - max number of unique values before aggregating remainder into "Other"
  * @param ignoreOther - drop Other
+ * @param referenceOtherValues - list of 'other values' used to preserve reference defined 'Other' after filtering
  * @returns Object with sorted value/count map and list of values grouped as "Other"
  */
 const _organizeValueCounts = (
-    valueCounts: Map<string, number>,
+    facetedValues: Map<string, number>,
     naValue: string,
     limit: number,
-    ignoreOther: boolean = false
+    ignoreOther: boolean = false,
+    referenceOtherValues: string[] | undefined = undefined
 ): RowValueSummary => {
-    let filteredValueCounts: Record<string, number> = {};
+    let topFacetedValues: Record<string, number> = {};
     let otherValues: string[] = [];
 
-    // consolidate values if there are too many into "Other"
-    if (valueCounts.size > limit) {
-        // sort by most frequent to least frequent values; filtering for n/as
-        const sortedEntries = [...valueCounts.entries()]
-            .filter(([value]) => value !== naValue)
-            .sort((a, b) => b[1] - a[1]);
+    // sort by most frequent to least frequent values; filtering for n/as
+    const sortedEntries = [...facetedValues.entries()]
+        .filter(([value]) => value !== naValue)
+        .sort((a, b) => b[1] - a[1]);
 
-        const topEntries = sortedEntries.slice(0, limit);
-        const otherEntries = sortedEntries.slice(limit).reduce(
-            (acc, [value, count]) => ({
-                values: [...acc.values, value],
-                count: acc.count + count,
-            }),
-            { values: [] as string[], count: 0 }
+    if (referenceOtherValues) {
+        // don't rank and recalc `Other`; just remove "Others" & count them based on reference
+        const topEntries = sortedEntries.filter(([value]) => !referenceOtherValues.includes(value));
+        topFacetedValues = Object.fromEntries(topEntries);
+        const otherCount = sortedEntries.reduce(
+            (total, [value, count]) => total + (referenceOtherValues.includes(value) ? count : 0),
+            0
         );
 
-        filteredValueCounts = Object.fromEntries(topEntries);
-        if (otherEntries.count > 0 && !ignoreOther) {
-            filteredValueCounts.Other = otherEntries.count;
-            otherValues = otherEntries.values;
+        if (otherCount > 0 && !ignoreOther) {
+            topFacetedValues.Other = otherCount;
+            otherValues = referenceOtherValues;
         }
     } else {
-        const sortedEntries = [...valueCounts.entries()]
-            .filter(([value]) => value !== naValue)
-            .sort((a, b) => b[1] - a[1]);
+        // consolidate values if there are too many into "Other"
+        if (facetedValues.size > limit) {
+            const topEntries = sortedEntries.slice(0, limit);
+            const otherEntries = sortedEntries.slice(limit).reduce(
+                (acc, [value, count]) => ({
+                    values: [...acc.values, value],
+                    count: acc.count + count,
+                }),
+                { values: [] as string[], count: 0 }
+            );
 
-        filteredValueCounts = Object.fromEntries(sortedEntries);
+            topFacetedValues = Object.fromEntries(topEntries);
+            if (otherEntries.count > 0 && !ignoreOther) {
+                topFacetedValues.Other = otherEntries.count;
+                otherValues = otherEntries.values;
+            }
+        } else {
+            topFacetedValues = Object.fromEntries(sortedEntries);
+        }
     }
 
     // add NAs back in if relevant
-    const naCount = valueCounts.get(naValue) || 0;
+    const naCount = facetedValues.get(naValue) || 0;
     if (naCount > 0) {
-        filteredValueCounts[naValue] = naCount;
+        topFacetedValues[naValue] = naCount;
     }
 
-    return { counts: filteredValueCounts, otherValues: otherValues };
+    return { counts: topFacetedValues, otherValues: otherValues };
 };
