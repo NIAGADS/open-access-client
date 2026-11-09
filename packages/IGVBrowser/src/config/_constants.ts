@@ -7,7 +7,7 @@ export const HASH_PREFIX = "#/locus/";
 
 export const API_ROOT = "https://api.niagads.org";
 export const LEGACY_API_ROOT = `${API_ROOT}/genomics/legacy`;
-export const FEATURE_SEARCH_URL = `${API_ROOT}/genomics/service/igvbrowser/feature?id=$FEATURE$&flank=${DEFAULT_FLANK}`;
+export const FEATURE_SEARCH_URL = `${API_ROOT}/api/service/feature?id=$FEATURE$&flank=${DEFAULT_FLANK}`;
 
 export const GENOMICSDB_ROOT = "https://www.niagads.org/genomics/app";
 
