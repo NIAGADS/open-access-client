@@ -26,6 +26,7 @@ export interface PieChartProps {
     preserveSliceOrder?: boolean;
     title?: string;
     visualizationInfo?: VisualizationInfoContent;
+    selectedSlice?: string; /* needed so that parent can set default and/or clear selection */
 }
 
 const Legend = ({ legendData, compact }: { legendData: PieChartDataRow[]; compact?: boolean }) => {
@@ -65,10 +66,11 @@ const PieChart = ({
     legendPosition = "right",
     preserveSliceOrder = false,
     visualizationInfo,
+    selectedSlice,
 }: PieChartProps) => {
     const containerRef = useRef<HTMLDivElement | null>(null);
     const chartRef = useRef<HTMLDivElement | null>(null);
-    const [selectedId, setSelectedId] = useState<string | undefined>();
+    const [selectedSliceId, setSelectedSliceId] = useState<string | undefined>(selectedSlice);
     const requestedWidth = displayOpts?.width || 300;
     const [measuredWidth, setMeasuredWidth] = useState<number | undefined>();
 
@@ -108,7 +110,7 @@ const PieChart = ({
     };
 
     const handleSelect = (id: string) => {
-        setSelectedId(id);
+        setSelectedSliceId(id);
         onClick?.(id);
     };
 
@@ -122,7 +124,7 @@ const PieChart = ({
             referenceData,
             onClick: handleSelect,
             preserveSliceOrder,
-            selectedId,
+            selectedId: selectedSliceId,
         };
         pieChart(chartRef.current, data, opts);
 
@@ -133,12 +135,17 @@ const PieChart = ({
         };
     }, [data, referenceData, displayOpts, preserveSliceOrder, chartWidth, chartHeight]);
 
-    // Update selection styling (runs when selectedId changes)
+    // allow selection state to clear if cleared in parent (e.g., table filters)
     useEffect(() => {
-        if (chartRef.current && selectedId !== undefined) {
-            updatePieChartSelection(chartRef.current, selectedId);
+        setSelectedSliceId(selectedSlice ?? "");
+    }, [selectedSlice]);
+
+    // Update selection styling (runs when selectedSliceId changes)
+    useEffect(() => {
+        if (chartRef.current && selectedSliceId !== undefined) {
+            updatePieChartSelection(chartRef.current, selectedSliceId);
         }
-    }, [selectedId]);
+    }, [selectedSliceId]);
 
     return (
         <>

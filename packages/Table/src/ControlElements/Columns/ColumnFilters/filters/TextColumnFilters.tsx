@@ -110,6 +110,8 @@ export const PieChartFilter = ({ column, referenceValues, filteredValues }: Filt
             }));
     }, [column.id, filteredValues.counts]);
 
+    const currentFilterValue = column.getFilterValue() as CategoryFilterValue;
+
     return (
         <PieChart
             title={column.columnDef.header!.toString()}
@@ -144,6 +146,7 @@ export const PieChartFilter = ({ column, referenceValues, filteredValues }: Filt
             }
             displayOpts={{ width: "100%" }}
             preserveSliceOrder={true}
+            selectedSlice={currentFilterValue?.values[0]}
         />
     );
 };
