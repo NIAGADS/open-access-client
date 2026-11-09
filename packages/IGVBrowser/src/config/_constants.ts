@@ -6,6 +6,7 @@ export const ALWAYS_ON_TRACKS = ["ideogram", "ruler", "sequence", "ENSEMBL_GENE"
 export const HASH_PREFIX = "#/locus/";
 
 export const API_ROOT = "https://api.niagads.org";
+// FIXME: legacy route missing from API
 export const LEGACY_API_ROOT = `${API_ROOT}/genomics/legacy`;
 export const FEATURE_SEARCH_URL = `${API_ROOT}/api/service/feature?id=$FEATURE$&flank=${DEFAULT_FLANK}`;
 

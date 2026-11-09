@@ -40,6 +40,7 @@ import { resolveFilterFn, resolveFilterType, resolveIsTopic, resolveSortingFn } 
 import { AGGEGRATE_TOPICS_COLUMN_ID } from "./ControlElements/Columns/ColumnFilters/filters/types";
 import { RowSelectionControls } from "./ControlElements/RowSelectionControls";
 import TableHeader from "./TableHeader";
+import { extractTopics } from "./utils/topics";
 import styles from "./styles/table.module.css";
 import { toTitleCase } from "@niagads/common";
 
@@ -49,11 +50,10 @@ export interface TableProps {
     columns: TableColumn[];
     data: TableData;
     rowSelection?: RowSelectionState | string[];
-    onRowSelectionChange?: (state: RowSelectionState) => void;
 }
 
 // TODO: use table options to initialize the state (e.g., initial sort, initial filter)
-const Table = ({ id, columns, data, options, rowSelection, onRowSelectionChange }: TableProps) => {
+const Table = ({ id, columns, data, options, rowSelection }: TableProps) => {
     const [sorting, setSorting] = useState<SortingState>([]);
     const [globalFilter, setGlobalFilter] = useState("");
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -76,9 +76,9 @@ const Table = ({ id, columns, data, options, rowSelection, onRowSelectionChange 
         (updater: Updater<RowSelectionState>) => {
             const next = typeof updater === "function" ? updater(resolveRowSelectionState(rowSelection)) : updater;
             const limited = limitRowSelection(selectedState, next, maxSelectedRows);
-            if (limited !== selectedState) onRowSelectionChange?.(limited);
+            if (limited !== selectedState) options?.rowSelectOpts?.onRowSelectionChange?.(limited);
         },
-        [rowSelection, onRowSelectionChange, maxSelectedRows, selectedState]
+        [rowSelection, options?.rowSelectOpts, maxSelectedRows, selectedState]
     );
 
     // Translate GenericColumns provided by user into React Table ColumnDefs

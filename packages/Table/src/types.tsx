@@ -1,6 +1,13 @@
 import { BasicType, NAString } from "@niagads/common";
 import { CellType, TableCell } from "./Cells/types";
-import { FilterFn, FilterFnOption, RowData, SortingFn, SortingFnOption } from "@tanstack/react-table";
+import {
+    FilterFn,
+    FilterFnOption,
+    RowData,
+    RowSelectionState,
+    SortingFn,
+    SortingFnOption,
+} from "@tanstack/react-table";
 
 import { RankingInfo } from "@tanstack/match-sorter-utils";
 
@@ -25,6 +32,7 @@ export interface RowSelectOptions {
     enableMultiSelect?: boolean; // optional: allow selection of multiple rows, false if missing
     maxSelectedRows?: number; // optional positive limit; omitted means unlimited
     rowUniqueKey: string; // specify a field containing unique values to return as the row_id
+    onRowSelectionChange?: (state: RowSelectionState) => void;
 }
 
 export interface TableOptions {

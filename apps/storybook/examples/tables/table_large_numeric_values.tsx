@@ -48,7 +48,12 @@ export const TABLE_DEFINITION: Table = {
         },
         { id: "allele", header: "Test Allele", disableColumnFilter: true },
         { id: "track_name_link", header: "Track", type: "link", required: true, disableColumnFilter: true },
-        { id: "track_description", header: "Track Description", disableColumnFilter: true },
+        {
+            id: "track_description",
+            header: "Track Description",
+            disableColumnFilter: true,
+            filterOpts: { isTopic: true },
+        },
         {
             id: "is_adsp_variant",
             header: "ADSP Variant?",

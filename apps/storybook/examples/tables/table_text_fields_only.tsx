@@ -3,7 +3,7 @@ import { TableConfig as Table } from "@niagads/table";
 export const TABLE_DEFINTION: Table = {
     id: "text_fields_only",
     rowSelection: ["R5", "R2"],
-    onRowSelectionChange: (selectedRows: any) => alert(`Selection: ${JSON.stringify(selectedRows)}`),
+
     options: {
         initialize: { sort: { publication_date: "asc" } },
         enableColumnFilters: false,
@@ -13,6 +13,7 @@ export const TABLE_DEFINTION: Table = {
             description: "select row to target",
             enableMultiSelect: true,
             rowUniqueKey: "id",
+            onRowSelectionChange: (selectedRows: any) => alert(`Selection: ${JSON.stringify(selectedRows)}`),
         },
     },
     columns: [

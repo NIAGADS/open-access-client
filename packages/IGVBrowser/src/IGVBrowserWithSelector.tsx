@@ -124,7 +124,6 @@ export default function IGVBrowserWithSelector({
                         columns={trackSelectorTable.columns}
                         data={trackSelectorTable.data}
                         rowSelection={selectedTracks}
-                        onRowSelectionChange={handleTrackSelectionChange}
                         options={{
                             ...(trackSelectorTable.options || {}),
                             enableRowSelect: true,
@@ -133,6 +132,7 @@ export default function IGVBrowserWithSelector({
                                 description: "Select tracks to display in the Genome Browser",
                                 enableMultiSelect: true,
                                 rowUniqueKey: "id",
+                                onRowSelectionChange: handleTrackSelectionChange,
                             },
                             enableExport: false,
                             enableColumnFilters: false,
