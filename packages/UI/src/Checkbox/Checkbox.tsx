@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useId } from "react";
 import styles from "./checkbox.module.css";
 
 export type CheckboxVariants = "default" | "primary" | "secondary" | "pink" | "accent";
@@ -26,11 +26,18 @@ export const Checkbox = ({
     alignCenter = false,
 }: CheckboxProps) => {
     const className = [styles["ui-checkbox"], styles[variant]].filter(Boolean).join(" ");
+    const checkboxId = useId();
     return (
-        <div className={alignCenter ? styles["centered"] : ""}>
+       <div
+            className={[
+                styles["checkbox-wrapper"],
+                alignCenter ? styles["centered"] : "",
+            ].filter(Boolean).join(" ")}
+        >
             {defaultChecked ? (
                 <input
                     type="checkbox"
+                    id={checkboxId}
                     className={className}
                     name={name}
                     onChange={onChange}
@@ -41,6 +48,7 @@ export const Checkbox = ({
             ) : (
                 <input
                     type="checkbox"
+                    id={checkboxId}
                     className={className}
                     name={name}
                     onChange={onChange}
@@ -50,7 +58,7 @@ export const Checkbox = ({
                 />
             )}
 
-            {label && <label className="text-sm ml-2">{label}</label>}
+            {label && <label htmlFor={checkboxId} className={styles["ui-checkbox-label"]}>{label}</label>}
         </div>
     );
 };

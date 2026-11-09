@@ -82,14 +82,15 @@ export const TableExportControls = ({ isFiltered, onSubmit }: ExportMenuOptions)
                             onChange={() => setFilteredOnly(!filteredOnly)}
                         ></Checkbox>
                     )}
-
-                    <Select
-                        id={`${formId}_select_export_format"`}
-                        name="format"
-                        fields={EXPORT_FILE_FORMATS}
-                        label="Format"
-                        inline={true}
-                    ></Select>
+                    
+                        <Select
+                            id={`${formId}_select_export_format`}
+                            name="format"
+                            fields={EXPORT_FILE_FORMATS}
+                            label="Format"
+                            inline={false}
+                            defaultValue="csv"
+                        ></Select>  
 
                     <Button color="primary" className={styles["export-control-button"]}>
                         Export
