@@ -93,6 +93,7 @@ declare module "@tanstack/react-table" {
         naValue?: string;
         trueValue?: BasicType;
         description?: string;
+        internal?: boolean; // hidden internal column
     }
 
     // This "merges" your custom functions into the existing Column interface

@@ -32,7 +32,7 @@ import {
 } from "./ControlElements/Columns";
 import { DEFAULT_NA_VALUE, TableColumn, TableData, TableOptions, TableRow } from "./types";
 import { PaginationControls, TableToolbar } from "./ControlElements";
-import React, { ReactNode, useCallback, useLayoutEffect, useMemo, useState } from "react";
+import React, { ReactNode, useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { getCellValue, renderCell, resolveCell, validateCellType } from "./Cells/utils";
 import { isValidUniqueKey, limitRowSelection, resolveRowSelectionState } from "./utils/rowSelection";
 import { resolveFilterFn, resolveFilterType, resolveIsTopic, resolveSortingFn } from "./utils/columnDefs";
@@ -169,10 +169,12 @@ const Table = ({ id, columns, data, options, rowSelection, onRowSelectionChange 
                     .join(" // "),
             filterFn: includesAnyOrAllFilter,
             enableColumnFilter: true,
+            enableHiding: false,
             header: "Topics",
             meta: {
                 type: "text_list",
                 filterType: "multiselect",
+                internal: true,
             },
         });
         return columnDefs;
@@ -183,6 +185,13 @@ const Table = ({ id, columns, data, options, rowSelection, onRowSelectionChange 
         options?.rowSelectOpts?.header,
         options?.rowSelectOpts?.description,
     ]);
+
+    useEffect(() => {
+        const internalColumns = Object.fromEntries(
+            resolvedColumns.filter((col) => col.meta?.internal).map((col) => [col.id, false])
+        );
+        setColumnVisibility((current) => ({ ...current, ...internalColumns }));
+    }, [resolvedColumns]);
 
     const resolvedData = useMemo<TableData>(() => {
         const tableData: TableData = [];
@@ -442,8 +451,9 @@ const _resolveCell = (userCell: TableCell | TableCell[], column: TableColumn, ro
 };
 
 /* set initial column visibility based on `defaultColumns` in opts*/
-const _setInitialColumnVisibility = (defaultColumns: string[] | undefined, columns: TableColumn[]) =>
-    defaultColumns ? Object.fromEntries(columns.map(({ id }) => [id, defaultColumns.includes(id)])) : {};
+const _setInitialColumnVisibility = (defaultColumns: string[] | undefined, columns: TableColumn[]) => {
+    return defaultColumns ? Object.fromEntries(columns.map(({ id }) => [id, defaultColumns.includes(id)])) : {};
+};
 
 const _getColumn = (columnId: string, columns: TableColumn[]) => {
     return columns.find((col) => col.id === columnId);
