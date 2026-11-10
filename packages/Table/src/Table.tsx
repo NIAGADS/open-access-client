@@ -30,9 +30,9 @@ import {
     neglog10Filter,
     scientificNotationSort,
 } from "./ControlElements/Columns";
+import { ColumnFilterType, TableColumn, TableData, TableOptions, TableRow } from "./types";
 import { PaginationControls, TableToolbar } from "./ControlElements";
 import React, { ReactNode, useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
-import { TableColumn, TableData, TableOptions, TableRow } from "./types";
 import { getCellValue, renderCell, resolveCell, validateCellType } from "./Cells/utils";
 import { isValidUniqueKey, limitRowSelection, resolveRowSelectionState } from "./utils/rowSelection";
 import { resolveFilterFn, resolveFilterType, resolveIsTopic, resolveSortingFn } from "./utils/columnDefs";
@@ -121,7 +121,7 @@ const Table = ({ id, columns, data, options, rowSelection }: TableProps) => {
         }
 
         // track columns that contribute to topics
-        const topicSources: string[] = [];
+        const topicSources: Record<string, ColumnFilterType | "free-text"> = {};
         columns.forEach((col: TableColumn) => {
             try {
                 col.type = validateCellType(col.type as string);
@@ -129,11 +129,14 @@ const Table = ({ id, columns, data, options, rowSelection }: TableProps) => {
                 throw Error("Error processing column definition for `" + col.id + "`.\n" + e.message);
             }
 
-            const filterType = col.filterOpts?.filterType || resolveFilterType(col);
+            const filterType: ColumnFilterType | "free-text" = col.filterOpts?.filterType || resolveFilterType(col);
             if (enableTopicFilter) {
-                const isTopic = col.filterOpts?.isTopic ?? (filterType && resolveIsTopic(filterType));
+                /* isTopic when explicitly flagged as `isTopic` or when filterType is categorical and filtering 
+                not disabled for the column */
+                const isTopic =
+                    col.filterOpts?.isTopic ?? (filterType && resolveIsTopic(filterType) && !col.disableColumnFilter);
                 if (isTopic) {
-                    topicSources.push(col.id);
+                    topicSources[col.id] = filterType;
                 }
             }
 
@@ -149,7 +152,7 @@ const Table = ({ id, columns, data, options, rowSelection }: TableProps) => {
                     enableHiding: !col.required, // if required is true, enableHiding is false
                     meta: {
                         type: col.type,
-                        filterType: filterType,
+                        filterType: filterType === "free-text" ? undefined : filterType,
                         filterGroup: col.filterOpts?.filterGroup || "",
                         filterValueColumn: col.filterOpts?.valueColumn,
                         description: col.description,
@@ -162,16 +165,17 @@ const Table = ({ id, columns, data, options, rowSelection }: TableProps) => {
         });
 
         // assemble aggregate internal topic filter column
-        /* TODO: use extracted topics and `keyword-extractor` (https://www.npmjs.com/package/keyword-extractor)
-        to extract and add topics from long text fields with isTopic set to true */
         if (enableTopicFilter) {
             columnDefs.push({
                 id: AGGEGRATE_TOPICS_COLUMN_ID,
                 accessorFn: (row) =>
-                    topicSources
-                        .map((id) => extractTopics(getCellValue(row[id] as Cell)))
-                        .filter((value): value is string => value != null && value !== DEFAULT_NA_VALUE)
-                        .join(" // "),
+                    [
+                        ...new Set(
+                            Object.entries(topicSources).flatMap(([id, filterType]) =>
+                                extractTopics(getCellValue(row[id] as Cell), filterType)
+                            )
+                        ),
+                    ].join(" // "),
                 filterFn: includesAnyOrAllFilter,
                 enableColumnFilter: true,
                 enableHiding: false,

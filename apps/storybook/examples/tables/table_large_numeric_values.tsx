@@ -52,7 +52,7 @@ export const TABLE_DEFINITION: Table = {
             id: "track_description",
             header: "Track Description",
             disableColumnFilter: true,
-            filterOpts: { isTopic: true },
+            filterOpts: { isTopic: false },
         },
         {
             id: "is_adsp_variant",

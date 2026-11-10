@@ -15,6 +15,7 @@ import styles from "./column-filter.module.css";
 export const TextColumnFilter = ({ column }: FilterColumn) => {
     const meta = column.columnDef.meta!;
     const naValue = meta.naValue || DEFAULT_NA_VALUE;
+    const isTopicFilter = column.columnDef.id === AGGEGRATE_TOPICS_COLUMN_ID;
 
     // get "reference" unique values -> all possible values in pre-filtered data
     const valueCounts: Map<string, number> = useMemo(() => column.getUniqueValues(), [column.id]);
@@ -25,28 +26,29 @@ export const TextColumnFilter = ({ column }: FilterColumn) => {
         return <NoValidValueAlert columnName={column.columnDef.header!.toString()} />;
     }
 
-    const categoryLimit =
-        meta.filterType === "pie"
-            ? MAX_PIE_SLICES
-            : column.columnDef.id === AGGEGRATE_TOPICS_COLUMN_ID
-              ? MAX_TOPICS
-              : MAX_SELECT_OPTS;
-
-    const ignoreOther = column.columnDef.id === AGGEGRATE_TOPICS_COLUMN_ID;
-
+    const categoryLimit = meta.filterType === "pie" ? MAX_PIE_SLICES : isTopicFilter ? MAX_TOPICS : MAX_SELECT_OPTS;
+    const totalRows = column.getFacetedRowModel().rows.length;
     // otherwise, sort and consolidate the value map
     const referenceValues = useMemo(() => {
-        return _organizeValueCounts(valueCounts, naValue, categoryLimit, ignoreOther);
+        if (isTopicFilter) {
+            // filter out redundant topics
+            const effectiveValueCounts = new Map([...valueCounts].filter(([, count]) => count !== totalRows));
+            return _organizeValueCounts(effectiveValueCounts, naValue, categoryLimit, true);
+        }
+
+        return _organizeValueCounts(valueCounts, naValue, categoryLimit);
     }, [column.id]);
 
     // get faceted values and do the same
     const filteredValueCount = column.getFacetedUniqueValues();
     const filteredValues = useMemo(() => {
+        if (isTopicFilter) {
+        }
         return _organizeValueCounts(
             filteredValueCount,
             naValue,
             categoryLimit,
-            ignoreOther,
+            isTopicFilter,
             referenceValues.otherValues
         );
     }, [Array.from(filteredValueCount.entries())]);
@@ -57,7 +59,7 @@ export const TextColumnFilter = ({ column }: FilterColumn) => {
         return <BooleanFilter {...FilterProps} />;
     }
 
-    if (column.columnDef.id === AGGEGRATE_TOPICS_COLUMN_ID) {
+    if (isTopicFilter) {
         return (
             <MultiSelectPillFilter
                 {...FilterProps}

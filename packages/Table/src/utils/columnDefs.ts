@@ -1,22 +1,15 @@
+import { CATEGORICAL_FILTER_TYPES, NUMERIC_CELL_TYPES } from "../config";
 import { ColumnFilterType, TableColumn, TableRow } from "../types";
 import { FilterFnOption, SortingFnOption } from "@tanstack/react-table";
 
-import { CellType } from "../Cells/types";
-import { NUMERIC_CELL_TYPES } from "../config";
+export const resolveIsTopic = (filterType: string): boolean => CATEGORICAL_FILTER_TYPES.includes(filterType);
 
-export const resolveIsTopic = (filterType: ColumnFilterType): boolean =>
-    ["select", "multiselect", "pie"].includes(filterType);
+export const resolveFilterType = (col: TableColumn): ColumnFilterType | "free-text" => {
+    // added to support topic filters; "approximately" identifies free text columns
+    if (col.disableColumnFilter && !col.disableGlobalFilter) return "free-text";
 
-export const resolveFilterType = (col: TableColumn): ColumnFilterType | undefined => {
-    if (col.disableColumnFilter) return undefined;
-
-    const cellType: CellType = col.type!;
-    if (NUMERIC_CELL_TYPES.includes(cellType)) {
-        return "histogram";
-    }
-    if (cellType === "boolean") {
-        return "boolean";
-    }
+    if (NUMERIC_CELL_TYPES.includes(col.type!)) return "histogram";
+    if (col.type! === "boolean") return "boolean";
 
     return "select";
 };

@@ -1,17 +1,20 @@
+import { CATEGORICAL_FILTER_TYPES } from "../config";
 import nlp from "compromise";
 
-export const extractTopics = (text: string): string => {
-    const normalizedText = nlp(text)
-        .normalize({
-            plurals: true,
-            parentheses: true,
-            possessives: true,
-            punctuation: true,
-            unicode: false,
-            whitespace: true,
-        })
-        .text();
+export const extractTopics = (text: string, filterType: string): string[] => {
+    // ignore categorical filters
+    if (CATEGORICAL_FILTER_TYPES.includes(filterType)) {
+        return text ? text.split(" // ") : [];
+    }
 
-    const phrases = nlp(normalizedText).nouns().out("array");
-    return [...new Set(phrases.map((phrase: string) => phrase.trim()).filter(Boolean))].join(" // ");
+    if (!text) return [];
+    const phrases = nlp(text).nouns().out("array");
+    return [
+        ...new Set(
+            phrases
+                .flatMap((phrase: string) => phrase.split(/[\[\]():;]/))
+                .map((p: string) => p.trim())
+                .filter(Boolean)
+        ),
+    ] as string[];
 };

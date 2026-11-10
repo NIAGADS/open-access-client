@@ -4,6 +4,7 @@ export const DEFAULT_NA_VALUE = "n/a";
 
 // cell types that use numeric filters
 export const NUMERIC_CELL_TYPES = ["float", "integer", "pvalue", "percentage_cell"];
+export const CATEGORICAL_FILTER_TYPES = ["select", "multiselect", "pie"];
 
 // limits for categorical filters; excess aggregated into "Other"
 // note for selects & pies max is actually value + 2 (n/a + Other)
