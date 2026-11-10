@@ -1,9 +1,12 @@
-import { LinkTarget, Text, TextRenderer } from ".";
 import React, { useId } from "react";
 import { _get, _isNull } from "@niagads/common";
 
 import { HelpIconWrapper } from "@niagads/ui";
+import { Text } from "./BasicText";
+import { TextRenderer } from "./types";
 import styles from "./cell.module.css";
+
+export type LinkTarget = "_blank" | "_self" | "_parent" | "_top";
 
 const _renderLink = (displayText: string, url: string, props: any) => {
     const target: LinkTarget = _get("target", props, "_blank");

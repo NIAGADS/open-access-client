@@ -1,9 +1,10 @@
 import { Badge, BooleanBadge, Float, Link, LinkList, PercentageBar, Text, TextList } from "./CellRenderers";
 import { BasicType, _deepCopy, _get, _hasOwnProperty, _isJSON, _isNA, _isNull } from "@niagads/common";
 import { BooleanCell, CELL_TYPES, Cell, CellType, FloatCell, PValueCell, TableCell } from "./types";
-import { DEFAULT_NA_VALUE, TableColumn } from "../types";
 
+import { DEFAULT_NA_VALUE } from "../config";
 import React from "react";
+import { TableColumn } from "../types";
 
 // validates cell type specified at runtime or by user is valid
 // if cell type is undefined, returns "abstract"
@@ -22,25 +23,25 @@ export const validateCellType = (ctype: string | undefined): CellType => {
 };
 
 // catch NULLs and NAs
-const __resolveValue = (props: Cell): BasicType => {
+const _resolveValue = (props: Cell): BasicType => {
     const naValue = _get("naValue", props, DEFAULT_NA_VALUE);
     const nullValue = _get("nullValue", props, naValue);
     return _isNull(props.value) ? nullValue : _isNA(props.value) ? naValue : _get("value", props);
 };
 
-const __resolveBooleanValue = (props: BooleanCell): BasicType => {
+const _resolveBooleanValue = (props: BooleanCell): BasicType => {
     const displayText = _get("displayText", props);
-    return displayText ? displayText : `${__resolveValue(props)}`;
+    return displayText ? displayText : `${_resolveValue(props)}`;
 };
 
-const __resolveFloatValue = (props: FloatCell): BasicType => {
+const _resolveFloatValue = (props: FloatCell): BasicType => {
     const displayText = _get("displayText", props);
-    return displayText ? displayText : +__resolveValue(props);
+    return displayText ? displayText : +_resolveValue(props);
 };
 
 // Preserve reported decimal strings, including values below floating-point range.
-const __resolvePValueValue = (props: PValueCell): BasicType => {
-    return __resolveValue(props);
+const _resolvePValueValue = (props: PValueCell): BasicType => {
+    return _resolveValue(props);
 };
 
 // cell accessor function; gets the value; resolves nulls
@@ -55,29 +56,29 @@ export const getCellValue = (cellProps: Cell | Cell[]): any => {
         const cellType: CellType = cellProps.type;
         switch (cellType) {
             case "boolean":
-                return __resolveBooleanValue(cellProps as BooleanCell);
+                return _resolveBooleanValue(cellProps as BooleanCell);
             case "float":
-                return __resolveFloatValue(cellProps as FloatCell);
+                return _resolveFloatValue(cellProps as FloatCell);
             case "pvalue":
-                return __resolvePValueValue(cellProps as PValueCell);
+                return _resolvePValueValue(cellProps as PValueCell);
             default:
-                return __resolveValue(cellProps);
+                return _resolveValue(cellProps);
         }
     }
 };
 
-const __resolveLinkCell = (cell: TableCell): TableCell => {
+const _resolveLinkCell = (cell: TableCell): TableCell => {
     const value = _get("value", cell);
     const url = _get("url", cell);
     Object.assign(cell as any, { value: value ? value : url, type: "link" });
     return cell;
 };
 
-const __resolveListCell = (cells: TableCell[]) => {
+const _resolveListCell = (cells: TableCell[]) => {
     const values = cells.map((c: TableCell) => _get("value", c));
     const value = values.join(" // ");
 
-    return { type: "abstract", value: value, items: cells };
+    return { type: "text_list", value: value, items: cells };
 };
 
 // assigns parent column cell type to each cell (to facilitate rendering)
@@ -104,10 +105,10 @@ export const resolveCell = (
 
         const cellList = cell.map((c: TableCell) => resolveCell(c, column, rowId) as TableCell);
         if (resolvedCellType == "text") {
-            resolvedCell = __resolveListCell(cellList);
+            resolvedCell = _resolveListCell(cellList);
             resolvedCellType = "text_list";
         } else if (resolvedCellType == "link") {
-            resolvedCell = __resolveListCell(cellList);
+            resolvedCell = _resolveListCell(cellList);
             resolvedCellType = "link_list";
         } else {
             throw Error(
@@ -120,13 +121,13 @@ export const resolveCell = (
         resolvedCell = _deepCopy(cell);
 
         if (resolvedCellType == "link") {
-            resolvedCell = __resolveLinkCell(resolvedCell);
+            resolvedCell = _resolveLinkCell(resolvedCell);
         }
 
         if (resolvedCellType === "abstract") {
             if (_hasOwnProperty("url", cell)) {
                 resolvedCellType = "link";
-                resolvedCell = __resolveLinkCell(resolvedCell);
+                resolvedCell = _resolveLinkCell(resolvedCell);
             } else {
                 resolvedCellType = "text";
             }

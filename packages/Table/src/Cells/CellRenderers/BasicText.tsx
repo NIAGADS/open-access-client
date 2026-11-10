@@ -1,14 +1,17 @@
 import { HelpIconWrapper, StylingProps } from "@niagads/ui";
 import React, { useState } from "react";
-import { TextRenderer, renderNullValue } from ".";
 import { _deepCopy, _get, _hasOwnProperty, _isJSON, _isNA, _isNull } from "@niagads/common";
 
-import { DEFAULT_NA_VALUE } from "../../types";
-import { __values } from "tslib";
+import { DEFAULT_NA_VALUE } from "../../config";
+import { TextRenderer } from "./types";
 import styles from "./cell.module.css";
 
 const DEFAULT_MAX_LENGTH = 100;
 const DEFAULT_VISIBLE_LIST_ITEMS = 3;
+
+export const renderNullValue = (value: string = DEFAULT_NA_VALUE) => {
+    return <span className={styles["null-value"]}>{value}</span>;
+};
 
 interface StyledTextProps extends StylingProps {
     value: string;

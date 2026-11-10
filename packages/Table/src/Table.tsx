@@ -30,14 +30,15 @@ import {
     neglog10Filter,
     scientificNotationSort,
 } from "./ControlElements/Columns";
-import { DEFAULT_NA_VALUE, TableColumn, TableData, TableOptions, TableRow } from "./types";
 import { PaginationControls, TableToolbar } from "./ControlElements";
 import React, { ReactNode, useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
+import { TableColumn, TableData, TableOptions, TableRow } from "./types";
 import { getCellValue, renderCell, resolveCell, validateCellType } from "./Cells/utils";
 import { isValidUniqueKey, limitRowSelection, resolveRowSelectionState } from "./utils/rowSelection";
 import { resolveFilterFn, resolveFilterType, resolveIsTopic, resolveSortingFn } from "./utils/columnDefs";
 
 import { AGGEGRATE_TOPICS_COLUMN_ID } from "./ControlElements/Columns/ColumnFilters/filters/types";
+import { DEFAULT_NA_VALUE } from "./config";
 import { RowSelectionControls } from "./ControlElements/RowSelectionControls";
 import TableHeader from "./TableHeader";
 import { extractTopics } from "./utils/topics";

@@ -11,8 +11,6 @@ import {
 
 import { RankingInfo } from "@tanstack/match-sorter-utils";
 
-export const DEFAULT_NA_VALUE = "n/a";
-
 // initial table state
 interface SortConfig {
     [column: string]: "asc" | "desc";

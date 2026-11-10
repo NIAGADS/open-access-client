@@ -1,7 +1,9 @@
-import { HistogramFilter, NUMERIC_CELL_TYPES, PValueFilter, TextColumnFilter } from ".";
+import { HistogramFilter, PValueFilter } from "./NumericColumnFilters";
 
 import { FilterColumn } from "./types";
+import { NUMERIC_CELL_TYPES } from "../../../../config";
 import React from "react";
+import { TextColumnFilter } from "./TextColumnFilters";
 
 /**
  * Renders an appropriate filter UI component based on the column's data type and metadata.

@@ -1,21 +1,16 @@
 import { AGGEGRATE_TOPICS_COLUMN_ID, FilterColumn, RowValueSummary } from "./types";
-import { BooleanFilter, NoValidValueAlert } from ".";
+import { DEFAULT_NA_VALUE, MAX_PIE_SLICES, MAX_SELECT_OPTS, MAX_TOPICS } from "../../../../config";
 import { FacetCountBadges, PillOption, PillSelect } from "@niagads/ui";
 import { PieChart, PieChartDataRow } from "@niagads/charts";
-import React, { ReactNode, useEffect, useMemo, useState } from "react";
+import React, { ReactNode, useMemo, useState } from "react";
 
+import { BooleanFilter } from "./BooleanColumnFilter";
 import { CategoryFilterValue } from "../filterFunctions";
 import { Column } from "@tanstack/react-table";
-import { DEFAULT_NA_VALUE } from "../../../../types";
 import { FilterProps } from "./types";
+import { NoValidValueAlert } from "./NoValidValueAlert";
 import { RichSelect } from "@niagads/ui/client";
 import styles from "./column-filter.module.css";
-
-// limits for categorical filters; excess aggregated into "Other"
-// note for selects & pies max is actually value + 2 (n/a + Other)
-const MAX_SELECT_OPTS = 7; // maximum unique opts for select / multiselect
-const MAX_TOPICS = 15; // maximum number of terms (topics) for topic filter
-const MAX_PIE_SLICES = 5; // maximum unique pie slices
 
 export const TextColumnFilter = ({ column }: FilterColumn) => {
     const meta = column.columnDef.meta!;

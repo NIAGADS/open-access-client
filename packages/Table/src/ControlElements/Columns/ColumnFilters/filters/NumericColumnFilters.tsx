@@ -1,13 +1,11 @@
+import { DEFAULT_NA_VALUE, NUMERIC_CELL_TYPES } from "../../../../config";
 import { Range, toNegLog10 } from "@niagads/common";
 import { RangeSelectHistogram, ThresholdSelectHistogram } from "@niagads/charts";
 import React, { useCallback, useMemo } from "react";
 
-import { DEFAULT_NA_VALUE } from "../../../../types";
 import { FilterColumn } from "./types";
 import { NoValidValueAlert } from "./NoValidValueAlert";
-import styles from "./column-filter.module.css";
 
-export const NUMERIC_CELL_TYPES = ["float", "integer", "pvalue", "percentage_cell"];
 const HISTOGRAM_DISPLAY_OPTS = {
     width: 300,
     height: 200,

@@ -1,8 +1,10 @@
-import { TextRenderer, formatFloat, renderNullValue } from ".";
 import { _get, _isNA, _isNull } from "@niagads/common";
 
-import { DEFAULT_NA_VALUE } from "../../types";
+import { DEFAULT_NA_VALUE } from "../../config";
 import React from "react";
+import { TextRenderer } from "./types";
+import { formatFloat } from "./Number";
+import { renderNullValue } from "./BasicText";
 import styles from "./cell.module.css";
 
 export const PercentageBar = <T,>({ props }: TextRenderer<T>) => {

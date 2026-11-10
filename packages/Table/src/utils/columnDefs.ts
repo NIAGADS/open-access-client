@@ -2,7 +2,7 @@ import { ColumnFilterType, TableColumn, TableRow } from "../types";
 import { FilterFnOption, SortingFnOption } from "@tanstack/react-table";
 
 import { CellType } from "../Cells/types";
-import { NUMERIC_CELL_TYPES } from "../ControlElements/Columns/ColumnFilters/filters";
+import { NUMERIC_CELL_TYPES } from "../config";
 
 export const resolveIsTopic = (filterType: ColumnFilterType): boolean =>
     ["select", "multiselect", "pie"].includes(filterType);
