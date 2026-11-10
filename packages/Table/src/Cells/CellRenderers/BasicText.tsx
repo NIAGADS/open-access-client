@@ -33,9 +33,11 @@ export const TextList = <T,>({ props }: TextRenderer<T>) => {
         const visibleItems = isExpanded ? items : items.slice(0, DEFAULT_VISIBLE_LIST_ITEMS);
         return (
             <div className={styles["truncated-text"]}>
-                {visibleItems.map((item: string, index: number) => (
+                {visibleItems.map((item: Record<string, any> | string, index: number) => (
                     <React.Fragment key={`item-${index}`}>
-                        <Text props={{ ...props, value: item, items: null }} />
+                        <Text
+                            props={{ ...props, ...(typeof item === "string" ? { value: item } : item), items: null }}
+                        />
                         {index < visibleItems.length - 1 ? " · " : ""}
                     </React.Fragment>
                 ))}
