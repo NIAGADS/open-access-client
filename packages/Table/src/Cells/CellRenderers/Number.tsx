@@ -26,7 +26,7 @@ export const Float = <T,>({ props }: TextRenderer<T>) => {
 
     // mono font is default for all numeric cells;
     // column-level getStyle spreads after and can override
-    const style = { fontFamily: "var(--font-mono)", ...(_get("style", props) || {}) };
+    const style = { fontVariantNumeric: "tabular-nums", ...(_get("style", props) || {}) };
 
     const cellType = _get("type", props);
     if (cellType === "integer" || (cellType === "pvalue" && typeof value === "string")) {
