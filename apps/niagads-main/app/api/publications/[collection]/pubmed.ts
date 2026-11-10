@@ -82,7 +82,7 @@ const parsePubMedArticle = (xml: TNode, grantsByPmid: Map<string, string | null>
         year: Number(year),
         pmcid: (pmcid && { value: pmcid, url: `${URLS.PMC}/${pmcid}` }) || null,
         keywords: keywords,
-        grants: grantsByPmid.get(pmid)?.split(",") ?? null,
+        grants: grantsByPmid.get(pmid)?.split(";") ?? null,
     };
 };
 
