@@ -9,9 +9,10 @@ interface TabsProps extends StylingProps {
     children: ReactElement<TabProps>[];
     onTabChange?: (tabId: string) => void;
     selectedTab?: string;
+    outlineTabBody?: boolean; /* show outline for tab body cards */
 }
 
-export const Tabs = ({ children, onTabChange, selectedTab }: TabsProps) => {
+export const Tabs = ({ children, onTabChange, selectedTab, outlineTabBody = true }: TabsProps) => {
     const [selectedId, setSelectedId] = useState<string | null>(selectedTab || children[0].props.id);
     const tabsId = useId();
 
@@ -37,7 +38,7 @@ export const Tabs = ({ children, onTabChange, selectedTab }: TabsProps) => {
                 ))}
             </div>
 
-            <Card hover={false} role="tabpanel">
+            <Card hover={false} role="tabpanel" outline={outlineTabBody}>
                 {children.map((tab) => {
                     const isActive = tab.props.id === selectedId;
                     return (

@@ -1,12 +1,12 @@
 "use client";
 
 import { Alert, LoadingSpinner } from "@niagads/ui";
-import { PublicationsTable, PublicationsTableData } from "./PublicationsTable";
+import { Publication, PublicationsTable } from "./PublicationsTable";
 import { Tab, TabBody, TabHeader, Tabs } from "@niagads/ui/client";
-
-import useSWR from "swr";
 import { useCallback, useEffect, useState } from "react";
+
 import styles from "./publications-tabs.module.css";
+import useSWR from "swr";
 
 export interface PublicationCollection {
     id: string;
@@ -17,7 +17,7 @@ interface PublicationsTabsProps {
     collections: PublicationCollection[];
 }
 
-const fetchCollection = async (url: string): Promise<PublicationsTableData> => {
+const fetchCollection = async (url: string): Promise<Publication[]> => {
     const response = await fetch(url);
     const body = await response.json();
 
@@ -35,11 +35,7 @@ const CollectionTable = ({
     collection: PublicationCollection;
     onTableLoad: (collectionId: string, count: number) => void;
 }) => {
-    const { data, error, isLoading } = useSWR<PublicationsTableData>(
-        collectionUrl(collection.id),
-        fetchCollection,
-        swrOptions
-    );
+    const { data, error, isLoading } = useSWR<Publication[]>(collectionUrl(collection.id), fetchCollection, swrOptions);
 
     useEffect(() => {
         if (data && !isLoading) onTableLoad(collection.id, data.length);
@@ -67,7 +63,7 @@ export const PublicationsTabs = ({ collections }: PublicationsTabsProps) => {
 
     return (
         <div className={styles["publications-tabs"]}>
-            <Tabs selectedTab={selectedTab} onTabChange={setSelectedTab}>
+            <Tabs selectedTab={selectedTab} onTabChange={setSelectedTab} outlineTabBody={false}>
                 {collections.map((collection) => (
                     <Tab id={collection.id} key={collection.id}>
                         <TabHeader>
