@@ -1,7 +1,7 @@
-import type { PublicationsTableData } from "@/components/Publications/PublicationsTable";
 import { URLS } from "@/data/url_ref";
 import { parsePubMedPublications } from "./pubmed";
 import { getCachePaths, readCachedResponse, writeCachedResponse, type CachePaths } from "../../cache";
+import { Publication } from "@/components/Publications/PublicationsTable";
 
 const ZOTERO_PAGE_SIZE = 100;
 const PUBMED_BATCH_SIZE = 100;
@@ -82,9 +82,9 @@ const fetchZoteroPage = async (collection: string, start: number): Promise<Zoter
     return { grantsByPmid, total };
 };
 
-const fetchPubMedPublications = async (grantsByPmid: Map<string, string | null>): Promise<PublicationsTableData> => {
+const fetchPubMedPublications = async (grantsByPmid: Map<string, string | null>): Promise<Publication[]> => {
     const pmids = [...grantsByPmid.keys()];
-    const publications: PublicationsTableData = [];
+    const publications: Publication[] = [];
     for (let start = 0; start < pmids.length; start += PUBMED_BATCH_SIZE) {
         const url = new URL(URLS.PUBMED_EUTILS_EFETCH);
         url.searchParams.set("db", "pubmed");
@@ -98,8 +98,8 @@ const fetchPubMedPublications = async (grantsByPmid: Map<string, string | null>)
     return publications;
 };
 
-const loadCollection = async (collection: string): Promise<PublicationsTableData> => {
-    const publicationRequests: Promise<PublicationsTableData | Error>[] = [];
+const loadCollection = async (collection: string): Promise<Publication[]> => {
+    const publicationRequests: Promise<Publication[] | Error>[] = [];
     let start = 0;
     let total = 0;
 
@@ -117,7 +117,7 @@ const loadCollection = async (collection: string): Promise<PublicationsTableData
         start += ZOTERO_PAGE_SIZE;
     } while (start < total);
 
-    const publications: PublicationsTableData = [];
+    const publications: Publication[] = [];
     for (const result of await Promise.all(publicationRequests)) {
         if (result instanceof Error) throw result;
         publications.push(...result);
@@ -131,7 +131,9 @@ export async function GET(_: Request, { params }: PublicationsRouteContext) {
     try {
         const { collection } = await params;
         paths = getCachePaths("publications", collection);
+
         const revision = await checkZoteroCollectionRevision(collection);
+
         const cached = await readCachedResponse(paths, revision);
         if (cached !== null) return new Response(cached, { headers });
 
@@ -139,14 +141,21 @@ export async function GET(_: Request, { params }: PublicationsRouteContext) {
         if ((await checkZoteroCollectionRevision(collection)) !== revision) {
             throw new Error("The Zotero collection changed while loading publications.");
         }
+
         const data = JSON.stringify(publications);
+
         await writeCachedResponse(paths, revision, data);
+
         return new Response(data, { headers });
     } catch (error) {
         console.error("Unable to refresh publications:", error);
+
         const cached = paths ? await readCachedResponse(paths) : null;
+
         if (cached !== null) return new Response(cached, { headers });
+
         const message = error instanceof Error ? error.message : "Unable to load this collection.";
+
         return Response.json({ error: message }, { status: 502 });
     }
 }
