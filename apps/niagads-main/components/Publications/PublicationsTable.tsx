@@ -16,7 +16,6 @@ export interface Publication {
     journal: string;
     year: number;
     publicationType: string;
-    abstract: string | null;
     pmid: LinkEntry;
     doi: LinkEntry | null;
     pmcid: LinkEntry | null;
@@ -53,13 +52,11 @@ const columns: TableColumn[] = [
         header: "Publication type",
         disableColumnFilter: true,
     },
-    { id: "abstract", header: "Abstract", disableColumnFilter: true, filterOpts: { isTopic: true } },
-
     { id: "doi", header: "DOI", type: "link", disableColumnFilter: true },
     { id: "pmcid", header: "PMC ID", type: "link", disableColumnFilter: true },
     {
         id: "keywords",
-        header: "Concepts",
+        header: "MeSH Topics",
         description:
             "Medical subject headings (MeSH) mapping each article to its primary biomedical topics, clinical conditions, and specific health concepts.",
         disableColumnFilter: true,
@@ -75,18 +72,16 @@ interface PublicationsTableProps {
 }
 
 export const PublicationsTable = ({ data, id = "niagads-publications" }: PublicationsTableProps) => (
-    <div className={styles["publications-table"]}>
-        <Table
-            id={id}
-            columns={columns}
-            data={data as any}
-            options={{
-                enableColumnFilters: false,
-                enableExport: true,
-                enableTopicFilter: true,
-                defaultColumns: ["pmid", "year", "title", "journal", "authors"],
-                filterGroupOrder: ["Publication"],
-            }}
-        />
-    </div>
+    <Table
+        id={id}
+        columns={columns}
+        data={data as any}
+        options={{
+            enableColumnFilters: false,
+            enableExport: true,
+            enableTopicFilter: true,
+            defaultColumns: ["pmid", "year", "title", "journal", "authors"],
+            filterGroupOrder: ["Publication"],
+        }}
+    />
 );

@@ -46,16 +46,6 @@ const parsePubMedArticle = (xml: TNode, grantsByPmid: Map<string, string | null>
         if (name) authors.push(name);
     }
 
-    // abstract
-    const abstract: string[] = [];
-    for (const section of elements(article, "AbstractText") ?? []) {
-        const value = content(section);
-        if (value) {
-            const label = section.attributes.Label || section.attributes.NlmCategory;
-            abstract.push(label ? `${label}: ${value}` : value);
-        }
-    }
-
     // keywords
     const keywords: LinkEntry[] = [];
     for (const heading of elements(citation, "MeshHeading") ?? []) {
@@ -75,7 +65,6 @@ const parsePubMedArticle = (xml: TNode, grantsByPmid: Map<string, string | null>
         pmid: { value: `PMID:${pmid}`, displayText: pmid, url: `${URLS.PUBMED}/${pmid}` },
         authors: authors,
         title: title!,
-        abstract: abstract.join(" ") || null,
         doi: (doi && { url: doi }) || null,
         journal: content(journal)!,
         publicationType: content(publicationType)!,

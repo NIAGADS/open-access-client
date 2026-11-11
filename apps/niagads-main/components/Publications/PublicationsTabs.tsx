@@ -5,7 +5,6 @@ import { Publication, PublicationsTable } from "./PublicationsTable";
 import { Tab, TabBody, TabHeader, Tabs } from "@niagads/ui/client";
 import { useCallback, useEffect, useState } from "react";
 
-import styles from "./publications-tabs.module.css";
 import useSWR from "swr";
 
 export interface PublicationCollection {
@@ -62,21 +61,19 @@ export const PublicationsTabs = ({ collections }: PublicationsTabsProps) => {
     }, []);
 
     return (
-        <div className={styles["publications-tabs"]}>
-            <Tabs selectedTab={selectedTab} onTabChange={setSelectedTab} outlineTabBody={false}>
-                {collections.map((collection) => (
-                    <Tab id={collection.id} key={collection.id}>
-                        <TabHeader>
-                            {counts[collection.id] !== undefined
-                                ? `${collection.name} (${counts[collection.id]})`
-                                : collection.name}
-                        </TabHeader>
-                        <TabBody>
-                            <CollectionTable collection={collection} onTableLoad={onTableLoad} />
-                        </TabBody>
-                    </Tab>
-                ))}
-            </Tabs>
-        </div>
+        <Tabs selectedTab={selectedTab} onTabChange={setSelectedTab} outlineTabBody={false}>
+            {collections.map((collection) => (
+                <Tab id={collection.id} key={collection.id}>
+                    <TabHeader>
+                        {counts[collection.id] !== undefined
+                            ? `${collection.name} (${counts[collection.id]})`
+                            : collection.name}
+                    </TabHeader>
+                    <TabBody>
+                        <CollectionTable collection={collection} onTableLoad={onTableLoad} />
+                    </TabBody>
+                </Tab>
+            ))}
+        </Tabs>
     );
 };
