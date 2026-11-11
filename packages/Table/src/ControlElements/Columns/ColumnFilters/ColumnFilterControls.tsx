@@ -107,13 +107,15 @@ export const ColumnFilterControls = ({
                                 : filter.value;
                         if (typeof value === "object") {
                             value = value.values;
+                        } else {
+                            value = `${value}`;
                         }
 
                         return (
                             <FilterChip
                                 key={`filter-chip-${filter.id}`}
                                 label={col!.columnDef.header as string}
-                                value={`${value}`}
+                                value={value}
                                 onRemove={() => onRemoveFilter(filter)}
                             />
                         );

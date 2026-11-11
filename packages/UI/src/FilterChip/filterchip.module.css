@@ -38,9 +38,9 @@
 .value {
     margin-left: 0;
     padding: 3px 7px;
-    max-width: 140px;
+    /* max-width: 140px; 
     overflow: hidden;
-    text-overflow: ellipsis;
+    text-overflow: ellipsis; */
     font-family: "Roboto Mono", monospace;
     font-size: 0.68rem;
     font-weight: 700;
