@@ -10,6 +10,7 @@ export const TABLE_DEFINITION: Table = {
         initialize: { sort: { pvalue: "asc" }, filter: { pvalue: 5e-8 } },
         enableExport: true,
         enableColumnFilters: true,
+        density: "compact",
         defaultColumns: [
             "relative_position",
             "variant_link",

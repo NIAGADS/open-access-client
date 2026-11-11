@@ -43,6 +43,7 @@ export interface TableOptions {
     enableRowSelect?: boolean; // optional; enables row selection when TRUE; defaults to FALSE
     rowSelectOpts?: RowSelectOptions; // optional: enables row selection and related state change options
     defaultColumns?: string[]; // optional: any column ids not listed will be hidden by default
+    density?: "comfortable" | "compact"; // optional: controls table cell padding; defaults to comfortable
     onTableLoad?: any;
     filterGroupOrder?: string[]; // optional: order of the filter groups, ordered array
 }

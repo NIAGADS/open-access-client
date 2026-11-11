@@ -67,6 +67,7 @@ const Table = ({ id, columns, data, options, rowSelection }: TableProps) => {
     const enableRowSelect = !!options?.enableRowSelect;
     const maxSelectedRows = options?.rowSelectOpts?.maxSelectedRows;
     const enableTopicFilter = options?.enableTopicFilter;
+    const density = options?.density ?? "comfortable";
 
     if (maxSelectedRows !== undefined && (!Number.isInteger(maxSelectedRows) || maxSelectedRows < 1)) {
         throw new Error("maxSelectedRows must be a positive integer");
@@ -418,7 +419,9 @@ const Table = ({ id, columns, data, options, rowSelection }: TableProps) => {
             )}
             <div className={styles["table-container"]}>
                 {rowModel.rows.length > 0 ? (
-                    <table className={`${styles["table-layout"]} ${styles["table-border"]} ${styles["table-text"]}`}>
+                    <table
+                        className={`${styles["table-layout"]} ${styles["table-border"]} ${styles["table-text"]} ${styles[density]} ${table.getState().columnSizingInfo.isResizingColumn ? styles["is-resizing"] : ""}`}
+                    >
                         <TableHeader headerGroups={table.getHeaderGroups()} />
                         <tbody>
                             {rowModel.rows.map((row) => (
