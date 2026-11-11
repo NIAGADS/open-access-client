@@ -123,35 +123,40 @@ export const ColumnFilterControls = ({
                 )}
             </FilterChipBar>
 
-            {(hasVisualFilters || topicFilterColumn) && (
-                <section className={styles["glance-section"]}>
-                    <header className={styles["section-header"]}>
-                        <span>At a Glance</span>
+            
+              
+                {(hasVisualFilters || topicFilterColumn) && (
+                    <section className={styles["glance-section"]}>
+                        <header className={styles["section-header"]}>
+                            <span>At a Glance</span>
 
-                        <SectionToggleButton
-                            isExpanded={showAtAGlanceFilters}
-                            expandedLabel="Collapse At a Glance filters"
-                            collapsedLabel="Expand At a Glance filters"
-                            onClick={() => setShowAtAGlanceFilters((value) => !value)}
-                        />
-                    </header>
-
-                    {hasVisualFilters && (
-                        <div className={styles["visual-filter-grid"]}>
-                            {visualFilterColumns.map((column) => (
-                                <div className={styles["visual-filter-panel"]} key={`visual-filter-panel-${column.id}`}>
-                                    <FilterComponent key={`visual-filter-${column.id}`} column={column} />
+                            <SectionToggleButton
+                                isExpanded={showAtAGlanceFilters}
+                                expandedLabel="Collapse At a Glance filters"
+                                collapsedLabel="Expand At a Glance filters"
+                                onClick={() => setShowAtAGlanceFilters((value) => !value)}
+                            />
+                        </header>
+                        {showAtAGlanceFilters && (
+                           <> 
+                            {hasVisualFilters && (
+                                <div className={styles["visual-filter-grid"]}>
+                                    {visualFilterColumns.map((column) => (
+                                        <div className={styles["visual-filter-panel"]} key={`visual-filter-panel-${column.id}`}>
+                                            <FilterComponent key={`visual-filter-${column.id}`} column={column} />
+                                        </div>
+                                    ))}
                                 </div>
-                            ))}
-                        </div>
-                    )}
-                    {topicFilterColumn && (
-                        <div className={styles["topic-filter-panel"]}>
-                            <FilterComponent key={`topic-filter`} column={topicFilterColumn} />
-                        </div>
-                    )}
-                </section>
-            )}
+                            )}
+                            {topicFilterColumn && (
+                                <div className={styles["topic-filter-panel"]}>
+                                    <FilterComponent key={`topic-filter`} column={topicFilterColumn} />
+                                </div>
+                            )}
+                            </>
+                        )}    
+                    </section>
+                )} 
 
             {hasAdditionalFilters && (
                 <section className={styles["additional-filters-section"]}>
