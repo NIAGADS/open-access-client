@@ -1,12 +1,13 @@
 import { AGGEGRATE_TOPICS_COLUMN_ID, FilterColumn, RowValueSummary } from "./types";
 import { DEFAULT_NA_VALUE, MAX_PIE_SLICES, MAX_SELECT_OPTS, MAX_TOPICS } from "../../../../config";
-import { FacetCountBadges, PillOption, PillSelect } from "@niagads/ui";
 import { PieChart, PieChartDataRow } from "@niagads/charts";
+import { PillOption, PillSelect } from "@niagads/ui/client";
 import React, { ReactNode, useMemo, useState } from "react";
 
 import { BooleanFilter } from "./BooleanColumnFilter";
 import { CategoryFilterValue } from "../filterFunctions";
 import { Column } from "@tanstack/react-table";
+import { FacetCountBadges } from "@niagads/ui";
 import { FilterProps } from "./types";
 import { NoValidValueAlert } from "./NoValidValueAlert";
 import { RichSelect } from "@niagads/ui/client";
@@ -362,10 +363,12 @@ const _organizeValueCounts = (
         }
     }
 
-    // add NAs back in if relevant
-    const naCount = facetedValues.get(naValue) || 0;
-    if (naCount > 0) {
-        topFacetedValues[naValue] = naCount;
+    if (!ignoreOther) {
+        // add NAs back in if relevant
+        const naCount = facetedValues.get(naValue) || 0;
+        if (naCount > 0) {
+            topFacetedValues[naValue] = naCount;
+        }
     }
 
     return { counts: topFacetedValues, otherValues: otherValues };

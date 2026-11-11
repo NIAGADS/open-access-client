@@ -1,6 +1,6 @@
-import { Badge, FacetCountBadges } from "../Badge";
+import { Badge, FacetCountBadges } from "../../Badge";
+import React, { useState } from "react";
 
-import React from "react";
 import styles from "./pill-select.module.css";
 
 export interface PillOption {
@@ -21,12 +21,16 @@ interface PillSelectProps {
 type PillButtonVariant = "default" | "counts" | "faceted-counts";
 
 export const PillSelect = ({ options, label, selectedValues, variant = "default", onChange }: PillSelectProps) => {
+    const [visibleCount, setVisibleCount] = useState(10);
+    const visibleOptions = options.slice(0, visibleCount);
+    const hasMoreOptions = visibleCount < options.length;
+
     return (
         <div className={styles["pill-select-container"]}>
             {label && <div className={styles["pill-select-field-label"]}>{label}</div>}
 
             <div className={styles["pill-select-grid"]}>
-                {options.map((opt, index) => {
+                {visibleOptions.map((opt, index) => {
                     const isSelected = selectedValues.includes(opt.value);
                     const newValues = isSelected
                         ? selectedValues.filter((v) => v !== opt.value)
@@ -60,6 +64,16 @@ export const PillSelect = ({ options, label, selectedValues, variant = "default"
                         </button>
                     );
                 })}
+
+                {options.length > 10 && (
+                    <button
+                        type="button"
+                        className={styles["pill-select-more-button"]}
+                        onClick={() => setVisibleCount(hasMoreOptions ? visibleCount + 10 : 10)}
+                    >
+                        {hasMoreOptions ? "...show more" : "...show less"}
+                    </button>
+                )}
             </div>
         </div>
     );
