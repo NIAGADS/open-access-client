@@ -64,6 +64,7 @@ Pass options through the `options` prop.
 | `enableTopicFilter` | Adds a `topic` filtter when `true`. Defaults to `false`; see [Topic Filter](#topic-filters) |
 | `rowSelectOpts` | Configuration required for useful row selection; see [Row selection](#row-selection). |
 | `defaultColumns` | IDs of the columns initially visible. Columns omitted from this list start hidden. Required columns remain visible. |
+| `density` | Table spacing: `"comfortable"` (default) or `"compact"`. Compact uses less header and cell padding while preserving the same table behavior and visual treatment. |
 | `onTableLoad` | Called with the TanStack Table instance after layout. See [Accessing the table instance](#accessing-the-table-instance). |
 | `filterGroupOrder` | Ordered list of additional-filter group names to render. Groups not listed here are not rendered. |
 | `initialize` | Declared for initial sort/filter state **NOT YET IMPLEMENTED** |
