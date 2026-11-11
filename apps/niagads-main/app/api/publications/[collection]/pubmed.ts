@@ -2,6 +2,8 @@ import { parse, filter, type TNode } from "txml";
 import type { Publication, LinkEntry } from "@/components/Publications/PublicationsTable";
 import { URLS } from "@/data/url_ref";
 
+const IGNORE_TOPICS = ["Aged", "Middle Aged", "Humans", "Female", "Male", "United States"];
+
 const elements = (node: TNode | null | undefined, tag: string): TNode[] | null => {
     if (!node) return null;
     const matches = filter(node.children, (child) => child.tagName === tag);
@@ -51,10 +53,9 @@ const parsePubMedArticle = (xml: TNode, grantsByPmid: Map<string, string | null>
     for (const heading of elements(citation, "MeshHeading") ?? []) {
         const descriptor = first(heading, "DescriptorName");
         const value = content(descriptor);
-        // const majorTopic = descriptor?.attributes.MajorTopicYN;
+        const majorTopic = descriptor?.attributes.MajorTopicYN;
         const curie = descriptor?.attributes.UI!;
-        //if (value && majorTopic)
-        if (value)
+        if (value && majorTopic && !IGNORE_TOPICS.includes(value))
             keywords.push({ value: value, url: `${URLS.MESH}/${curie}`, displayText: `${value} [MeSH:${curie}]` });
     }
 
@@ -70,7 +71,7 @@ const parsePubMedArticle = (xml: TNode, grantsByPmid: Map<string, string | null>
         publicationType: content(publicationType)!,
         year: Number(year),
         pmcid: (pmcid && { value: pmcid, url: `${URLS.PMC}/${pmcid}` }) || null,
-        keywords: keywords,
+        keywords: keywords.length > 0 ? keywords : null,
         grants:
             grantsByPmid
                 .get(pmid)
