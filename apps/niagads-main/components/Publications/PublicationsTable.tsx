@@ -19,7 +19,7 @@ export interface Publication {
     pmid: LinkEntry;
     doi: LinkEntry | null;
     pmcid: LinkEntry | null;
-    keywords: LinkEntry[];
+    keywords: LinkEntry[] | null;
     grants: string[] | null;
     // is_niagads: boolean;
 }
@@ -30,6 +30,7 @@ const columns: TableColumn[] = [
         id: "year",
         header: "Year",
         type: "integer",
+        disableColumnFilter: true,
         filterOpts: {},
     },
     {
@@ -37,7 +38,7 @@ const columns: TableColumn[] = [
         header: "Title",
         required: true,
         disableColumnFilter: true,
-        filterOpts: { isTopic: true },
+        filterOpts: { isTopic: false },
     },
     {
         id: "journal",
@@ -61,7 +62,7 @@ const columns: TableColumn[] = [
             "Medical subject headings (MeSH) mapping each article to its primary biomedical topics, clinical conditions, and specific health concepts.",
         disableColumnFilter: true,
         type: "link",
-        filterOpts: { isTopic: true },
+        filterOpts: { isTopic: true, filterType: "select" },
     },
     { id: "grants", header: "Grants", type: "text", disableColumnFilter: true },
 ];
@@ -77,7 +78,7 @@ export const PublicationsTable = ({ data, id = "niagads-publications" }: Publica
         columns={columns}
         data={data as any}
         options={{
-            enableColumnFilters: false,
+            enableColumnFilters: true,
             enableExport: true,
             enableTopicFilter: true,
             defaultColumns: ["pmid", "year", "title", "journal", "authors"],
