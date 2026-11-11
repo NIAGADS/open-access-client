@@ -225,16 +225,19 @@ export const MultiSelectPillFilter = ({
         referenceValues.otherValues
     );
 
-    const opts: PillOption[] = useMemo(
-        () =>
-            Object.entries(referenceValues.counts).map(([value, total]) => {
-                const count = internalFilterValues.counts[value] ?? 0;
-                return { value, count, total, disabled: (filteredValues.counts[value] ?? 0) === 0 };
-            }),
-        [referenceValues.counts, filteredValues.counts, internalFilterValues.counts]
-    );
-
-    let selectedValues = _getActiveFilters(column, referenceValues.otherValues);
+    const selectedValues = _getActiveFilters(column, referenceValues.otherValues);
+    const opts: PillOption[] = Object.entries(referenceValues.counts).map(([value, total]) => {
+        const count = internalFilterValues.counts[value] ?? 0;
+        const isSelected = selectedValues.includes(value);
+        const unavailableUnderOtherFilters = (filteredValues.counts[value] ?? 0) === 0;
+        const unavailableForMatchAll = matchMode === "all" && count === 0;
+        return {
+            value,
+            count,
+            total,
+            disabled: !isSelected && (unavailableUnderOtherFilters || unavailableForMatchAll),
+        };
+    });
 
     const handleMatchModeChange = (mode: "any" | "all") => {
         setMatchMode(mode);
