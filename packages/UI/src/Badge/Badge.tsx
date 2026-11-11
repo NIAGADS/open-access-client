@@ -54,20 +54,38 @@ export const FacetCountBadges = ({
     style = {},
     size = "default",
 }: FacetCountBadgesProps) => {
-    const isDisabled = count === 0 ? "-disabled" : "";
-    const badgeVariant = variant === "pill" ? "pill" : "badge";
+    const isDisabled = count === 0;
+
+    const classes = [
+        styles["facet-count"],
+        variant === "pill" && styles["facet-count-pill"],
+        size === "small" && styles["facet-count-small"],
+        isDisabled && styles["facet-count-disabled"],
+        className,
+    ]
+        .filter(Boolean)
+        .join(" ");
+
     return (
         <span
-            className={`${styles["facet-count-badges"]} ${className}`}
+            className={classes}
             style={style}
             aria-label={`${count} matching current filters, ${total} total`}
         >
-            <Badge size={size} variant={badgeVariant} className={styles[`facet-count-badges-count${isDisabled}`]}>
-                {count}
-            </Badge>
-            <Badge size={size} variant={badgeVariant} className={styles[`facet-count-badges-total${isDisabled}`]}>
-                {total}
-            </Badge>
+           <span
+                className={styles["facet-count-current"]}
+                style={{ minWidth: `${total.toLocaleString().length}ch` }}
+            >
+                {count.toLocaleString()}
+            </span>
+
+            <span className={styles["facet-count-separator"]}>
+                /
+            </span>
+
+            <span className={styles["facet-count-total"]}>
+                {total.toLocaleString()}
+            </span>
         </span>
     );
 };

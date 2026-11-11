@@ -20,16 +20,16 @@
 .filter-topic-match-mode {
     display: inline-flex;
     overflow: hidden;
-    border: 1px solid var(--border, #d0dbe8);
+    border: 1px solid var(--secondary-blue, #d0dbe8);
     border-radius: 6px;
 }
 
 .filter-topic-match-mode-button {
     padding: 0.3125rem 0.625rem;
     border: 0;
-    border-right: 1px solid var(--border, #d0dbe8);
+    /* border-right: 1px solid var(--secondary-blue, #d0dbe8); */
     background: var(--surface, #fff);
-    color: var(--text-primary, #1a2636);
+    color: var(--text-muted, #6b7a95);
     font: inherit;
     font-size: 0.75rem;
     cursor: pointer;
