@@ -60,16 +60,35 @@
 .link:hover,
 .info-link:hover {
     text-decoration: underline;
-    color: var(--blue-mid, #4a7fc1);
+    color: var(--secondary-blue), #4a7fc1);
 }
 
+/* for inline "help" or info tagged text */
 .info-link {
     cursor: pointer;
     text-decoration: underline;
     text-decoration-style: dashed;
     text-decoration-color: --var(--secondary-blue); /* Tailwind blue-700 */
-    /* text-underline-offset: 4px; */
-    text-decoration-color: var(--blue-mid, #4a7fc1);
     text-underline-offset: 3px;
-    color: var(--blue, #3d5a80);
+    color: var(--primary-blue, #3d5a80);
+}
+
+/* inline show more/show less toggles */
+.more-toggle {
+    display: inline-block;
+    padding: 0 0.5rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--secondary-blue, #4a7fc1) 14%, transparent);
+    color: var(--primary-blue, #3d5a80);
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.5;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.more-toggle:hover {
+    background: color-mix(in srgb, var(--secondary-blue, #4a7fc1) 26%, transparent);
+    text-decoration: none;
 }

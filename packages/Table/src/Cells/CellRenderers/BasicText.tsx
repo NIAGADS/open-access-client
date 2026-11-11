@@ -1,13 +1,10 @@
+import { DEFAULT_MAX_LENGTH, DEFAULT_NA_VALUE, DEFAULT_VISIBLE_LIST_ITEMS } from "../../config";
 import { HelpIconWrapper, StylingProps } from "@niagads/ui";
 import React, { useState } from "react";
 import { _deepCopy, _get, _hasOwnProperty, _isJSON, _isNA, _isNull } from "@niagads/common";
 
-import { DEFAULT_NA_VALUE } from "../../config";
 import { TextRenderer } from "./types";
 import styles from "./cell.module.css";
-
-const DEFAULT_MAX_LENGTH = 100;
-const DEFAULT_VISIBLE_LIST_ITEMS = 3;
 
 export const renderNullValue = (value: string = DEFAULT_NA_VALUE) => {
     return <span className={styles["null-value"]}>{value}</span>;
@@ -44,7 +41,7 @@ export const TextList = <T,>({ props }: TextRenderer<T>) => {
                 {remainingItemCount > 0 && (
                     <>
                         {" "}
-                        <a className={`text-xs ${styles["info-link"]}`} onClick={() => setIsExpanded(!isExpanded)}>
+                        <a className={`text-xs ${styles["more-toggle"]}`} onClick={() => setIsExpanded(!isExpanded)}>
                             {isExpanded ? "Show Less" : `+${remainingItemCount} more`}
                         </a>
                     </>
@@ -135,7 +132,7 @@ export const LargeText = <T,>({ props }: TextRenderer<T>) => {
         <div className={styles["truncated-text"]}>
             {styledText}
             {"   "}
-            <a className={`text-xs ${styles["info-link"]}`} onClick={toggleIsExpanded}>
+            <a className={`text-xs ${styles["more-toggle"]}`} onClick={toggleIsExpanded}>
                 {action}
             </a>
         </div>
