@@ -115,6 +115,12 @@
     max-width: 100%;
 }
 
+/* ── TOPIC FILTER PANEL ── */
+.topic-filter-panel {
+    padding: 14px 20px 16px;
+    border-top: 1px solid var(--border, #dce4ef);
+}
+
 /* ── ADDITIONAL FILTERS SECTION ── */
 .additional-filters-section {
     background: var(--surface, #fff);
@@ -153,8 +159,8 @@
 .additional-filter-panel-body {
     display: flex;
     flex-direction: column;
-    gap: 14px;
-    padding: 14px 16px 16px;
+    gap: 8px;
+    padding: 10px 14px 12px;
 }
 
 /* ── RESPONSIVE ── */

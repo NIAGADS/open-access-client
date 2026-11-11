@@ -146,7 +146,7 @@ export const ColumnFilterControls = ({
                         </div>
                     )}
                     {topicFilterColumn && (
-                        <div>
+                        <div className={styles["topic-filter-panel"]}>
                             <FilterComponent key={`topic-filter`} column={topicFilterColumn} />
                         </div>
                     )}
