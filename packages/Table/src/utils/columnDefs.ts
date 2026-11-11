@@ -5,6 +5,8 @@ import { FilterFnOption, SortingFnOption } from "@tanstack/react-table";
 export const resolveIsTopic = (filterType: string): boolean => CATEGORICAL_FILTER_TYPES.includes(filterType);
 
 export const resolveFilterType = (col: TableColumn): ColumnFilterType | "free-text" => {
+    if (col.filterOpts?.filterType) return col.filterOpts.filterType;
+
     // added to support topic filters; "approximately" identifies free text columns
     if (col.disableColumnFilter && !col.disableGlobalFilter) return "free-text";
 
