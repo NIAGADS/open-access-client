@@ -9,7 +9,6 @@ export default function AboutPage() {
     return (
         <main>
             <div className="content-section content-section-centered">
-
                 <AboutLayout
                     intro={
                         <div className="mdx-content">

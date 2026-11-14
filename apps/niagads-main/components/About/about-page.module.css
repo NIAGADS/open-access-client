@@ -1,11 +1,8 @@
-
 /* Introduction */
 
 .about-intro {
     padding-bottom: 3rem;
 }
-
-
 
 .about-intro :global(p) {
     margin-block: 0.75rem;
@@ -68,12 +65,9 @@
     color: var(--primary-blue);
     background: var(--gray-100);
 }
-
-.about-sidebar :global(a[aria-current="location"]) {
-    color: var(--primary-blue);
-    background: var(--gray-100);
-    border-left-color: var(--primary-blue);
-    font-weight: 600;
+.about-sidebar :global(a:focus-visible) {
+    outline: 2px solid var(--secondary-blue);
+    outline-offset: 2px;
 }
 
 /* Article */
@@ -89,11 +83,11 @@
     scroll-margin-top: 6rem;
 }
 
-.about-article :global(h2:first-child) {
+.about-article :global(h2:first-of-type) {
     margin-top: 0;
 }
 
-.about-article :global(h2:not(:first-child)) {
+.about-article :global(h2:not(:first-of-type)) {
     padding-top: 2rem;
     border-top: 1px solid var(--gray-200);
 }
