@@ -4,6 +4,10 @@
 
 `TabbedTableView` is one application of `TableView`, not a requirement for using it. A `TableView` can appear on its own in a page, dashboard section or another layout. Its configuration and data-source handling are the same whether it is standalone or inside tabs.
 
+![TabbedTableView wraps navigation and active-tab state around an independent table view containing its title, description, data retrieval, filters and table.](./images/tabbed-table-view-architecture.svg)
+
+The diagram shows the composition, not the request timing: background fetching also retrieves data for inactive tabs by default. The table and filter UI render on first selection.
+
 ## Data sources
 
 Use existing `data: rows` for data already available, or `dataSource` for one of three source types. Columns and options use the existing Table types.
