@@ -67,25 +67,14 @@ export const FacetCountBadges = ({
         .join(" ");
 
     return (
-        <span
-            className={classes}
-            style={style}
-            aria-label={`${count} matching current filters, ${total} total`}
-        >
-           <span
-                className={styles["facet-count-current"]}
-                style={{ minWidth: `${total.toLocaleString().length}ch` }}
-            >
+        <span className={classes} style={style} aria-label={`${count} matching current filters, ${total} total`}>
+            <span className={styles["facet-count-current"]} style={{ minWidth: `${total.toLocaleString().length}ch` }}>
                 {count.toLocaleString()}
             </span>
 
-            <span className={styles["facet-count-separator"]}>
-                /
-            </span>
+            <span className={styles["facet-count-separator"]}>/</span>
 
-            <span className={styles["facet-count-total"]}>
-                {total.toLocaleString()}
-            </span>
+            <span className={styles["facet-count-total"]}>{total.toLocaleString()}</span>
         </span>
     );
 };

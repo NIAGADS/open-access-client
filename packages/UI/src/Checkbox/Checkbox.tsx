@@ -28,12 +28,7 @@ export const Checkbox = ({
     const className = [styles["ui-checkbox"], styles[variant]].filter(Boolean).join(" ");
     const checkboxId = useId();
     return (
-       <div
-            className={[
-                styles["checkbox-wrapper"],
-                alignCenter ? styles["centered"] : "",
-            ].filter(Boolean).join(" ")}
-        >
+        <div className={[styles["checkbox-wrapper"], alignCenter ? styles["centered"] : ""].filter(Boolean).join(" ")}>
             {defaultChecked ? (
                 <input
                     type="checkbox"
@@ -58,7 +53,11 @@ export const Checkbox = ({
                 />
             )}
 
-            {label && <label htmlFor={checkboxId} className={styles["ui-checkbox-label"]}>{label}</label>}
+            {label && (
+                <label htmlFor={checkboxId} className={styles["ui-checkbox-label"]}>
+                    {label}
+                </label>
+            )}
         </div>
     );
 };

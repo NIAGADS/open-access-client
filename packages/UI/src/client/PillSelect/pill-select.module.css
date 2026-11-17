@@ -82,9 +82,7 @@
 }
 .pill-select-button-selected:hover {
     border-color: var(--secondary-blue);
-   
 }
-
 
 .pill-select-button-disabled,
 .pill-select-button-disabled:hover {

@@ -1,4 +1,3 @@
-
 import React, { ReactNode } from "react";
 
 import { StylingProps } from "../types";
@@ -40,7 +39,7 @@ export const Toggle = ({
                 className={styles["toggle-input"]}
             />
             <span className={`${styles["toggle-slider"]} ${variant !== "default" ? styles[variant] : ""}`} />
-           {label && (
+            {label && (
                 <span
                     className={`${styles["toggle-label"]} ${truncateLabel ? styles["toggle-label-truncated"] : ""}`}
                     title={truncateLabel ? label : undefined}
