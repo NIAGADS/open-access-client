@@ -1,19 +1,35 @@
 "use client";
 
-import React, { useEffect, useId, useRef, useState } from "react";
+import React, { useCallback, useEffect, useId, useRef, useState } from "react";
 
-import { TableView } from "./TableView";
-import type { TabbedTableViewProps } from "./types";
+import { TableViewContent } from "./TableView";
+import { tableDataKey, useTableData } from "./useTableData";
+import type { TableTabConfig, TabbedTableViewProps } from "./types";
 import styles from "./table-view.module.css";
 
 /** Lazy-mount views once, retaining each table's data and interaction state. */
 export const TabbedTableView = ({ config, selectedTab, onTabChange, label = "Tables" }: TabbedTableViewProps) => {
-    const { tabs, defaultTab } = config;
+    const { tabs, defaultTab, fetchPolicy = "background" } = config;
     const instanceId = useId();
     const tabList = useRef<HTMLDivElement>(null);
     const [internalTab, setInternalTab] = useState(defaultTab ?? tabs[0]?.id);
     const activeId = selectedTab ?? (tabs.some((tab) => tab.id === internalTab) ? internalTab : tabs[0]?.id);
     const [visited, setVisited] = useState<Set<string>>(() => new Set(activeId ? [activeId] : []));
+
+    const [counts, setCounts] = useState<Record<string, { key: string; count: number }>>({});
+    const updateCount = useCallback((id: string, key: string, count: number | undefined) => {
+        setCounts((previous) => {
+            if (previous[id]?.key === key && previous[id]?.count === count) return previous;
+            const next = { ...previous };
+            if (count === undefined) delete next[id];
+            else next[id] = { key, count };
+            return next;
+        });
+    }, []);
+    const getCount = (tab: TableTabConfig) =>
+        tab.count ??
+        tab.table.data?.length ??
+        (counts[tab.id]?.key === tableDataKey(tab.table) ? counts[tab.id].count : undefined);
 
     useEffect(() => {
         setVisited((previous) => {
@@ -86,8 +102,8 @@ export const TabbedTableView = ({ config, selectedTab, onTabChange, label = "Tab
                         onKeyDown={(event) => handleKeyDown(event, index)}
                     >
                         {tab.label}
-                        {tab.count !== undefined && (
-                            <span className={styles.count}> ({tab.count.toLocaleString("en-US")})</span>
+                        {getCount(tab) !== undefined && (
+                            <span className={styles.count}> ({getCount(tab)?.toLocaleString("en-US")})</span>
                         )}
                     </button>
                 ))}
@@ -102,7 +118,7 @@ export const TabbedTableView = ({ config, selectedTab, onTabChange, label = "Tab
                     {tabs.map((tab) => (
                         <option key={tab.id} value={tab.id}>
                             {tab.label}
-                            {tab.count !== undefined ? ` (${tab.count.toLocaleString("en-US")})` : ""}
+                            {getCount(tab) !== undefined ? ` (${getCount(tab)?.toLocaleString("en-US")})` : ""}
                         </option>
                     ))}
                 </select>
@@ -117,10 +133,35 @@ export const TabbedTableView = ({ config, selectedTab, onTabChange, label = "Tab
                         tabIndex={0}
                         hidden={tab.id !== activeId}
                     >
-                        {(visited.has(tab.id) || tab.id === activeId) && <TableView config={tab.table} />}
+                        <TablePanel
+                            tab={tab}
+                            renderView={visited.has(tab.id) || tab.id === activeId}
+                            fetchEnabled={fetchPolicy === "background" || visited.has(tab.id) || tab.id === activeId}
+                            onCount={updateCount}
+                        />
                     </div>
                 ))}
             </div>
         </div>
     );
 };
+
+function TablePanel({
+    tab,
+    renderView,
+    fetchEnabled,
+    onCount,
+}: {
+    tab: TableTabConfig;
+    renderView: boolean;
+    fetchEnabled: boolean;
+    onCount: (id: string, key: string, count: number | undefined) => void;
+}) {
+    const state = useTableData(tab.table, fetchEnabled);
+    const key = tableDataKey(tab.table);
+    const count = state.data?.length;
+    useEffect(() => {
+        onCount(tab.id, key, count);
+    }, [tab.id, key, count, onCount]);
+    return renderView ? <TableViewContent config={tab.table} state={state} /> : null;
+}

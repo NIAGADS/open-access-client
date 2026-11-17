@@ -8,6 +8,8 @@ const require = createRequire(import.meta.url);
 const config: StorybookConfig = {
     stories: ["../stories/**/*.stories.@(js|jsx|mjs|ts|tsx)"],
 
+    staticDirs: ["../public"],
+
     core: {
         disableTelemetry: true, // Disables telemetry (tracking / usage stats)
     },

@@ -49,3 +49,9 @@ The user supplied the approved spec and requested execution. Implement inline, p
 - Package and story type checks, with command-line ignoreDeprecations=5.0 for the installed TypeScript, report the pre-existing missing ../../types import in ControlElements/Columns/ColumnFilters/sortingFunctions.ts. A compiler-host comparison against the original index and file set reports identical baseline/current diagnostics, with no new diagnostics.
 - No package/application production builds, application changes, deployments, dependency changes or lockfile changes. Table source is resolved directly by the existing Storybook Vite alias.
 - Reviewed implementation and scoped diff locally; repository instructions prohibit subagents. Implementation prepared for review on feature/tabbed-table-view.
+
+## Revised source and fetch policy — 2026-11-17
+
+The user requested background fetching by default and application-specific opt-in to fetching on selection. Implemented a lightweight SWR data subscriber per tab, separate from lazy table rendering. Source configuration now supports a browser-accessible JSON file path, endpoint URL, or custom loader with a stable cache key. HTTP/JSON loading is built in; optional selectors adapt wrapped responses. Counts use explicit metadata first, then loaded array length. SWR deduplicates and retains data without automatic focus/reconnect/stale revalidation or error retries. Shared requests can finish after unmount rather than aborting another consumer's work.
+
+Preserved the user's pulled UI edits at 376472c2, including the informational empty-state Alert. Renamed stories to describe fetch policies, responsive navigation and application-controlled selection. Stories remain passive, and simulated two-second requests make policy differences visible. A small public JSON fixture is derived from the existing rendering example for the file-source story. No Storybook tests or unrelated application changes were introduced.

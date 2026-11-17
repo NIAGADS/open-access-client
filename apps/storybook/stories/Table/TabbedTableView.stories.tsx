@@ -34,6 +34,32 @@ const config: TabbedTableConfig = {
     ],
 };
 
+function remoteExample(policy: "background" | "onSelect"): TabbedTableConfig {
+    return {
+        ...config,
+        fetchPolicy: policy,
+        tabs: config.tabs.map((tab) => ({
+            ...tab,
+            table: {
+                ...tab.table,
+                data: undefined,
+                description: `${tab.table.description} This example simulates a two-second request.`,
+                dataSource: {
+                    type: "custom",
+                    cacheKey: `storybook-table-${policy}-${tab.id}`,
+                    load: async () => {
+                        await new Promise((resolve) => setTimeout(resolve, 2000));
+                        return tab.id === "associations" ? associations.data : tracks.data;
+                    },
+                },
+            },
+        })),
+    };
+}
+
+const backgroundConfig = remoteExample("background");
+const onSelectConfig = remoteExample("onSelect");
+
 const meta = {
     title: "Table/TabbedTableView",
     component: TabbedTableView,
@@ -45,9 +71,20 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const ConnectedFolders: Story = {};
+export const ConnectedFolders: Story = {
+    name: "Fetch Tables in Background (Default)",
+    args: { config: backgroundConfig },
+    parameters: {
+        docs: {
+            description: {
+                story: "Both simulated requests start immediately. Each takes two seconds. Wait on the first table, then switch: the second table is already available. Counts are supplied in advance.",
+            },
+        },
+    },
+};
 
 export const ConstrainedWidth: Story = {
+    name: "Responsive Navigation on Narrow Screens",
     render: (args) => (
         <div style={{ maxWidth: 420 }}>
             <TabbedTableView {...args} />
@@ -71,38 +108,19 @@ function ControlledExample() {
     );
 }
 
-export const Controlled: Story = { render: () => <ControlledExample /> };
-
-const loadAssociations = async () => associations.data;
-const loadTracks = async () => tracks.data;
+export const Controlled: Story = {
+    name: "Switch Tables from an External Control",
+    render: () => <ControlledExample />,
+};
 
 export const LazySources: Story = {
-    args: {
-        config: {
-            tabs: [
-                {
-                    id: "remote-associations",
-                    label: "Associations",
-                    table: {
-                        id: "remote-associations",
-                        title: "Associations loaded on first selection",
-                        columns: associations.columns,
-                        options: associations.options,
-                        dataSource: { load: loadAssociations },
-                    },
-                },
-                {
-                    id: "remote-tracks",
-                    label: "Annotation tracks",
-                    table: {
-                        id: "remote-tracks",
-                        title: "Tracks loaded on first selection",
-                        columns: tracks.columns,
-                        options: { ...tracks.options, enableRowSelect: false },
-                        dataSource: { load: loadTracks },
-                    },
-                },
-            ],
+    name: "Fetch Each Table on First Selection",
+    args: { config: onSelectConfig },
+    parameters: {
+        docs: {
+            description: {
+                story: 'Explicit fetchPolicy: "onSelect". Each table starts its simulated two-second request only when first selected. Switching back uses the cached data and preserves table state.',
+            },
         },
     },
 };

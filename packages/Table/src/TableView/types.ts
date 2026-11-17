@@ -1,10 +1,19 @@
 import type { TableProps } from "../Table";
 import type { TableData } from "../types";
 
-/** Adapt an API response to TableData; keep this object stable between renders. */
-export interface DataSourceConfig {
-    load: (signal: AbortSignal) => Promise<TableData>;
-}
+type JsonDataSource = {
+    /** Extract rows when the JSON response is not already a TableData array. */
+    select?: (response: unknown) => TableData;
+} & ({ type: "file"; path: string } | { type: "endpoint"; url: string });
+
+export type DataSourceConfig =
+    | JsonDataSource
+    | {
+          type: "custom";
+          /** A stable, unique SWR cache key for this request, including any parameters. */
+          cacheKey: string;
+          load: (signal: AbortSignal) => Promise<TableData>;
+      };
 
 export type TableViewConfig = Omit<TableProps, "data"> & {
     title: string;
@@ -25,6 +34,8 @@ export interface TableTabConfig {
 export interface TabbedTableConfig {
     tabs: TableTabConfig[];
     defaultTab?: string;
+    /** Fetch all sources immediately by default; onSelect defers each until first selection. */
+    fetchPolicy?: "background" | "onSelect";
 }
 
 export interface TabbedTableViewProps {
