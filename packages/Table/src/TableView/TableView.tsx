@@ -1,11 +1,11 @@
 "use client";
 
+import { ActionButton, Alert, LoadingSpinner } from "@niagads/ui";
+import type { DataSourceConfig, TableViewProps } from "./types";
 import React, { useEffect, useId, useState } from "react";
-import { ActionButton, LoadingSpinner } from "@niagads/ui";
 
 import Table from "../Table";
 import type { TableData } from "../types";
-import type { DataSourceConfig, TableViewProps } from "./types";
 import styles from "./table-view.module.css";
 
 type RequestState = {
@@ -70,7 +70,12 @@ export const TableView = ({ config }: TableViewProps) => {
                     <ActionButton onClick={() => setAttempt((value) => value + 1)}>Retry</ActionButton>
                 </div>
             )}
-            {rows && (rows.length > 0 ? <Table {...tableProps} data={rows} /> : <p role="status">No records found.</p>)}
+            {rows &&
+                (rows.length > 0 ? (
+                    <Table {...tableProps} data={rows} />
+                ) : (
+                    <Alert variant="info" message="No records found." />
+                ))}
         </section>
     );
 };
