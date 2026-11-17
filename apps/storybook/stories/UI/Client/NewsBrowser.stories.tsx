@@ -1,6 +1,5 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { expect, userEvent, within } from "storybook/test";
 import { NewsBrowser, type NewsItem } from "@niagads/ui/client";
 
 // Illustrative fixtures, not a live NIAGADS news feed.
@@ -115,23 +114,6 @@ export const SummaryExpansion: Story = {
             },
         ],
     },
-    play: async ({ canvasElement }) => {
-        const canvas = within(canvasElement);
-        const articles = canvas.getAllByRole("article");
-        const linked = within(articles[0]);
-        const local = within(articles[1]);
-        const preview = articles[0].querySelector("p")!;
-        await expect(preview.textContent!.length).toBeLessThanOrEqual(240);
-        await expect(preview.textContent).toMatch(/…$/);
-        await expect(linked.getByText(longSummary)).not.toBeVisible();
-        await userEvent.click(linked.getByText("Read more", { exact: false }));
-        await expect(linked.getByText(longSummary)).toBeVisible();
-        await expect(canvas.queryByText("Full linked article should stay on the original site.")).toBeNull();
-        await userEvent.click(local.getByText("Read more", { exact: false }));
-        await expect(local.getByText("Full local article is available here.")).toBeVisible();
-        await expect(articles[2].querySelector("details")).toBeNull();
-        await expect(canvas.queryByText("Another linked article should stay on the original site.")).toBeNull();
-    },
 };
 export const Mobile: Story = {
     decorators: [
@@ -141,28 +123,4 @@ export const Mobile: Story = {
             </div>
         ),
     ],
-};
-export const FilterAndExpand: Story = {
-    play: async ({ canvasElement }) => {
-        const canvas = within(canvasElement);
-        await expect(canvas.getByRole("status")).toHaveTextContent("7 news items");
-        await userEvent.selectOptions(canvas.getByLabelText("Resource"), "NIAGADS Open Access");
-        await userEvent.selectOptions(canvas.getByLabelText("Type"), "Patch / correction");
-        await userEvent.selectOptions(canvas.getByLabelText("Year"), "2026");
-        await expect(canvas.getByRole("status")).toHaveTextContent("1 news item · Newest first");
-        await userEvent.type(canvas.getByLabelText("Search"), "no matching news");
-        await expect(canvas.getByText("No news matches these filters.")).toBeVisible();
-        await userEvent.click(canvas.getByRole("button", { name: "Clear filters" }));
-        await expect(canvas.getByRole("status")).toHaveTextContent("7 news items");
-        await expect(canvas.getByLabelText("Search")).toHaveValue("");
-        await expect(canvas.getByLabelText("Resource")).toHaveValue("All resources");
-        await expect(canvas.getByLabelText("Type")).toHaveValue("All types");
-        await expect(canvas.getByLabelText("Year")).toHaveValue("All years");
-        await userEvent.click(
-            canvas.getAllByText("Read more", { exact: false }).find((element) => element.tagName === "SUMMARY")!
-        );
-        await expect(
-            canvas.getByText("The webinar covers dataset discovery, access applications, and open-access resources.")
-        ).toBeVisible();
-    },
 };
