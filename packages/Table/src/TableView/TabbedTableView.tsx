@@ -12,13 +12,18 @@ export const TabbedTableView = ({ config, selectedTab, onTabChange, label = "Tab
     const { tabs, defaultTab, fetchPolicy = "background" } = config;
     const instanceId = useId();
     const tabList = useRef<HTMLDivElement>(null);
+    // External selection takes precedence; otherwise use local state initialized once
+    // from defaultTab. If the selected local tab is removed, display the first remaining tab.
     const [internalTab, setInternalTab] = useState(defaultTab ?? tabs[0]?.id);
     const activeId = selectedTab ?? (tabs.some((tab) => tab.id === internalTab) ? internalTab : tabs[0]?.id);
     const [visited, setVisited] = useState<Set<string>>(() => new Set(activeId ? [activeId] : []));
 
+    // Navigation needs count metadata, not row arrays. Tag counts with their source
+    // identity so a late result from a replaced source cannot label the new table.
     const [counts, setCounts] = useState<Record<string, { key: string; count: number }>>({});
     const updateCount = useCallback((id: string, key: string, count: number | undefined) => {
         setCounts((previous) => {
+            // Avoid rerendering navigation when a subscriber reports the same metadata.
             if (previous[id]?.key === key && previous[id]?.count === count) return previous;
             const next = { ...previous };
             if (count === undefined) delete next[id];
@@ -26,11 +31,15 @@ export const TabbedTableView = ({ config, selectedTab, onTabChange, label = "Tab
             return next;
         });
     }, []);
+    // Explicit totals win over loaded-row counts (important for paginated endpoints).
+    // Nullish checks retain valid zero counts; an unknown count stays absent.
     const getCount = (tab: TableTabConfig) =>
         tab.count ??
         tab.table.data?.length ??
         (counts[tab.id]?.key === tableDataKey(tab.table) ? counts[tab.id].count : undefined);
 
+    // Visited controls rendering only, independently of fetchPolicy. Retain visited
+    // views to preserve their table state, but discard IDs removed from configuration.
     useEffect(() => {
         setVisited((previous) => {
             const retained = new Set(
@@ -58,6 +67,7 @@ export const TabbedTableView = ({ config, selectedTab, onTabChange, label = "Tab
 
     const selectTab = (id: string) => {
         if (id === activeId) return;
+        // In controlled mode the caller must update selectedTab, e.g. through its router.
         if (selectedTab === undefined) setInternalTab(id);
         onTabChange?.(id);
     };
@@ -80,6 +90,7 @@ export const TabbedTableView = ({ config, selectedTab, onTabChange, label = "Tab
             default:
                 return;
         }
+        // Keyboard navigation uses automatic activation, matching click selection.
         event.preventDefault();
         tabList.current?.querySelectorAll<HTMLButtonElement>('[role="tab"]')[next]?.focus();
         selectTab(tabs[next].id);
@@ -146,6 +157,8 @@ export const TabbedTableView = ({ config, selectedTab, onTabChange, label = "Tab
     );
 };
 
+// Each tab has a data subscriber even before its visual table exists. This keeps hooks
+// inside a keyed component rather than calling a variable number of hooks in the wrapper.
 function TablePanel({
     tab,
     renderView,
@@ -157,11 +170,14 @@ function TablePanel({
     fetchEnabled: boolean;
     onCount: (id: string, key: string, count: number | undefined) => void;
 }) {
+    // Background mode enables all subscribers immediately; onSelect enables visited tabs.
     const state = useTableData(tab.table, fetchEnabled);
     const key = tableDataKey(tab.table);
     const count = state.data?.length;
     useEffect(() => {
         onCount(tab.id, key, count);
     }, [tab.id, key, count, onCount]);
+    // Only the expensive table/filter tree is deferred. Once rendered, the wrapper hides
+    // it instead of unmounting it, preserving pagination, sorting and filter state.
     return renderView ? <TableViewContent config={tab.table} state={state} /> : null;
 }

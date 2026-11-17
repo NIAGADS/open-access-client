@@ -1,6 +1,7 @@
 import type { TableProps } from "../Table";
 import type { TableData } from "../types";
 
+// File paths must be served URLs (e.g. /data/table.json), not repository filesystem paths.
 type JsonDataSource = {
     /** Extract rows when the JSON response is not already a TableData array. */
     select?: (response: unknown) => TableData;
@@ -15,6 +16,8 @@ export type DataSourceConfig =
           load: (signal: AbortSignal) => Promise<TableData>;
       };
 
+// Existing table options/columns are reused. The union prevents supplying both an
+// already available row array and a remote source with competing ownership of the data.
 export type TableViewConfig = Omit<TableProps, "data"> & {
     title: string;
     description?: string;
@@ -27,6 +30,7 @@ export interface TableViewProps {
 export interface TableTabConfig {
     id: string;
     label: string;
+    /** Optional known total; otherwise use the loaded row count when available. */
     count?: number;
     table: TableViewConfig;
 }
@@ -34,7 +38,10 @@ export interface TableTabConfig {
 export interface TabbedTableConfig {
     tabs: TableTabConfig[];
     defaultTab?: string;
-    /** Fetch all sources immediately by default; onSelect defers each until first selection. */
+    /**
+     * Background fetching is the default; onSelect waits until each tab is first selected.
+     * Table/filter rendering waits until first selection in either mode.
+     */
     fetchPolicy?: "background" | "onSelect";
 }
 

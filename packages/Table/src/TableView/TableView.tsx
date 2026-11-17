@@ -16,6 +16,8 @@ export const TableView = ({ config }: TableViewProps) => {
 
 /** Shared presentation for standalone views and the tab wrapper's data-only panels. */
 export const TableViewContent = ({ config, state }: TableViewProps & { state: TableDataState }) => {
+    // Fetching is already owned by TableView or TablePanel. Consume its state instead
+    // of starting a second subscription, and forward only Table's own props below.
     const { title, description, dataSource, data, ...tableProps } = config;
     const titleId = useId();
     const { data: rows, loading, error, retry } = state;
