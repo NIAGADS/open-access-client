@@ -60,7 +60,7 @@
 .link:hover,
 .info-link:hover {
     text-decoration: underline;
-    color: var(--secondary-blue), #4a7fc1);
+    color: var(--secondary-blue, #4a7fc1);
 }
 
 /* for inline "help" or info tagged text */
