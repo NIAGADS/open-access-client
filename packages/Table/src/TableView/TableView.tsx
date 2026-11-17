@@ -4,9 +4,13 @@ import { ActionButton, Alert, LoadingSpinner } from "@niagads/ui";
 import React, { useId } from "react";
 
 import Table from "../Table";
-import type { TableViewProps } from "./types";
 import { useTableData, type TableDataState } from "./useTableData";
 import styles from "./table-view.module.css";
+import { TableViewConfig } from "./types";
+
+interface TableViewProps {
+    config: TableViewConfig;
+}
 
 /** A standalone view; it has no knowledge of tab navigation. */
 export const TableView = ({ config }: TableViewProps) => {

@@ -1,14 +1,21 @@
 "use client";
 
 import React, { useCallback, useEffect, useId, useRef, useState } from "react";
+import type { TabbedTableConfig, TableTabConfig } from "./types";
+import { tableDataKey, useTableData } from "./useTableData";
 
 import { TableViewContent } from "./TableView";
-import { tableDataKey, useTableData } from "./useTableData";
-import type { TableTabConfig, TabbedTableViewProps } from "./types";
 import styles from "./table-view.module.css";
 
-/** Lazy-mount views once, retaining each table's data and interaction state. */
-export const TabbedTableView = ({ config, selectedTab, onTabChange, label = "Tables" }: TabbedTableViewProps) => {
+interface TabbedTableViewProps {
+    config: TabbedTableConfig;
+    selectedTab?: string;
+    onTabChange?: (tabId: string) => void;
+    /** Accessible name shared by the tab list and compact selector. */
+    label?: string;
+}
+
+export const TabbedTableView = ({ config, selectedTab, onTabChange, label }: TabbedTableViewProps) => {
     const { tabs, defaultTab, fetchPolicy = "background" } = config;
     const instanceId = useId();
     const tabList = useRef<HTMLDivElement>(null);
@@ -120,7 +127,7 @@ export const TabbedTableView = ({ config, selectedTab, onTabChange, label = "Tab
                 ))}
             </div>
             <div className={styles.compact}>
-                <label htmlFor={`${instanceId}-select`}>{label}</label>
+                {label && <label htmlFor={`${instanceId}-select`}>{label}</label>}
                 <select
                     id={`${instanceId}-select`}
                     value={activeId}

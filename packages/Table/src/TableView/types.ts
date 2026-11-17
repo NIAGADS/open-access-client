@@ -1,5 +1,5 @@
-import type { TableProps } from "../Table";
 import type { TableData } from "../types";
+import type { TableProps } from "../Table";
 
 // File paths must be served URLs (e.g. /data/table.json), not repository filesystem paths.
 type JsonDataSource = {
@@ -23,10 +23,6 @@ export type TableViewConfig = Omit<TableProps, "data"> & {
     description?: string;
 } & ({ data: TableData; dataSource?: never } | { data?: never; dataSource: DataSourceConfig });
 
-export interface TableViewProps {
-    config: TableViewConfig;
-}
-
 export interface TableTabConfig {
     id: string;
     label: string;
@@ -43,12 +39,4 @@ export interface TabbedTableConfig {
      * Table/filter rendering waits until first selection in either mode.
      */
     fetchPolicy?: "background" | "onSelect";
-}
-
-export interface TabbedTableViewProps {
-    config: TabbedTableConfig;
-    selectedTab?: string;
-    onTabChange?: (tabId: string) => void;
-    /** Accessible name shared by the tab list and compact selector. */
-    label?: string;
 }
