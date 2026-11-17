@@ -1,0 +1,139 @@
+.container {
+    container-type: inline-size;
+    min-width: 0;
+    width: 100%;
+    color: var(--text, #1e2a3a);
+    font-family: var(--font-inter), sans-serif;
+    --table-view-border: var(--border, #c3d0e3);
+    --table-view-accent: var(--primary, #365780);
+}
+
+.tabs {
+    display: flex;
+    align-items: stretch;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    padding-inline: 0;
+    border-bottom: 1px solid var(--table-view-border);
+}
+
+.tab {
+    position: relative;
+    max-width: 100%;
+    min-height: 44px;
+    margin-bottom: -1px;
+    padding: 0.625rem 1rem;
+    border: 1px solid transparent;
+    border-top: 3px solid transparent;
+    border-radius: 5px 5px 0 0;
+    background: transparent;
+    color: var(--text-muted, #53657e);
+    font: inherit;
+    font-size: 0.8125rem;
+    overflow-wrap: anywhere;
+    cursor: pointer;
+}
+
+.tab:hover {
+    color: var(--table-view-accent);
+    background: var(--gray-50, #f4f7fb);
+}
+
+.tab[aria-selected="true"] {
+    z-index: 1;
+    border-color: var(--table-view-border);
+    border-top-color: var(--table-view-accent);
+    border-bottom-color: var(--surface, #fff);
+    background: var(--surface, #fff);
+    color: var(--table-view-accent);
+    font-weight: 600;
+}
+
+.tab:focus-visible,
+.compact select:focus-visible,
+.panels > [role="tabpanel"]:focus-visible {
+    outline: 2px solid var(--table-view-accent);
+    outline-offset: -4px;
+}
+
+.count {
+    font-variant-numeric: tabular-nums;
+    font-size: 0.75rem;
+}
+
+.panels {
+    border: 1px solid var(--table-view-border);
+    border-top: 0;
+    background: var(--surface, #fff);
+}
+
+.panels > [hidden] {
+    display: none;
+}
+
+.view {
+    min-width: 0;
+    padding: 0.75rem;
+    color: var(--text, #1e2a3a);
+    font-family: var(--font-inter), sans-serif;
+}
+
+.header {
+    margin-bottom: 0.75rem;
+}
+
+.title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.5;
+}
+
+.description {
+    margin: 0.25rem 0 0;
+    color: var(--text-muted, #53657e);
+    font-size: 0.8125rem;
+    line-height: 1.5;
+}
+
+.feedback {
+    padding-block: 0.5rem;
+}
+
+.compact {
+    display: none;
+    padding: 0.625rem;
+    border: 1px solid var(--table-view-border);
+    background: var(--surface, #fff);
+}
+
+.compact label {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+}
+
+.compact select {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 44px;
+    border: 1px solid var(--table-view-border);
+    border-radius: 4px;
+    padding: 0.5rem;
+    background: var(--surface, #fff);
+    color: inherit;
+    font: inherit;
+}
+
+@container (max-width: 40rem) {
+    .tabs {
+        display: none;
+    }
+    .compact {
+        display: block;
+    }
+    .view {
+        padding: 0.5rem;
+    }
+}
