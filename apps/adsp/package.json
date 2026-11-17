@@ -4,11 +4,12 @@
     "private": true,
     "scripts": {
         "adsp": "next dev",
-        "build-adsp": "next build",
+        "build-adsp": "npm run unzip-data && next build",
         "start-adsp": "next start",
-        "build-app": "next build",
+        "build-app": "npm run unzip-data && next build",
         "start-app": "next start",
-        "start-dev-app": "next dev"
+        "start-dev-app": "next dev",
+        "unzip-data": "unzip -n ./lib/data.ts.zip -d ./lib"
     },
     "dependencies": {
         "@niagads/charts": "^0.2.1",
