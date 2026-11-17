@@ -2,6 +2,12 @@
 
 `TableView` presents a standalone table with its title, description and loading/error/empty states. `TabbedTableView` adds connected table navigation and retained table state. Both are exported from `@niagads/table`.
 
+`TabbedTableView` is one application of `TableView`, not a requirement for using it. A `TableView` can appear on its own in a page, dashboard section or another layout. Its configuration and data-source handling are the same whether it is standalone or inside tabs.
+
+![TabbedTableView wraps navigation and active-tab state around an independent table view containing its title, description, data retrieval, filters and table.](./images/tabbed-table-view-architecture.svg)
+
+The diagram shows the composition, not the request timing: background fetching also retrieves data for inactive tabs by default. The table and filter UI render on first selection.
+
 ## Data sources
 
 Use existing `data: rows` for data already available, or `dataSource` for one of three source types. Columns and options use the existing Table types.
@@ -10,6 +16,7 @@ Use existing `data: rows` for data already available, or `dataSource` for one of
 const publications = {
     id: "publications",
     title: "NIAGADS Publications",
+    description: "Publications authored by NIAGADS investigators and collaborators.",
     columns: publicationColumns,
     dataSource: { type: "file", path: "/data/publications.json" },
 };
@@ -21,6 +28,16 @@ const associations = {
     dataSource: { type: "endpoint", url: "/api/associations" },
 };
 ```
+
+Render the file-backed example directly, without a tab wrapper:
+
+```tsx
+import { TableView } from "@niagads/table";
+
+<TableView config={publications} />;
+```
+
+`description` belongs to the table-view configuration alongside `dataSource` and appears below the title; the source itself specifies how to retrieve the rows.
 
 File paths are browser-accessible JSON URLs, such as a file served from `public/data`. Arbitrary source-code filesystem paths cannot be loaded by the browser. File and endpoint sources use fetch, check HTTP status and parse JSON. By default the response must be a row array in the existing Table data format. For wrapped responses, supply `select` only when needed:
 
@@ -77,8 +94,8 @@ Memory grows with visited tables; interaction state lasts for the mounted wrappe
 
 Storybook examples are passive UI examples with no automated interactions:
 
-- **Fetch Tables in Background (Default):** both simulated two-second requests start immediately, with counts supplied in advance.
-- **Fetch Each Table on First Selection:** explicitly opts into `onSelect` with the same simulated delay.
-- **Responsive Navigation on Narrow Screens:** shows the dropdown in a narrow container.
-- **Switch Tables from an External Control:** demonstrates application-owned selection.
+- **Default:** both simulated two-second requests start immediately, with counts supplied in advance.
+- **Load on Select:** explicitly opts into `onSelect` with the same simulated delay.
+- **Mobile Responsive View:** shows the dropdown in a narrow container.
+- **External Tab Control:** demonstrates application-owned selection.
 - **Table from a JSON File**, **Table with No Records**, **Loading Indicator**, and **Request Failure and Manual Retry:** demonstrate standalone presentation states.
