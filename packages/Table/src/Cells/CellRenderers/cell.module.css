@@ -67,7 +67,7 @@
     cursor: pointer;
     text-decoration: underline;
     text-decoration-style: dashed;
-    text-decoration-color: --var(--secondary-blue); /* Tailwind blue-700 */
+    text-decoration-color: var(--secondary-blue); /* Tailwind blue-700 */
     /* text-underline-offset: 4px; */
     text-decoration-color: var(--blue-mid, #4a7fc1);
     text-underline-offset: 3px;
