@@ -11,11 +11,4 @@ export type { RowSelectionState } from "@tanstack/react-table";
 export default Table;
 
 export { TableView, TabbedTableView } from "./TableView";
-export type {
-    DataSourceConfig,
-    TableViewConfig,
-    TableViewProps,
-    TableTabConfig,
-    TabbedTableConfig,
-    TabbedTableViewProps,
-} from "./TableView";
+export type { DataSourceConfig, TableViewConfig, TableTabConfig, TabbedTableConfig } from "./TableView";
