@@ -1,7 +1,7 @@
 "use client";
 
-import Table from "@niagads/table";
-import { TableColumn } from "@niagads/table";
+import { TabbedTableView, type TabbedTableConfig } from "@niagads/table";
+import { TableColumn, type TableViewConfig } from "@niagads/table";
 import styles from "./publications-table.module.css";
 
 export interface LinkEntry {
@@ -67,22 +67,43 @@ const columns: TableColumn[] = [
     { id: "grants", header: "Grants", type: "text", disableColumnFilter: true },
 ];
 
-interface PublicationsTableProps {
-    id?: string;
-    data: Publication[];
+export const getPublicationsTableConfig = (id: string, title: string, url: string): TableViewConfig => ({
+    id,
+    title,
+    columns,
+    dataSource: { type: "endpoint", url },
+    options: {
+        enableColumnFilters: true,
+        enableExport: true,
+        enableTopicFilter: true,
+        defaultColumns: ["pmid", "year", "title", "journal", "authors"],
+        filterGroupOrder: ["Publication"],
+    },
+});
+
+export interface PublicationCollection {
+    id: string;
+    name: string;
 }
 
-export const PublicationsTable = ({ data, id = "niagads-publications" }: PublicationsTableProps) => (
-    <Table
-        id={id}
-        columns={columns}
-        data={data as any}
-        options={{
-            enableColumnFilters: true,
-            enableExport: true,
-            enableTopicFilter: true,
-            defaultColumns: ["pmid", "year", "title", "journal", "authors"],
-            filterGroupOrder: ["Publication"],
-        }}
-    />
-);
+interface PublicationsTabsProps {
+    collections: PublicationCollection[];
+}
+
+const collectionUrl = (collectionId: string) => `/api/publications/${encodeURIComponent(collectionId)}`;
+
+export const PublicationsTableView = ({ collections }: PublicationsTabsProps) => {
+    const config: TabbedTableConfig = {
+        tabs: collections.map((collection) => ({
+            id: collection.id,
+            label: collection.name,
+            table: getPublicationsTableConfig(
+                `niagads-publications-${collection.id}`,
+                collection.name,
+                collectionUrl(collection.id)
+            ),
+        })),
+    };
+
+    return <TabbedTableView config={config} label="Publication collections" />;
+};
