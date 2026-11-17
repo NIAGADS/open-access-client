@@ -6,6 +6,8 @@ import { Publication } from "@/components/Publications/PublicationsTable";
 const ZOTERO_PAGE_SIZE = 100;
 const PUBMED_BATCH_SIZE = 100;
 const PUBLICATIONS_CACHE_VERSION = "mesh-ids-v1";
+const EXTERNAL_REQUEST_ATTEMPTS = 3;
+const RETRY_DELAY_MS = 250;
 
 interface ZoteroItem {
     data?: { extra?: string };
@@ -31,6 +33,22 @@ const zoteroHeaders = () => {
     return { "Zotero-API-Key": apiKey, "Zotero-API-Version": "3" };
 };
 
+const fetchWithRetry = async (url: URL, init: RequestInit): Promise<Response> => {
+    for (let attempt = 0; attempt < EXTERNAL_REQUEST_ATTEMPTS; attempt += 1) {
+        try {
+            const response = await fetch(url, init);
+            const retryable = response.status === 429 || response.status >= 500;
+            if (!retryable || attempt === EXTERNAL_REQUEST_ATTEMPTS - 1) return response;
+        } catch (error) {
+            if (attempt === EXTERNAL_REQUEST_ATTEMPTS - 1) throw error;
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS * 2 ** attempt));
+    }
+
+    throw new Error("Unable to complete external request.");
+};
+
 const extractZoteroNote = (note: string | undefined, field: string) =>
     note
         ?.replaceAll("\\n", "\n")
@@ -48,7 +66,7 @@ const extractZoteroNote = (note: string | undefined, field: string) =>
 const checkZoteroCollectionRevision = async (collection: string): Promise<string> => {
     const url = zoteroItemsUrl(collection);
     url.searchParams.set("limit", "1");
-    const response = await fetch(url, { headers: zoteroHeaders(), cache: "no-store" });
+    const response = await fetchWithRetry(url, { headers: zoteroHeaders(), cache: "no-store" });
     if (!response.ok) throw new Error(`Zotero request failed with status ${response.status}.`);
     const total = response.headers.get("Total-Results");
     const version = response.headers.get("Last-Modified-Version");
@@ -66,7 +84,7 @@ const fetchZoteroPage = async (collection: string, start: number): Promise<Zoter
     url.searchParams.set("start", String(start));
     url.searchParams.set("limit", String(ZOTERO_PAGE_SIZE));
 
-    const response = await fetch(url, { headers: zoteroHeaders(), cache: "no-store" });
+    const response = await fetchWithRetry(url, { headers: zoteroHeaders(), cache: "no-store" });
     if (!response.ok) throw new Error(`Zotero request failed with status ${response.status}.`);
 
     const page: ZoteroItem[] = await response.json();
@@ -90,7 +108,7 @@ const fetchPubMedPublications = async (grantsByPmid: Map<string, string | null>)
         url.searchParams.set("db", "pubmed");
         url.searchParams.set("id", pmids.slice(start, start + PUBMED_BATCH_SIZE).join(","));
         url.searchParams.set("retmode", "xml");
-        const response = await fetch(url, { cache: "no-store" });
+        const response = await fetchWithRetry(url, { cache: "no-store" });
         if (!response.ok) throw new Error(`PubMed E-utilities request failed with status ${response.status}.`);
 
         publications.push(...parsePubMedPublications(await response.text(), grantsByPmid));
