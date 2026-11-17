@@ -72,7 +72,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const ConnectedFolders: Story = {
-    name: "Fetch Tables in Background (Default)",
+    name: "Default",
     args: { config: backgroundConfig },
     parameters: {
         docs: {
@@ -84,7 +84,7 @@ export const ConnectedFolders: Story = {
 };
 
 export const ConstrainedWidth: Story = {
-    name: "Responsive Navigation on Narrow Screens",
+    name: "Mobile Responsive View",
     render: (args) => (
         <div style={{ maxWidth: 420 }}>
             <TabbedTableView {...args} />
@@ -109,12 +109,12 @@ function ControlledExample() {
 }
 
 export const Controlled: Story = {
-    name: "Switch Tables from an External Control",
+    name: "External Tab Control",
     render: () => <ControlledExample />,
 };
 
 export const LazySources: Story = {
-    name: "Fetch Each Table on First Selection",
+    name: "Load on Select",
     args: { config: onSelectConfig },
     parameters: {
         docs: {
