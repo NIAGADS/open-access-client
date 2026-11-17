@@ -6,7 +6,7 @@ import { StylingProps } from "../types";
 import { _get } from "@niagads/common";
 import styles from "./alert.module.css";
 
-interface Alert extends StylingProps {
+interface AlertProps extends StylingProps {
     variant?: AlertVariants;
     message: string;
     children?: ReactNode;
@@ -23,7 +23,14 @@ const ICONS = {
 
 type AlertVariants = keyof typeof ICONS;
 
-export const Alert = ({ variant = "info", message, children, fitToContent = false, className, style = {} }: Alert) => {
+export const Alert = ({
+    variant = "info",
+    message,
+    children,
+    fitToContent = false,
+    className,
+    style = {},
+}: AlertProps) => {
     const classes = [
         styles.alert,
         styles[variant === "construction" ? "warning" : variant],
@@ -35,7 +42,7 @@ export const Alert = ({ variant = "info", message, children, fitToContent = fals
     const Icon = ICONS[variant] || Info;
 
     return (
-        <div className={`${classes} ${className}`} role="alert" style={style}>
+        <div className={`${classes} ${className}`} role="status" style={style}>
             <span className={styles["alert-sr"]}>{variant}</span>
             <InlineIcon icon={<Icon size={18} />}>
                 <span className={styles["alert-message"]}>{message}</span>
