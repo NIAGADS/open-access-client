@@ -24,21 +24,26 @@ import {
     ColumnFilterControls,
     booleanSort,
     globalFuzzyFilter,
+    includesAllFilter,
     includesAnyFilter,
+    includesAnyOrAllFilter,
     neglog10Filter,
     scientificNotationSort,
-} from "./ControlElements/Columns/ColumnFilters";
-import { DEFAULT_NA_VALUE, TableColumn, TableData, TableOptions, TableRow } from "./types";
+} from "./ControlElements/Columns";
+import { ColumnFilterType, TableColumn, TableData, TableOptions, TableRow } from "./types";
 import { PaginationControls, TableToolbar } from "./ControlElements";
-import React, { ReactNode, useCallback, useLayoutEffect, useMemo, useState } from "react";
-import { _get, toTitleCase } from "@niagads/common";
+import React, { ReactNode, useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { getCellValue, renderCell, resolveCell, validateCellType } from "./Cells/utils";
 import { isValidUniqueKey, limitRowSelection, resolveRowSelectionState } from "./utils/rowSelection";
-import { resolveFilterFn, resolveSortingFn } from "./utils/columnDefs";
+import { resolveFilterFn, resolveFilterType, resolveIsTopic, resolveSortingFn } from "./utils/columnDefs";
 
+import { AGGEGRATE_TOPICS_COLUMN_ID } from "./ControlElements/Columns/ColumnFilters/filters/types";
+import { DEFAULT_NA_VALUE } from "./config";
 import { RowSelectionControls } from "./ControlElements/RowSelectionControls";
 import TableHeader from "./TableHeader";
+import { extractTopics } from "./utils/topics";
 import styles from "./styles/table.module.css";
+import { toTitleCase } from "@niagads/common";
 
 export interface TableProps {
     id: string;
@@ -46,11 +51,10 @@ export interface TableProps {
     columns: TableColumn[];
     data: TableData;
     rowSelection?: RowSelectionState | string[];
-    onRowSelectionChange?: (state: RowSelectionState) => void;
 }
 
 // TODO: use table options to initialize the state (e.g., initial sort, initial filter)
-const Table = ({ id, columns, data, options, rowSelection, onRowSelectionChange }: TableProps) => {
+const Table = ({ id, columns, data, options, rowSelection }: TableProps) => {
     const [sorting, setSorting] = useState<SortingState>([]);
     const [globalFilter, setGlobalFilter] = useState("");
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -62,6 +66,9 @@ const Table = ({ id, columns, data, options, rowSelection, onRowSelectionChange 
 
     const enableRowSelect = !!options?.enableRowSelect;
     const maxSelectedRows = options?.rowSelectOpts?.maxSelectedRows;
+    const enableTopicFilter = options?.enableTopicFilter;
+    const density = options?.density ?? "comfortable";
+
     if (maxSelectedRows !== undefined && (!Number.isInteger(maxSelectedRows) || maxSelectedRows < 1)) {
         throw new Error("maxSelectedRows must be a positive integer");
     }
@@ -72,9 +79,9 @@ const Table = ({ id, columns, data, options, rowSelection, onRowSelectionChange 
         (updater: Updater<RowSelectionState>) => {
             const next = typeof updater === "function" ? updater(resolveRowSelectionState(rowSelection)) : updater;
             const limited = limitRowSelection(selectedState, next, maxSelectedRows);
-            if (limited !== selectedState) onRowSelectionChange?.(limited);
+            if (limited !== selectedState) options?.rowSelectOpts?.onRowSelectionChange?.(limited);
         },
-        [rowSelection, onRowSelectionChange, maxSelectedRows, selectedState]
+        [rowSelection, options?.rowSelectOpts, maxSelectedRows, selectedState]
     );
 
     // Translate GenericColumns provided by user into React Table ColumnDefs
@@ -82,6 +89,7 @@ const Table = ({ id, columns, data, options, rowSelection, onRowSelectionChange 
     const resolvedColumns = useMemo<ColumnDef<TableRow>[]>(() => {
         const columnHelper = createColumnHelper<TableRow>();
         const columnDefs: ColumnDef<TableRow>[] = [];
+
         if (enableRowSelect) {
             const multiSelect: boolean = !!options?.rowSelectOpts?.enableMultiSelect;
             columnDefs.push({
@@ -113,16 +121,30 @@ const Table = ({ id, columns, data, options, rowSelection, onRowSelectionChange 
             });
         }
 
+        // track columns that contribute to topics
+        const topicSources: Record<string, ColumnFilterType | "free-text"> = {};
         columns.forEach((col: TableColumn) => {
             try {
                 col.type = validateCellType(col.type as string);
             } catch (e: any) {
                 throw Error("Error processing column definition for `" + col.id + "`.\n" + e.message);
             }
+
+            const filterType: ColumnFilterType | "free-text" = col.filterOpts?.filterType || resolveFilterType(col);
+            if (enableTopicFilter) {
+                /* isTopic when explicitly flagged as `isTopic` or when filterType is categorical and filtering 
+                not disabled for the column */
+                const isTopic =
+                    col.filterOpts?.isTopic ?? (filterType && resolveIsTopic(filterType) && !col.disableColumnFilter);
+                if (isTopic) {
+                    topicSources[col.id] = filterType;
+                }
+            }
+
             columnDefs.push(
                 columnHelper.accessor((row) => getCellValue(row[col.id as keyof typeof row] as Cell), {
                     id: col.id,
-                    header: _get("header", col, toTitleCase(col.id)),
+                    header: col.header || toTitleCase(col.id),
                     enableColumnFilter: !col.disableColumnFilter,
                     enableGlobalFilter: !col.disableGlobalFilter,
                     enableSorting: !col.disableSorting,
@@ -131,7 +153,7 @@ const Table = ({ id, columns, data, options, rowSelection, onRowSelectionChange 
                     enableHiding: !col.required, // if required is true, enableHiding is false
                     meta: {
                         type: col.type,
-                        filterType: col.filterOpts?.filterType || undefined,
+                        filterType: filterType === "free-text" ? undefined : filterType,
                         filterGroup: col.filterOpts?.filterGroup || "",
                         filterValueColumn: col.filterOpts?.valueColumn,
                         description: col.description,
@@ -142,6 +164,30 @@ const Table = ({ id, columns, data, options, rowSelection, onRowSelectionChange 
                 })
             );
         });
+
+        // assemble aggregate internal topic filter column
+        if (enableTopicFilter) {
+            columnDefs.push({
+                id: AGGEGRATE_TOPICS_COLUMN_ID,
+                accessorFn: (row) =>
+                    [
+                        ...new Set(
+                            Object.entries(topicSources).flatMap(([id, filterType]) =>
+                                extractTopics(getCellValue(row[id] as Cell), filterType)
+                            )
+                        ),
+                    ].join(" // "),
+                filterFn: includesAnyOrAllFilter,
+                enableColumnFilter: true,
+                enableHiding: false,
+                header: "Topics",
+                meta: {
+                    type: "text_list",
+                    filterType: "multiselect",
+                    internal: true,
+                },
+            });
+        }
         return columnDefs;
     }, [
         columns,
@@ -150,6 +196,13 @@ const Table = ({ id, columns, data, options, rowSelection, onRowSelectionChange 
         options?.rowSelectOpts?.header,
         options?.rowSelectOpts?.description,
     ]);
+
+    useEffect(() => {
+        const internalColumns = Object.fromEntries(
+            resolvedColumns.filter((col) => col.meta?.internal).map((col) => [col.id, false])
+        );
+        setColumnVisibility((current) => ({ ...current, ...internalColumns }));
+    }, [resolvedColumns]);
 
     const resolvedData = useMemo<TableData>(() => {
         const tableData: TableData = [];
@@ -256,6 +309,22 @@ const Table = ({ id, columns, data, options, rowSelection, onRowSelectionChange 
                         return values;
                     };
 
+                    /* tanstack getFacetedUniqueValues uses the facetedRowModel which responds to
+                    changes in state for all columns except the current.  So when the multi-select filter
+                    state changes, even though the table updates, its faceted rows won't.  This is to
+                    by pass that by counting the FilteredRowModel directly */
+                    column.getFilteredUniqueValues = () => {
+                        const values = column.getFilteredValues();
+                        const uniqueValues = new Map<any, number>();
+
+                        values.forEach((value) => {
+                            const count = uniqueValues.get(value) ?? 0;
+                            uniqueValues.set(value, count + 1);
+                        });
+
+                        return uniqueValues;
+                    };
+
                     column.getUniqueValues = () => {
                         const values = column.getAllValues(false);
                         const uniqueValues = new Map<any, number>();
@@ -350,7 +419,9 @@ const Table = ({ id, columns, data, options, rowSelection, onRowSelectionChange 
             )}
             <div className={styles["table-container"]}>
                 {rowModel.rows.length > 0 ? (
-                    <table className={`${styles["table-layout"]} ${styles["table-border"]} ${styles["table-text"]}`}>
+                    <table
+                        className={`${styles["table-layout"]} ${styles["table-border"]} ${styles["table-text"]} ${styles[density]} ${table.getState().columnSizingInfo.isResizingColumn ? styles["is-resizing"] : ""}`}
+                    >
                         <TableHeader headerGroups={table.getHeaderGroups()} />
                         <tbody>
                             {rowModel.rows.map((row) => (
@@ -393,8 +464,9 @@ const _resolveCell = (userCell: TableCell | TableCell[], column: TableColumn, ro
 };
 
 /* set initial column visibility based on `defaultColumns` in opts*/
-const _setInitialColumnVisibility = (defaultColumns: string[] | undefined, columns: TableColumn[]) =>
-    defaultColumns ? Object.fromEntries(columns.map(({ id }) => [id, defaultColumns.includes(id)])) : {};
+const _setInitialColumnVisibility = (defaultColumns: string[] | undefined, columns: TableColumn[]) => {
+    return defaultColumns ? Object.fromEntries(columns.map(({ id }) => [id, defaultColumns.includes(id)])) : {};
+};
 
 const _getColumn = (columnId: string, columns: TableColumn[]) => {
     return columns.find((col) => col.id === columnId);

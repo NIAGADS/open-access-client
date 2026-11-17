@@ -23,6 +23,7 @@ export const TableColumnHeader = ({ header }: TableColumnHeaderProps) => {
     const description = _get("description", header.column.columnDef.meta);
 
     const canSort = header.column.getCanSort();
+    const columnSize = header.getContext().table.getState().columnSizing[header.column.id];
 
     const headerContent = flexRender(header.column.columnDef.header, header.getContext());
 
@@ -31,6 +32,7 @@ export const TableColumnHeader = ({ header }: TableColumnHeaderProps) => {
             key={header.id}
             scope="col"
             className={`${styles["column-header"]} ${styles["column-header-text"]} ${canSort ? styles["sortable"] : ""}`}
+            style={columnSize === undefined ? undefined : { width: columnSize }}
         >
             <div className={styles["column-header-controls-container"]}>
                 <div
@@ -59,6 +61,14 @@ export const TableColumnHeader = ({ header }: TableColumnHeaderProps) => {
                     ) : null}
                 </div>
             </div>
+            {header.column.getCanResize() && (
+                <div
+                    className={`${styles["column-resizer"]} ${header.column.getIsResizing() ? styles["is-resizing"] : ""}`}
+                    onMouseDown={header.getResizeHandler()}
+                    onTouchStart={header.getResizeHandler()}
+                    onClick={(event) => event.stopPropagation()}
+                />
+            )}
         </th>
     );
 };

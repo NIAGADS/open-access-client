@@ -83,20 +83,28 @@
 /* ── AT A GLANCE SECTION ── */
 .glance-section {
     border-bottom: 1px solid var(--border, #dce4ef);
-    overflow: hidden;
+    overflow: visible;
 }
 
 /* ── VISUAL FILTER PANELS ── */
 .visual-filter-grid {
     display: grid;
-    grid-template-columns: minmax(420px, 1.125fr) minmax(300px, 1fr) minmax(360px, 1fr);
+    grid-template-columns: minmax(420px, 1.125fr) minmax(300px, 0.875fr) minmax(360px, 1fr);
 }
 
 .visual-filter-panel {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    justify-items: center;
     min-width: 0;
-    min-height: 260px;
-    padding: 18px 24px 24px;
+    min-height: 0;
+    padding: 12px 16px 16px;
     border-right: 1px solid var(--border, #dce4ef);
+}
+
+.visual-filter-panel > div:first-child {
+    width: 100%;
 }
 
 .visual-filter-panel:last-child {
@@ -105,6 +113,12 @@
 
 .visual-filter-panel :global(svg) {
     max-width: 100%;
+}
+
+/* ── TOPIC FILTER PANEL ── */
+.topic-filter-panel {
+    padding: 14px 20px 16px;
+    border-top: 1px solid var(--border, #dce4ef);
 }
 
 /* ── ADDITIONAL FILTERS SECTION ── */
@@ -145,8 +159,8 @@
 .additional-filter-panel-body {
     display: flex;
     flex-direction: column;
-    gap: 14px;
-    padding: 14px 16px 16px;
+    gap: 8px;
+    padding: 10px 14px 12px;
 }
 
 /* ── RESPONSIVE ── */

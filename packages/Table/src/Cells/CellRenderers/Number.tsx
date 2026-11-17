@@ -1,8 +1,9 @@
-import { Text, TextRenderer, renderNullValue } from ".";
+import { Text, renderNullValue } from "./BasicText";
 import { _get, _isNA, _isNull, toExponential, toFixedWithoutZeros } from "@niagads/common";
 
-import { DEFAULT_NA_VALUE } from "../../types";
+import { DEFAULT_NA_VALUE } from "../../config";
 import React from "react";
+import { TextRenderer } from "./types";
 
 export const formatFloat = (value: number, precision: number = 2) => {
     const formattedValue: any = toExponential(value, precision);
@@ -25,7 +26,7 @@ export const Float = <T,>({ props }: TextRenderer<T>) => {
 
     // mono font is default for all numeric cells;
     // column-level getStyle spreads after and can override
-    const style = { fontFamily: "var(--font-mono)", ...(_get("style", props) || {}) };
+    const style = { fontVariantNumeric: "tabular-nums", ...(_get("style", props) || {}) };
 
     const cellType = _get("type", props);
     if (cellType === "integer" || (cellType === "pvalue" && typeof value === "string")) {

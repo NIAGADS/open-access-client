@@ -38,22 +38,25 @@
 } */
 
 .export-control-container {
-    width: 200px;
-    padding: 8px 10px;
+    width: 240px;
+    padding: 12px;
+    box-sizing: border-box;
 }
 
 .export-control-form {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    font-size: 0.8rem;
+    gap: 14px;
+    font-size: 0.875rem;
     color: var(--text, #1e2a3a);
 }
 
 .export-control-button {
-    margin: 4px auto 0;
-    width: 75px;
-    padding: 5px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin: 4px 0 0;
 }
 
 .table-toolbar-container {

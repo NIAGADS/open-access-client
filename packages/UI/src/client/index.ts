@@ -12,3 +12,4 @@ export * from "./MobileMenu";
 export * from "./Header";
 export * from "./BackToTop";
 export * from "./NewsBrowser";
+export * from "./PillSelect";

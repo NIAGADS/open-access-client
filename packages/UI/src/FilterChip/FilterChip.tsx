@@ -1,11 +1,12 @@
 import React, { ReactNode } from "react";
 
 import { StylingProps } from "../types";
+import { X } from "lucide-react";
 import styles from "./filterchip.module.css";
 
 export interface FilterChipProps extends StylingProps {
     label: string;
-    value?: string;
+    value?: string | string[];
     onRemove?: () => void;
     selected?: boolean;
     disabled?: boolean;
@@ -20,6 +21,18 @@ export const FilterChip = ({
     style = {},
     disabled = false,
 }: FilterChipProps) => {
+    const maxValueLength = 16;
+
+    const displayValue = Array.isArray(value)
+        ? `${value[0].slice(0, maxValueLength).trim()}${value[0].length > maxValueLength ? "..." : ""}${
+              value.length > 1 ? ` + ${value.length - 1}` : ""
+          }`
+        : value
+          ? `${value!.slice(0, maxValueLength).trim()}`
+          : value;
+
+    console.log(displayValue);
+
     return (
         <span
             className={[styles["chip"], selected && styles["selected"], disabled && styles["disabled"], className]
@@ -35,12 +48,12 @@ export const FilterChip = ({
                     tabIndex={0}
                     type="button"
                 >
-                    x
+                    <X />
                 </button>
             )}
 
             <span className={styles["label"]}>{label}</span>
-            {value && <span className={styles["value"]}>{value}</span>}
+            {value && <span className={styles["value"]}>{displayValue}</span>}
         </span>
     );
 };

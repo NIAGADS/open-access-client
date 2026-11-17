@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 import Table from "@niagads/table";
 import { TABLE_DEFINTION as table } from "../../examples/tables/table_filer";
@@ -26,6 +26,9 @@ const ControlledSelection: Story = {
             setSelectedRows(Object.keys(state));
         };
 
+        const opts = table.options;
+        opts!.rowSelectOpts!.onRowSelectionChange = handleTrackSelectionChange;
+
         useEffect(() => {
             if ((selectedRows || []).length > 0) alert(JSON.stringify(selectedRows));
         }, [selectedRows]);
@@ -37,7 +40,6 @@ const ControlledSelection: Story = {
                 options={table.options}
                 data={table.data}
                 rowSelection={selectedRows}
-                onRowSelectionChange={handleTrackSelectionChange}
             />
         );
     },
