@@ -1,24 +1,25 @@
 "use client";
 
-import React, { useCallback, useEffect, useId, useRef, useState } from "react";
-import type { TabbedTableConfig, TableTabConfig } from "./types";
-import { tableDataKey, useTableData } from "./useTableData";
+import React, { useCallback, useEffect, useState } from "react";
+
+import { Tab, TabBody, TabHeader, Tabs } from "@niagads/ui/client";
 
 import { TableViewContent } from "./TableView";
+import { tableDataKey, useTableData } from "./useTableData";
+import type { TabbedTableConfig, TableTabConfig } from "./types";
 import styles from "./table-view.module.css";
 
 interface TabbedTableViewProps {
     config: TabbedTableConfig;
     selectedTab?: string;
     onTabChange?: (tabId: string) => void;
-    /** Accessible name shared by the tab list and compact selector. */
+    /** Optional visible caption and accessible navigation name. */
     label?: string;
 }
 
+/** Lazy-mount views once, retaining each table's data and interaction state. */
 export const TabbedTableView = ({ config, selectedTab, onTabChange, label }: TabbedTableViewProps) => {
     const { tabs, defaultTab, fetchPolicy = "background" } = config;
-    const instanceId = useId();
-    const tabList = useRef<HTMLDivElement>(null);
     // External selection takes precedence; otherwise use local state initialized once
     // from defaultTab. If the selected local tab is removed, display the first remaining tab.
     const [internalTab, setInternalTab] = useState(defaultTab ?? tabs[0]?.id);
@@ -79,88 +80,33 @@ export const TabbedTableView = ({ config, selectedTab, onTabChange, label }: Tab
         onTabChange?.(id);
     };
 
-    const handleKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>, index: number) => {
-        let next: number;
-        switch (event.key) {
-            case "ArrowRight":
-                next = (index + 1) % tabs.length;
-                break;
-            case "ArrowLeft":
-                next = (index - 1 + tabs.length) % tabs.length;
-                break;
-            case "Home":
-                next = 0;
-                break;
-            case "End":
-                next = tabs.length - 1;
-                break;
-            default:
-                return;
-        }
-        // Keyboard navigation uses automatic activation, matching click selection.
-        event.preventDefault();
-        tabList.current?.querySelectorAll<HTMLButtonElement>('[role="tab"]')[next]?.focus();
-        selectTab(tabs[next].id);
-    };
-
     return (
-        <div className={styles.container}>
-            <div className={styles.tabs} ref={tabList} role="tablist" aria-label={label}>
-                {tabs.map((tab, index) => (
-                    <button
-                        key={tab.id}
-                        id={`${instanceId}-tab-${index}`}
-                        type="button"
-                        className={styles.tab}
-                        role="tab"
-                        aria-selected={tab.id === activeId}
-                        aria-controls={`${instanceId}-panel-${index}`}
-                        tabIndex={tab.id === activeId ? 0 : -1}
-                        onClick={() => selectTab(tab.id)}
-                        onKeyDown={(event) => handleKeyDown(event, index)}
-                    >
-                        {tab.label}
-                        {getCount(tab) !== undefined && (
-                            <span className={styles.count}> ({getCount(tab)?.toLocaleString("en-US")})</span>
-                        )}
-                    </button>
-                ))}
-            </div>
-            <div className={styles.compact}>
-                {label && <label htmlFor={`${instanceId}-select`}>{label}</label>}
-                <select
-                    id={`${instanceId}-select`}
-                    value={activeId}
-                    onChange={(event) => selectTab(event.target.value)}
-                >
-                    {tabs.map((tab) => (
-                        <option key={tab.id} value={tab.id}>
+        <Tabs variant="integrated" label={label} selectedTab={activeId} onTabChange={selectTab}>
+            {tabs.map((tab) => {
+                const count = getCount(tab);
+                const tabLabel = `${tab.label}${count !== undefined ? ` (${count.toLocaleString("en-US")})` : ""}`;
+                return (
+                    <Tab key={tab.id} id={tab.id} label={tabLabel}>
+                        <TabHeader>
                             {tab.label}
-                            {getCount(tab) !== undefined ? ` (${getCount(tab)?.toLocaleString("en-US")})` : ""}
-                        </option>
-                    ))}
-                </select>
-            </div>
-            <div className={styles.panels}>
-                {tabs.map((tab, index) => (
-                    <div
-                        key={tab.id}
-                        id={`${instanceId}-panel-${index}`}
-                        role="tabpanel"
-                        aria-labelledby={`${instanceId}-tab-${index}`}
-                        tabIndex={0}
-                        hidden={tab.id !== activeId}
-                    >
-                        <TablePanel
-                            tab={tab}
-                            renderView={visited.has(tab.id) || tab.id === activeId}
-                            fetchEnabled={fetchPolicy === "background" || visited.has(tab.id) || tab.id === activeId}
-                            onCount={updateCount}
-                        />
-                    </div>
-                ))}
-            </div>
-        </div>
+                            {count !== undefined && (
+                                <span className={styles.count}> ({count.toLocaleString("en-US")})</span>
+                            )}
+                        </TabHeader>
+                        <TabBody>
+                            <TablePanel
+                                tab={tab}
+                                renderView={visited.has(tab.id) || tab.id === activeId}
+                                fetchEnabled={
+                                    fetchPolicy === "background" || visited.has(tab.id) || tab.id === activeId
+                                }
+                                onCount={updateCount}
+                            />
+                        </TabBody>
+                    </Tab>
+                );
+            })}
+        </Tabs>
     );
 };
 

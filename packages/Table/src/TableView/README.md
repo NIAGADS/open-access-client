@@ -1,6 +1,6 @@
 # Table views
 
-`TableView` presents a standalone table with its title, description and loading/error/empty states. `TabbedTableView` adds connected table navigation and retained table state. Both are exported from `@niagads/table`.
+`TableView` presents a standalone table with its title, description and loading/error/empty states. `TabbedTableView` composes the shared `Tabs`, `Tab`, `TabHeader` and `TabBody` from `@niagads/ui/client` with `variant="integrated"`, adding table data management and retained table state. Both are exported from `@niagads/table`.
 
 `TabbedTableView` is one application of `TableView`, not a requirement for using it. A `TableView` can appear on its own in a page, dashboard section or another layout. Its configuration and data-source handling are the same whether it is standalone or inside tabs.
 
@@ -90,7 +90,7 @@ Memory grows with visited tables; interaction state lasts for the mounted wrappe
 
 ## Navigation and Storybook
 
-`selectedTab` and `onTabChange` support external or URL-backed selection; the caller owns browser history. `defaultTab` is the initial uncontrolled selection. Blank/duplicate tab IDs, empty lists and unknown configured selections throw actionable errors. Arrow/Home/End keys use automatic tab activation. At container widths of 40rem or less, a labeled native dropdown replaces the tab strip without replacing the views. `label` names both controls (default: “Tables”).
+`selectedTab` and `onTabChange` support external or URL-backed selection; the caller owns browser history. `defaultTab` is the initial uncontrolled selection. Blank/duplicate tab IDs, empty lists and unknown configured selections throw actionable errors. Keyboard navigation, focus management, unique tab/panel IDs and the responsive dropdown are shared UI Tabs behavior for every variant. Arrow/Home/End keys use automatic activation. At container widths of 40rem or less, a labeled native dropdown replaces the tab strip without replacing the views. An optional `label` supplies a visible dropdown caption and names both controls; without it, shared Tabs supplies the accessible name “Tabs” without a visible caption.
 
 Storybook examples are passive UI examples with no automated interactions:
 
