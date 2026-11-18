@@ -31,7 +31,7 @@ const partners = [
     {
         name: "National Alzheimer's Coordinating Center",
         logo: "/partners/NACC.png",
-        href: "https://www.naccdata.org/"
+        href: "https://www.naccdata.org/",
     },
     {
         name: "National Centralized Repository for Alzheimer's Disease",
