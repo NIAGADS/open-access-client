@@ -143,6 +143,7 @@
     text-decoration: underline;
     background: transparent;
     transform: none;
+    text-decoration: none;
 }
 
 .resource-detail-action:focus-visible {
