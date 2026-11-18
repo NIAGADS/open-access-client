@@ -67,6 +67,7 @@ export interface Resource {
     url?: string;
     logo?: ResourceLogo;
     color: string;
+    connectionColor: string;
     groupId: string;
     concepts: ConceptType[];
 }
@@ -562,14 +563,14 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
                                         <path
                                             className={pathClass(resource.id, conceptId)}
                                             d={connectorPath}
-                                            style={{ stroke: resource.color }}
+                                            style={{ stroke: resource.connectionColor }}
                                         />
                                         <circle
                                             className={`${styles["link-target"]} ${isActiveLink ? styles.active : ""}`}
                                             cx={targetX}
                                             cy={targetY}
                                             r="3.5"
-                                            style={{ fill: resource.color }}
+                                            style={{ fill: resource.connectionColor }}
                                         />
                                     </g>
                                 );
