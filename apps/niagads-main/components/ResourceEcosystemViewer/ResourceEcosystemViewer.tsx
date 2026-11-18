@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { Card, CardBody, NIAGADSLogo } from "@niagads/ui";
+import { VisualizationInfo, type VisualizationInfoContent } from "@niagads/charts";
 import { Layers, ChartScatter, CodeXml, Globe } from "lucide-react";
 import styles from "./resource-ecosystem.module.css";
 
@@ -79,6 +80,7 @@ export interface ResourceEcosystemOverview {
 }
 
 interface ResourceEcosystemViewerProps {
+    title: string;
     resources: Resource[];
     resourceGroups: ResourceGroup[];
 }
@@ -90,6 +92,32 @@ interface ResourceGroupLabel {
 }
 
 type ActiveTarget = { type: "resource"; id: string } | { type: "concept"; id: ConceptType } | null;
+
+const VISUALIZATION_INFO: VisualizationInfoContent = {
+    description:
+        "Explore how NIAGADS and partner resources connect to genomic features, data context, and access options. The genomic drawings are schematic, not measured data.",
+    encodings: [
+        {
+            label: "Connections",
+            description: "Colored lines link a NIAGADS resource to its supported data types and access options.",
+        },
+        {
+            label: "Active features",
+            description: "Amber marks identify highlighted features; unrelated features fade.",
+        },
+        {
+            label: "Features",
+            description:
+                "The genomic landscape illustrates types genomic features and annotations available through NIAGADS Open Access resources.",
+        },
+    ],
+    interactions: [
+        "Hover over, focus, click, or tap a resource to highlight its connections and display its description.",
+        "Click or tap a feature, context, or access layer to highlight connected resources.",
+        "Press Escape or click outside the resource, feature, or description to clear the selection.",
+        "Click `Explore resource` in the description box to open the selected resource in a new tab.",
+    ],
+};
 
 const CONCEPTS: Concept[] = [
     { id: "genes", label: "Genes" },
@@ -197,7 +225,7 @@ const conceptById = Object.fromEntries(CONCEPTS.map((concept) => [concept.id, co
     (typeof CONCEPTS)[number]
 >;
 
-export function ResourceEcosystemViewer({ resources, resourceGroups }: ResourceEcosystemViewerProps) {
+export function ResourceEcosystemViewer({ title, resources, resourceGroups }: ResourceEcosystemViewerProps) {
     // Hovering or focusing a resource selects it persistently; taps/clicks also select it.
     // Concept highlights remain temporary.
     const [hovered, setHovered] = useState<ActiveTarget>(null);
@@ -321,6 +349,7 @@ export function ResourceEcosystemViewer({ resources, resourceGroups }: ResourceE
                 shell.contains(target) &&
                 (target.closest("[data-resource-id]") ||
                     target.closest("[data-concept-id]") ||
+                    target.closest(`.${styles["visualization-tools"]}`) ||
                     target.closest(`.${styles["resource-detail"]}`));
 
             if (!isInteractiveTarget) {
@@ -414,6 +443,10 @@ export function ResourceEcosystemViewer({ resources, resourceGroups }: ResourceE
     return (
         <main className={styles.shell} ref={shellRef}>
             <section className={styles.ecosystem} aria-label="NIAGADS homepage resource visualization prototype">
+                <div className={styles["visualization-tools"]}>
+                    <h2>{title}</h2>
+                    <VisualizationInfo content={VISUALIZATION_INFO} />
+                </div>
                 <div className={styles["resource-group-labels"]} aria-hidden="true" style={resourceGridStyle}>
                     {resourceGroupLabels.map((groupLabel) => (
                         <span

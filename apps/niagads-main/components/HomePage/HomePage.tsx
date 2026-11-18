@@ -51,7 +51,11 @@ export const HomePage = () => {
             </HeroSection>
 
             <div id="ecosystem" className={styles["home-page-section"]}>
-                <ResourceEcosystemViewer resources={RESOURCES} resourceGroups={RESOURCE_GROUPS} />
+                <ResourceEcosystemViewer
+                    title="NIAGADS Open Access Ecosystem"
+                    resources={RESOURCES}
+                    resourceGroups={RESOURCE_GROUPS}
+                />
             </div>
             <HomePageMission />
         </div>
