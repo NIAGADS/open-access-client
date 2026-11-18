@@ -1,6 +1,6 @@
 import * as d3 from "d3";
 
-import { AxisConfig, DisplayProps } from "../d3/types";
+import { AxisConfig, AxisScaleType, DisplayProps } from "../d3/types";
 import { SelectionMode, ThresholdHandle, createSelectionOverlay } from "../d3/selectionOverlay";
 
 import { Range } from "@niagads/common";
@@ -27,7 +27,7 @@ export interface HistogramOptions {
     binDomain?: Range; // minimum bin start, maximum bin end
     xAxis?: AxisConfig;
     displayOpts?: DisplayProps;
-    yAxisScale?: "linear" | "log10";
+    yAxisScale?: AxisScaleType;
     selection?: {
         mode: SelectionMode;
         selectedRange?: Range; // [min, max] for highlighting bins
@@ -467,6 +467,9 @@ export function histogram(container: HTMLElement, data: number[], opts: Histogra
     g.append("g")
         .attr("class", "histogram-axis")
         .attr("transform", `translate(0,${plotHeight})`)
+        // TODO: add tickFormatFn to AxisConfig
+        // disable default thousandths separator
+        .call(d3.axisBottom(x).tickFormat((value) => d3.format("~g")(Number(value))))
         .call(d3.axisBottom(x))
         .call((axis) => {
             axis.select(".domain").attr("stroke", HISTOGRAM_COLORS.axis).attr("stroke-width", 1);

@@ -1,8 +1,6 @@
+import React from "react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { TabHeader, TabBody, Tabs, Tab } from "@niagads/ui/client";
-
-//@ts-nocheck
-// b/c of https://github.com/storybookjs/storybook/issues/23170 issue w/subcomponets w/children
 
 const meta: Meta<typeof Tabs> = {
     title: "UI/Client/Tabs",
@@ -10,21 +8,22 @@ const meta: Meta<typeof Tabs> = {
     parameters: {},
     tags: ["autodocs"],
     argTypes: {
-        width: { control: "text", description: "Tailwind width class for the tab container" },
+        variant: { control: "radio", options: ["default", "integrated"] },
+        label: { control: "text", description: "Accessible name for tab navigation and the responsive dropdown" },
         children: { control: false, description: "Tab components" },
     },
     args: {
-        width: "full",
+        variant: "default",
         children: [
-            <Tab id="tab1">
+            <Tab key="tab1" id="tab1">
                 <TabHeader>Tab 1</TabHeader>
                 <TabBody>This is tab 1</TabBody>
             </Tab>,
-            <Tab id="tab2">
+            <Tab key="tab2" id="tab2">
                 <TabHeader>Tab 2</TabHeader>
                 <TabBody>This is tab 2</TabBody>
             </Tab>,
-            <Tab id="tab3">
+            <Tab key="tab3" id="tab3">
                 <TabHeader>Tab 3</TabHeader>
                 <TabBody>This is tab 3</TabBody>
             </Tab>,
@@ -35,8 +34,15 @@ const meta: Meta<typeof Tabs> = {
 export default meta;
 type Story = StoryObj<typeof Tabs>;
 
-export const Playground: Story = {
-    args: {
-        // Controls for width and sectionId are available in the Storybook UI
-    },
+export const Playground: Story = { name: "Default" };
+
+export const Integrated: Story = { args: { variant: "integrated" } };
+
+export const MobileResponsiveView: Story = {
+    name: "Mobile Responsive View",
+    render: (args) => (
+        <div style={{ maxWidth: 420 }}>
+            <Tabs {...args} />
+        </div>
+    ),
 };

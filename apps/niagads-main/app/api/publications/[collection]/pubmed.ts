@@ -1,6 +1,8 @@
 import { parse, filter, type TNode } from "txml";
-import type { PublicationRow, PublicationsTableData } from "@/components/Publications/PublicationsTable";
+import type { Publication, LinkEntry } from "@/components/Publications/PublicationsTable";
 import { URLS } from "@/data/url_ref";
+
+const IGNORE_TOPICS = ["Aged", "Middle Aged", "Humans", "Female", "Male", "United States"];
 
 const elements = (node: TNode | null | undefined, tag: string): TNode[] | null => {
     if (!node) return null;
@@ -18,12 +20,23 @@ const text = (node: TNode | string | null | undefined): string | null => {
 
 const content = (node: TNode | null | undefined) => text(node)?.replace(/\s+/g, " ").trim() || null;
 
-const parsePubMedArticle = (xml: TNode, grantsByPmid: Map<string, string | null>): PublicationRow | null => {
+const parsePubMedArticle = (xml: TNode, grantsByPmid: Map<string, string | null>): Publication | null => {
     const citation = first(xml, "MedlineCitation");
     const pmid = content(first(citation, "PMID"));
     const article = first(citation, "Article");
     if (!pmid || !article) return null;
 
+    const publicationType = first(article, "PublicationType");
+    const ids = elements(first(xml, "PubmedData"), "ArticleId");
+    const journal = first(article, "ISOAbbreviation");
+    const title = content(first(article, "ArticleTitle"));
+
+    // year
+    const journalIssue = first(first(article, "Journal"), "JournalIssue");
+    const pubDate = first(journalIssue, "PubDate");
+    const year = (content(first(pubDate, "Year")) || content(first(pubDate, "MedlineDate")))?.match(/\d{4}/)?.[0];
+
+    // authors
     const authors: string[] = [];
     for (const author of elements(article, "Author") ?? []) {
         let name = content(first(author, "CollectiveName"));
@@ -34,62 +47,47 @@ const parsePubMedArticle = (xml: TNode, grantsByPmid: Map<string, string | null>
         }
         if (name) authors.push(name);
     }
-    const abstract: string[] = [];
-    for (const section of elements(article, "AbstractText") ?? []) {
-        const value = content(section);
-        if (value) {
-            const label = section.attributes.Label || section.attributes.NlmCategory;
-            abstract.push(label ? `${label}: ${value}` : value);
-        }
-    }
-    const publicationTypes: string[] = [];
-    for (const publicationType of elements(article, "PublicationType") ?? []) {
-        const value = content(publicationType);
-        if (value) publicationTypes.push(value);
-    }
-    const ids = elements(first(xml, "PubmedData"), "ArticleId");
-    const journal = first(article, "Journal");
-    const pubDate = first(journal, "PubDate");
-    const year = (content(first(pubDate, "Year")) || content(first(pubDate, "MedlineDate")))?.match(/\d{4}/)?.[0];
-    const meshTerms: string[] = [];
+
+    // keywords
+    const keywords: LinkEntry[] = [];
     for (const heading of elements(citation, "MeshHeading") ?? []) {
-        const descriptor = content(first(heading, "DescriptorName"));
-        if (descriptor) meshTerms.push(descriptor);
+        const descriptor = first(heading, "DescriptorName");
+        const value = content(descriptor);
+        const majorTopic = descriptor?.attributes.MajorTopicYN;
+        const curie = descriptor?.attributes.UI!;
+        if (value && majorTopic && !IGNORE_TOPICS.includes(value))
+            keywords.push({ value: value, url: `${URLS.MESH}/${curie}`, displayText: `${value} [MeSH:${curie}]` });
     }
 
     const doi = content(ids?.find((id) => id.attributes.IdType?.toLowerCase() === "doi"));
     const pmcid = content(ids?.find((id) => id.attributes.IdType?.toLowerCase() === "pmc"));
-    const title = content(first(article, "ArticleTitle"));
-    const pubmedUrl = `${URLS.PUBMED}/${pmid}/`;
-    const links: { value: string; url: string }[] = [];
-    if (doi) links.push({ value: "DOI", url: `${URLS.DOI}/${doi}` });
-    links.push({ value: "PubMed", url: pubmedUrl });
-    if (pmcid) links.push({ value: "PMC", url: `${URLS.PMC}/${pmcid}/` });
 
     return {
-        pmid,
-        authors: authors.join("; ") || null,
-        title: title === null ? null : { value: title, url: pubmedUrl },
-        abstract: abstract.join(" ") || null,
-        doi,
-        journal: content(first(journal, "Title")),
-        publicationType: publicationTypes.join("; ") || null,
-        year: year ? Number(year) : null,
-        pmcid,
-        meshTerms,
-        links,
-        grants: grantsByPmid.get(pmid) ?? null,
+        pmid: { value: `PMID:${pmid}`, displayText: pmid, url: `${URLS.PUBMED}/${pmid}` },
+        authors: authors,
+        title: title!,
+        doi: (doi && { url: doi }) || null,
+        journal: content(journal)!,
+        publicationType: content(publicationType)!,
+        year: Number(year),
+        pmcid: (pmcid && { value: pmcid, url: `${URLS.PMC}/${pmcid}` }) || null,
+        keywords: keywords.length > 0 ? keywords : null,
+        grants:
+            grantsByPmid
+                .get(pmid)
+                ?.split(";")
+                .map((grant) => grant.trim()) ?? null,
     };
 };
 
-export function parsePubMedPublications(xml: string, grantsByPmid: Map<string, string | null>): PublicationsTableData {
+export function parsePubMedPublications(xml: string, grantsByPmid: Map<string, string | null>): Publication[] {
     const document = parse(xml, {
         decodeEntities: true,
         keepWhitespace: true,
         skipXmlDeclaration: true,
         selfClosingTags: [],
     });
-    const publications: PublicationsTableData = [];
+    const publications: Publication[] = [];
     for (const article of filter(document, (node) => node.tagName === "PubmedArticle")) {
         const row = parsePubMedArticle(article, grantsByPmid);
         if (row) publications.push(row);

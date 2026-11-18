@@ -3,7 +3,7 @@
     align-items: center;
     gap: 6px;
     max-width: 280px;
-    min-height: 26px;
+    min-height: 2rem;
     background-color: var(--surface);
     border-radius: 90px;
     padding: 3px 7px;
@@ -38,9 +38,9 @@
 .value {
     margin-left: 0;
     padding: 3px 7px;
-    max-width: 140px;
+    /* max-width: 140px; 
     overflow: hidden;
-    text-overflow: ellipsis;
+    text-overflow: ellipsis; */
     font-family: "Roboto Mono", monospace;
     font-size: 0.68rem;
     font-weight: 700;
@@ -71,6 +71,7 @@
 .remove-btn:hover {
     background: var(--secondary-blue);
     color: #fff;
+    padding: 2px;
 }
 
 .chip-bar {

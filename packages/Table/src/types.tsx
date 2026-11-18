@@ -1,10 +1,15 @@
 import { BasicType, NAString } from "@niagads/common";
 import { CellType, TableCell } from "./Cells/types";
-import { FilterFn, FilterFnOption, RowData, SortingFn, SortingFnOption } from "@tanstack/react-table";
+import {
+    FilterFn,
+    FilterFnOption,
+    RowData,
+    RowSelectionState,
+    SortingFn,
+    SortingFnOption,
+} from "@tanstack/react-table";
 
 import { RankingInfo } from "@tanstack/match-sorter-utils";
-
-export const DEFAULT_NA_VALUE = "n/a";
 
 // initial table state
 interface SortConfig {
@@ -23,7 +28,9 @@ export interface RowSelectOptions {
     header: string; // select column header
     description?: string; // select column description
     enableMultiSelect?: boolean; // optional: allow selection of multiple rows, false if missing
+    maxSelectedRows?: number; // optional positive limit; omitted means unlimited
     rowUniqueKey: string; // specify a field containing unique values to return as the row_id
+    onRowSelectionChange?: (state: RowSelectionState) => void;
 }
 
 export interface TableOptions {
@@ -32,9 +39,11 @@ export interface TableOptions {
     initialize?: InitialTableState; // optional: set initial sort and/or filter state for the table
     enableColumnFilters?: boolean; // optional: disables all filtering on table columns when FALSE; defaults to FALSE
     enableExport?: boolean; // optional: disables exporting when FALSE; defaults to FALSE
+    enableTopicFilter?: boolean; //optional; enables Topic Filter when TRUE: defaults to FALSE
     enableRowSelect?: boolean; // optional; enables row selection when TRUE; defaults to FALSE
     rowSelectOpts?: RowSelectOptions; // optional: enables row selection and related state change options
     defaultColumns?: string[]; // optional: any column ids not listed will be hidden by default
+    density?: "comfortable" | "compact"; // optional: controls table cell padding; defaults to comfortable
     onTableLoad?: any;
     filterGroupOrder?: string[]; // optional: order of the filter groups, ordered array
 }
@@ -42,13 +51,16 @@ export interface TableOptions {
 export type TableRow = Record<string, TableCell | TableCell[]>;
 export type TableData = TableRow[];
 
-export type ColumnFilterType = "histogram" | "pie" | "select" | "multiselect" | "boolean";
+export type ColumnFilterType = "histogram" | "pie" | "select" | "multiselect" | "boolean" | "range";
 
 export interface ColumnFilteringOpts {
     filterType?: ColumnFilterType; // defaults based on data type in column
     filterFn?: FilterFnOption<TableRow>; // defaults based on data type in  column
     // valueTransformFn?: (value: BasicType) => BasicType; // for transforming value for filter display
     filterGroup?: string;
+    valueColumn?: string; // precomputed filter values; pvalue columns expect -log10(p)
+    isTopic?: boolean; // field contains values that could be used in topic filter; defaults to true for multiselect and select
+    modelPath?: string; // path the LLM model for text-extraction based topic filter. If not provide, defaults to keyword extraction
 }
 
 export interface ColumnStylingOpts {
@@ -86,9 +98,11 @@ declare module "@tanstack/react-table" {
         type: CellType;
         filterType?: ColumnFilterType;
         filterGroup?: string;
+        filterValueColumn?: string;
         naValue?: string;
         trueValue?: BasicType;
         description?: string;
+        internal?: boolean; // hidden internal column
     }
 
     // This "merges" your custom functions into the existing Column interface
@@ -98,6 +112,7 @@ declare module "@tanstack/react-table" {
         getAllValues: (filterNulls?: boolean, naValue?: string) => TValue[]; // returns pre-filtered values
         getFilteredValues: (filterNulls?: boolean, naValue?: string) => TValue[]; // returns filtered values
         getUniqueValues: () => Map<any, number>; // returns pre-filtered unique value : count mapping
+        getFilteredUniqueValues: () => Map<any, number>; // returns filtered unique value : count mapping, including active filter on self
     }
 
     interface SortingFns {

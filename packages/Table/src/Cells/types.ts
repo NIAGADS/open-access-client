@@ -1,19 +1,8 @@
-import { BadgeIconType, LinkTarget } from "./CellRenderers";
-import {
-    BasicType,
-    Expand,
-    Modify,
-    NAString,
-    TypeMapper,
-    _deepCopy,
-    _get,
-    _hasOwnProperty,
-    _isJSON,
-    _isNA,
-    _isNull,
-} from "@niagads/common";
+import { BasicType, Expand, Modify, NAString, TypeMapper } from "@niagads/common";
 
+import { BadgeIconType } from "./CellRenderers/Badge";
 import { CSSProperties } from "react";
+import { LinkTarget } from "./CellRenderers/Link";
 
 export type TableCell = BasicType | Record<string, any> | null;
 
@@ -32,7 +21,7 @@ export type IntegerCell = Expand<Modify<AbstractCell, { type: "integer"; value: 
 
 export type FloatCell = Expand<Modify<AbstractCell, { type: "float"; value: number | null; precision?: number }>>;
 
-export type PValueCell = Expand<Modify<FloatCell, { type: "pvalue" }>>;
+export type PValueCell = Expand<Modify<FloatCell, { type: "pvalue"; value: number | string | null }>>;
 
 export type TextCell = Expand<Modify<AbstractCell, { type: "text"; truncateTo?: number; info?: string }>>;
 

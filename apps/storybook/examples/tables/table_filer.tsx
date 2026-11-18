@@ -2,7 +2,7 @@ import { TableConfig } from "@niagads/table";
 
 export const TABLE_DEFINTION: TableConfig = {
     id: "metadata_query_by_region_and_filter",
-    onRowSelectionChange: (selectedRows: any) => alert(`Selection: ${JSON.stringify(selectedRows)}`),
+
     options: {
         enableColumnFilters: true,
         enableRowSelect: true,
@@ -11,6 +11,7 @@ export const TABLE_DEFINTION: TableConfig = {
             description: "select a row",
             enableMultiSelect: true,
             rowUniqueKey: "track_id",
+            onRowSelectionChange: (selectedRows: any) => alert(`Selection: ${JSON.stringify(selectedRows)}`),
         },
     },
 

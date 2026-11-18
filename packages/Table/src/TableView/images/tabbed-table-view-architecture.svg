@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="791" height="251" viewBox="0 0 791 251" role="img" aria-labelledby="title description">
+  <title id="title">TabbedTableView and its independent table view</title>
+  <desc id="description">TabbedTableView wraps tab navigation and active tab state around an independent table view. Each table view provides its own title and description, data retrieval, and filter and table components.</desc>
+  <rect width="791" height="251" fill="#fcfcfc"/>
+  <rect x="21.5" y="15.5" width="745" height="226" rx="8" fill="#f1f5fa" stroke="#91aaca"/>
+  <g font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#365780">
+    <text x="38" y="38" font-size="14" font-weight="600">TabbedTableView</text>
+    <rect x="38" y="51" width="712" height="36" rx="3" fill="#dfe7f1"/>
+    <text x="394" y="73" text-anchor="middle">Tab navigation · Active tab state</text>
+    <rect x="38" y="99.5" width="712" height="125.5" rx="4" fill="#fff" stroke="#a8beda"/>
+    <text x="53" y="120" font-size="14" font-weight="600" fill="#213b5d">Active Table View</text>
+    <rect x="53" y="132" width="682" height="22" rx="2" fill="#f0f4f9"/>
+    <text x="394" y="147" text-anchor="middle">Table title and description</text>
+    <rect x="53" y="160" width="682" height="22" rx="2" fill="#f0f4f9"/>
+    <text x="394" y="175" text-anchor="middle">Data retrieval</text>
+    <rect x="53" y="188" width="682" height="22" rx="2" fill="#f0f4f9"/>
+    <text x="394" y="203" text-anchor="middle">Filter / table component</text>
+  </g>
+</svg>
