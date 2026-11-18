@@ -56,6 +56,7 @@ jobs:
   adsp-staging-release:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
+    needs: publish-canary
     steps:
       - name: build image and push to ECR
         run: ./scripts/build-docker.sh adsp staging
@@ -68,6 +69,36 @@ jobs:
             --document-name AWS-RunShellScript \
             --comment "deploy adsp staging site" \
             --parameters commands="sudo /opt/oa-deploy/deploy.sh adsp "staging-v$GITHUB_RUN_NUMBER" \
+            --query Command.CommandId --output text)
+          echo "SSM CommandId: $CMD_ID"
+
+          aws ssm wait command-executed \
+            --region "$AWS_REGION" --command-id "$CMD_ID" --instance-id "$INSTANCE_ID" || true
+
+          get(){ aws ssm get-command-invocation --region "$AWS_REGION" \
+                   --command-id "$CMD_ID" --instance-id "$INSTANCE_ID" --query "$1" --output text; }
+          echo "----- deploy.sh stdout -----"; get StandardOutputContent
+          echo "----- deploy.sh stderr -----"; get StandardErrorContent
+          STATUS=$(get Status)
+          echo "SSM status: $STATUS"
+          [ "$STATUS" = "Success" ] || { echo "::error::deploy failed on host (status=$STATUS)"; exit 1; }
+
+  niagads-main-staging-release:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    needs: publish-canary
+    steps:
+      - name: build image and push to ECR
+        run: ./scripts/build-docker.sh niagads-main staging
+      - name: Pull and run image on staging server via SSM
+        run: |
+          set -euo pipefail
+          CMD_ID=$(aws ssm send-command \
+            --region "$AWS_REGION" \
+            --instance-ids "$INSTANCE_ID" \
+            --document-name AWS-RunShellScript \
+            --comment "deploy adsp staging site" \
+            --parameters commands="sudo /opt/oa-deploy/deploy.sh niagads-main "staging-v$GITHUB_RUN_NUMBER" \
             --query Command.CommandId --output text)
           echo "SSM CommandId: $CMD_ID"
 
