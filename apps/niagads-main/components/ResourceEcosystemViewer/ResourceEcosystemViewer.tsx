@@ -185,6 +185,12 @@ const LD_VALUES = [
 ] as const;
 
 const LD_COLORS = ["var(--gray-100)", "var(--gray-300)", "var(--secondary-blue)", "var(--primary-blue)"] as const;
+const ACTIVE_LD_COLORS = [
+    "var(--gray-100)",
+    "color-mix(in srgb, var(--active-feature-color) 25%, white)",
+    "color-mix(in srgb, var(--active-feature-color) 60%, white)",
+    "var(--active-feature-color)",
+] as const;
 
 const conceptById = Object.fromEntries(CONCEPTS.map((concept) => [concept.id, concept])) as Record<
     ConceptType,
@@ -472,15 +478,33 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
                     <defs>
                         <pattern id="regulatoryEnhancerPattern" width="6" height="6" patternUnits="userSpaceOnUse">
                             <rect width="6" height="6" fill="var(--gray-100)" />
-                            <path d="M-1 1 L1 -1 M0 6 L6 0 M5 7 L7 5" stroke="var(--gray-500)" strokeWidth="1" />
+                            <path
+                                d="M-1 1 L1 -1 M0 6 L6 0 M5 7 L7 5"
+                                stroke={
+                                    activeConcepts.has("regulatory") ? "var(--active-feature-color)" : "var(--gray-500)"
+                                }
+                                strokeWidth="1"
+                            />
                         </pattern>
                         <pattern id="regulatoryPromoterPattern" width="5" height="5" patternUnits="userSpaceOnUse">
                             <rect width="5" height="5" fill="var(--gray-100)" />
-                            <path d="M2.5 0 V5" stroke="var(--gray-500)" strokeWidth="1" />
+                            <path
+                                d="M2.5 0 V5"
+                                stroke={
+                                    activeConcepts.has("regulatory") ? "var(--active-feature-color)" : "var(--gray-500)"
+                                }
+                                strokeWidth="1"
+                            />
                         </pattern>
                         <pattern id="regulatorySilencerPattern" width="6" height="6" patternUnits="userSpaceOnUse">
                             <rect width="6" height="6" fill="var(--gray-100)" />
-                            <path d="M-1 5 L1 7 M0 0 L6 6 M5 -1 L7 1" stroke="var(--gray-500)" strokeWidth="1" />
+                            <path
+                                d="M-1 5 L1 7 M0 0 L6 6 M5 -1 L7 1"
+                                stroke={
+                                    activeConcepts.has("regulatory") ? "var(--active-feature-color)" : "var(--gray-500)"
+                                }
+                                strokeWidth="1"
+                            />
                         </pattern>
                     </defs>
 
@@ -593,7 +617,7 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
                                     <path
                                         className={styles["ld-cell"]}
                                         d={`M ${cx} ${cy - 7} L ${cx + 7} ${cy} L ${cx} ${cy + 7} L ${cx - 7} ${cy} Z`}
-                                        fill={LD_COLORS[value]}
+                                        fill={activeConcepts.has("ld") ? ACTIVE_LD_COLORS[value] : LD_COLORS[value]}
                                         key={`${rowIndex}-${columnIndex}`}
                                     />
                                 );

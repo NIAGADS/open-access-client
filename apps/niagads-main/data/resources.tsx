@@ -74,7 +74,15 @@ export const RESOURCES: Resource[] = [
             genomic tracks by biological context and genomic region to investigate regulatory evidence
             and help interpret disease-associated variants and loci.`,
         groupId: "knowledgebase",
-        concepts: ["regulatory", "downloads", "apiAccess", "webAccess", "genomicAnnotations"],
+        concepts: [
+            "qtls",
+            "geneticAssociations",
+            "regulatory",
+            "downloads",
+            "apiAccess",
+            "webAccess",
+            "genomicAnnotations",
+        ],
     },
 
     {

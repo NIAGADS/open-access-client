@@ -10,6 +10,7 @@
 }
 
 .ecosystem {
+    --active-feature-color: #b66b16;
     width: min(1240px, 100%);
     min-width: 760px;
     isolation: isolate;
@@ -338,7 +339,7 @@
 .concept-mark:focus-visible .utility-glyph,
 .concept-mark:hover .utility-glyph,
 .concept-mark.active .utility-glyph {
-    stroke: var(--accent-teal);
+    stroke: var(--active-feature-color);
     stroke-width: 2;
 }
 
@@ -547,6 +548,29 @@
     stroke-width: 3;
     stroke-linejoin: round;
     pointer-events: none;
+}
+
+.concept-mark.active .gene-exon,
+.concept-mark.active .association-point {
+    fill: var(--active-feature-color);
+}
+
+.concept-mark.active .association-point:not(.association-point-significant) {
+    opacity: 0.5;
+}
+
+.concept-mark.active .gene-direction,
+.concept-mark.active .variant,
+.concept-mark.active .association-baseline,
+.concept-mark.active .association-threshold,
+.concept-mark.active .ld-top-rule,
+.concept-mark.active .ld-tick,
+.concept-mark.active .qtl-bridge,
+.concept-mark.active .regulatory-loop,
+.concept-mark.active .regulatory-enhancer,
+.concept-mark.active .regulatory-promoter,
+.concept-mark.active .regulatory-silencer {
+    stroke: var(--active-feature-color);
 }
 
 @media (max-width: 640px) {
