@@ -13,10 +13,11 @@ ENV BUILD_ENV=$BUILD
 # 1. force update the OS packages to pull down newest security patches to 
 #    migitgate legacy CVEs since last image build
 # 2. install git & ca-certificates for HTTPS (for git-based npm installs) 
+#    also install unzip for unziping data.ts TODO: refactor adsp data site so that we don't need data.ts any more
 
 RUN apt-get update \
     && apt-get upgrade -y \
-    && apt-get install -y --no-install-recommends git \
+    && apt-get install -y --no-install-recommends git unzip \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/* 
 
