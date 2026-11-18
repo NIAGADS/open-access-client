@@ -2,18 +2,6 @@ import { ADVPLogo, NIAGADSFilerLogo, NIAGADSGenomicsDBLogo, NIAGADSXQTLLogo } fr
 
 import type { Resource } from "@/components/ResourceEcosystemViewer/ResourceEcosystemViewer";
 
-export const RESOURCE_ECOSYSTEM_OVERVIEW = {
-    title: "NIAGADS Ecosystem",
-    description: `Together with partner offerings, NIAGADS provides an integrated suite of resources for discovering, exploring, and accessing Alzheimer’s 
-        disease and related dementia genetics and genomics data.`,
-
-    instruction: "Select a resource to explore its connections.",
-    defaultDetail: {
-        title: "Explore the ecosystem",
-        description: "Select a resource to discover its genomic connections, available data, and access options.",
-    },
-};
-
 export const RESOURCE_GROUPS = [
     { id: "knowledgebase", label: "NIAGADS Resources", color: "var(--accent-teal)" },
     { id: "access", label: "NIAGADS Resources", color: "var(--warning-amber)" },
