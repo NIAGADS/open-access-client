@@ -41,58 +41,46 @@
 }
 
 .resource-detail-slot {
-    height: 150px;
+    height: 260px;
     margin: 12px 0 0;
 }
 
 .resource-detail {
     box-sizing: border-box;
     height: 100%;
-    border: 1px solid var(--border) !important;
-    border-radius: 8px;
-    background: var(--surface) !important;
+    border-radius: 0;
+    background: transparent !important;
     box-shadow: none;
 }
 
-.default-detail .resource-detail-body {
-    grid-template-columns: 1fr;
-    align-content: center;
-}
-
-.default-detail .resource-detail-content {
-    grid-column: 1;
-    max-width: 750px;
-}
-
-.default-detail h2,
-.default-detail p {
-    color: var(--text-primary);
-}
-
-.resource-detail-header {
-    display: flex;
-    align-items: center;
+.default-detail {
+    visibility: hidden;
 }
 
 .resource-detail-body {
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
     display: grid;
-    grid-template-columns: 150px minmax(0, 1fr) auto;
+    grid-template-columns: 210px minmax(0, 1fr) auto;
     align-items: center;
-    column-gap: 28px;
+    column-gap: 24px;
     box-sizing: border-box;
     height: 100% !important;
-    padding: 20px 28px !important;
+    padding: 16px !important;
 }
 
 .resource-logo-container {
     display: flex;
     align-items: center;
     justify-content: center;
+    align-self: stretch;
+    padding-right: 20px;
+    border-right: 1px solid var(--border);
 }
 
 .resource-logo-container > svg {
     display: block;
-    width: 150px;
+    width: 180px;
     height: auto;
     max-width: 100%;
     color: var(--primary-blue);
@@ -105,10 +93,10 @@
     min-width: 0;
 }
 
-.resource-detail h2 {
+.resource-detail h3 {
     margin: 0;
-    color: var(--text-secondary);
-    font-size: 1.125rem;
+    color: var(--primary-blue);
+    font-size: 1.5rem;
     font-weight: 700;
     line-height: 1.3;
     letter-spacing: -0.015em;
@@ -116,38 +104,36 @@
 
 .resource-detail p {
     margin: 0;
-    font-size: 0.875rem;
+    font-size: 1rem;
     font-weight: 400;
     line-height: 1.6;
 }
 
 .resource-detail-action {
-    grid-column: 3;
     align-self: center;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 4px 0;
+    gap: 8px;
+    padding: 10px 14px;
     border: none;
-    background: transparent;
-    color: var(--resource-color);
-    font-size: 0.875rem;
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--description-highlight-color) 65%, black);
+    color: var(--white);
+    font-size: 1rem;
     font-weight: 600;
     line-height: 1.4;
     text-decoration: none;
     white-space: nowrap;
-    transition: color 160ms ease;
 }
 
 .resource-detail-action:hover {
-    color: var(--text-primary);
-    text-decoration: underline;
-    background: transparent;
+    background: color-mix(in srgb, var(--description-highlight-color) 55%, black);
+    text-decoration: none;
     transform: none;
 }
 
 .resource-detail-action:focus-visible {
-    outline: 2px solid var(--resource-color);
+    outline: 2px solid var(--description-highlight-color);
     outline-offset: 4px;
 }
 
@@ -573,6 +559,12 @@
     stroke: var(--active-feature-color);
 }
 
+@media (min-width: 641px) and (max-width: 1000px) {
+    .resource-detail-slot {
+        height: 420px;
+    }
+}
+
 @media (max-width: 640px) {
     .shell {
         display: block;
@@ -586,13 +578,13 @@
     }
 
     .resource-detail-slot {
-        height: auto;
+        height: 560px;
         margin: 10px 0 18px;
     }
 
     .resource-detail {
         display: block;
-        height: auto;
+        height: 100%;
         width: auto;
     }
 
@@ -606,9 +598,12 @@
 
     .resource-logo-container {
         justify-content: flex-start;
+        align-self: auto;
+        padding-right: 0;
+        border-right: none;
     }
 
-    .resource-logo {
+    .resource-logo-container > svg {
         max-height: 56px;
     }
 
@@ -619,9 +614,7 @@
 
     .resource-detail-action {
         align-self: flex-start;
-        min-height: auto;
         margin-top: 4px;
-        padding: 6px 0;
     }
 
     .landscape,

@@ -31,8 +31,9 @@ export const RESOURCES: Resource[] = [
             and their potential functional relevance.`,
         url: "https://www.niagads.org/genomics",
         logo: <NIAGADSGenomicsDBLogo />,
-        color: "#087e78",
+        badgeColor: "#087e78",
         connectionColor: "#00b8ad",
+        descriptionHighlightColor: "#825ea8",
         groupId: "knowledgebase",
         concepts: [
             "adspData",
@@ -56,8 +57,9 @@ export const RESOURCES: Resource[] = [
             and other molecular traits.`,
         url: "https://xqtl.niagads.org",
         logo: <NIAGADSXQTLLogo />,
-        color: "#087e78",
+        badgeColor: "#087e78",
         connectionColor: "#00b8ad",
+        descriptionHighlightColor: "#2fa696",
         groupId: "knowledgebase",
         concepts: ["adspData", "qtls", "variants", "genes", "webAccess", "geneticAssociations", "downloads"],
     },
@@ -67,8 +69,9 @@ export const RESOURCES: Resource[] = [
         name: "FILER",
         url: "https://tf.lisanwanglab.org/FILER/",
         logo: <NIAGADSFilerLogo />,
-        color: "#087e78",
+        badgeColor: "#087e78",
         connectionColor: "#00b8ad",
+        descriptionHighlightColor: "#35ad7a",
         description: `FILER is a harmonized, searchable collection of human functional genomics data assembled from major resources including
             ENCODE, Roadmap Epigenomics, and GTEx. Researchers can identify and query functional
             genomic tracks by biological context and genomic region to investigate regulatory evidence
@@ -90,8 +93,9 @@ export const RESOURCES: Resource[] = [
         badge: "ADVP",
         name: "Alzheimer's Disease Variant Portal",
         logo: <ADVPLogo />,
-        color: "#385379",
+        badgeColor: "#385379",
         connectionColor: "#3984e6",
+        descriptionHighlightColor: "#FFCD05",
         description: `The Alzheimer’s Disease Variant Portal (ADVP) is a curated, harmonized collection of published genetic associations
              for AD and related phenotypes.`,
         url: "https://advp.niagads.org",

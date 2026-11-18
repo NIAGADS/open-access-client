@@ -61,8 +61,9 @@ export interface Resource {
     description: string;
     url?: string;
     logo?: ResourceLogo;
-    color: string;
+    badgeColor: string;
     connectionColor: string;
+    descriptionHighlightColor: string;
     groupId: string;
     concepts: ConceptType[];
 }
@@ -445,7 +446,7 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
                             key={resource.id}
                             style={
                                 {
-                                    "--resource-color": resource.color,
+                                    "--resource-color": resource.badgeColor,
                                     // Other project buttons must remain clickable while one is selected.
                                     pointerEvents: "auto",
                                 } as CSSProperties
@@ -465,14 +466,13 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
                     className={styles.landscape}
                     viewBox={`0 0 ${LANDSCAPE_WIDTH} 340`}
                     preserveAspectRatio="none"
-                    role="img"
-                    aria-labelledby="ecosystem-title ecosystem-desc"
+                    role="group"
+                    aria-label="NIAGADS Open Access Ecosystem"
+                    aria-describedby="ecosystem-desc"
                 >
-                    <title id="ecosystem-title">NIAGADS resource ecosystem concept landscape</title>
                     <desc id="ecosystem-desc">
                         Resources connect to a core genomic landscape plus peripheral context, evidence, download, and
-                        programmatic access zones. Hover or focus a resource or concept to highlight relevant
-                        connections.
+                        access zones. Hover or focus a resource or concept to highlight relevant connections.
                     </desc>
 
                     <defs>
@@ -823,11 +823,13 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
 
                 <div className={styles["resource-detail-slot"]}>
                     <Card
+                        outline={false}
+                        aria-hidden={!detailResource}
                         aria-label={`${detailResource?.name ?? "NIAGADS resource ecosystem"} description`}
                         className={`${styles["resource-detail"]} ${detailResource ? "" : styles["default-detail"]}`}
                         style={
                             {
-                                "--resource-color": detailResource?.color ?? "var(--primary-blue)",
+                                "--description-highlight-color": detailResource?.descriptionHighlightColor,
                             } as CSSProperties
                         }
                     >
@@ -843,13 +845,9 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
                             )}
 
                             <div className={styles["resource-detail-content"]}>
-                                <div className={styles["resource-detail-header"]}>
-                                    <h2>{detailResource?.name ?? overview.defaultDetail.title}</h2>
-                                </div>
-
+                                <h3>{detailResource?.name ?? overview.defaultDetail.title}</h3>
                                 <p>{detailResource?.description ?? overview.defaultDetail.description}</p>
                             </div>
-
                             {detailResource?.url && (
                                 <a
                                     className={styles["resource-detail-action"]}
