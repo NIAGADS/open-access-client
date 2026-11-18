@@ -156,22 +156,36 @@
     grid-template-columns: repeat(var(--resource-count), minmax(0, 1fr));
     gap: 10px;
     align-items: end;
-    margin-bottom: 14px;
+    margin-bottom: 16px;
 }
 
 .group-label {
-    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--primary-blue);
     font:
-        750 11px/1.1 ui-sans-serif,
+        700 10px/1.1 ui-sans-serif,
         system-ui,
         sans-serif;
-    letter-spacing: 0.045em;
-    text-align: center;
+    letter-spacing: 0.12em;
+    text-align: left;
     text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.group-label::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--gray-300);
+}
+
+.group-label.group-start {
+    margin-left: 10px;
 }
 
 .resource-row {
-    --group-divider-offset: -10.5px;
     display: grid;
     grid-template-columns: repeat(var(--resource-count), minmax(0, 1fr));
     gap: 10px;
@@ -189,28 +203,23 @@
     align-items: center;
     justify-content: center;
     padding: 12px 14px;
-    border: 1px solid color-mix(in srgb, var(--resource-color), var(--white) 65%);
-    border-radius: 8px;
-    background: var(--surface);
-    color: var(--text-primary);
+    border: 1px solid var(--resource-color);
+    border-radius: 4px;
+    background: var(--resource-color);
+    color: var(--white);
     cursor: pointer;
     text-align: center;
-    transition:
-        background-color 160ms ease,
-        border-color 160ms ease,
-        box-shadow 160ms ease,
-        opacity 160ms ease;
 }
 
 .resource:hover,
 .resource:focus-visible {
     border-color: var(--resource-color);
-    background: color-mix(in srgb, var(--resource-color), white 96%);
+    background: color-mix(in srgb, var(--resource-color), black 8%);
 }
 
 .resource.active {
     border-color: var(--resource-color);
-    background: color-mix(in srgb, var(--resource-color), white 90%);
+    background: color-mix(in srgb, var(--resource-color), black 8%);
     box-shadow: inset 0 0 0 1px var(--resource-color);
 }
 
@@ -222,16 +231,6 @@
 .resource.group-start {
     width: calc(100% - 10px);
     margin-left: 10px;
-}
-
-.resource.group-start::before {
-    content: "";
-    position: absolute;
-    top: 5px;
-    bottom: 5px;
-    left: var(--group-divider-offset);
-    width: 1px;
-    background: var(--gray-300);
 }
 
 .resource.recede {
@@ -247,7 +246,8 @@
     border: none;
     border-radius: 0;
 
-    color: var(--resource-color);
+    color: inherit;
+    font-size: 0.875rem;
     font-weight: 700;
     line-height: 1.35;
     text-align: center;
@@ -639,10 +639,6 @@
     .resource.group-start {
         width: 100%;
         margin-left: 0;
-    }
-
-    .resource.group-start::before {
-        display: none;
     }
 
     .badge {

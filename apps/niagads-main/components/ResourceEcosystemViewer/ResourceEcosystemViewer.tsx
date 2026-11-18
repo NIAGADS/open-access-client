@@ -452,7 +452,7 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
                 <div className={styles["resource-group-labels"]} aria-hidden="true" style={resourceGridStyle}>
                     {resourceGroupLabels.map((groupLabel) => (
                         <span
-                            className={styles["group-label"]}
+                            className={`${styles["group-label"]} ${groupLabel.start > 1 ? styles["group-start"] : ""}`}
                             key={`${groupLabel.label}-${groupLabel.start}`}
                             style={{ gridColumn: `${groupLabel.start} / span ${groupLabel.span}` }}
                         >

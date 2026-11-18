@@ -31,7 +31,7 @@ export const RESOURCES: Resource[] = [
             and their potential functional relevance.`,
         url: "https://www.niagads.org/genomics",
         logo: <NIAGADSGenomicsDBLogo />,
-        color: "#825ea8",
+        color: "#087e78",
         groupId: "knowledgebase",
         concepts: [
             "adspData",
@@ -55,7 +55,7 @@ export const RESOURCES: Resource[] = [
             and other molecular traits.`,
         url: "https://xqtl.niagads.org",
         logo: <NIAGADSXQTLLogo />,
-        color: "#2fa696",
+        color: "#087e78",
         groupId: "knowledgebase",
         concepts: ["adspData", "qtls", "variants", "genes", "openAccess", "genomicAnnotations"],
     },
@@ -65,7 +65,7 @@ export const RESOURCES: Resource[] = [
         name: "FILER",
         url: "https://tf.lisanwanglab.org/FILER/",
         logo: <NIAGADSFilerLogo />,
-        color: "#35ad7a",
+        color: "#087e78",
         description: `FILER is a harmonized, searchable collection of human functional genomics data assembled from major resources including
             ENCODE, Roadmap Epigenomics, and GTEx. Researchers can identify and query functional
             genomic tracks by biological context and genomic region to investigate regulatory evidence
@@ -79,7 +79,7 @@ export const RESOURCES: Resource[] = [
         badge: "ADVP",
         name: "Alzheimer's Disease Variant Portal",
         logo: <ADVPLogo />,
-        color: "#d4b000",
+        color: "#385379",
         description: `The Alzheimer’s Disease Variant Portal (ADVP) is a curated, harmonized collection of published genetic associations
              for AD and related phenotypes.`,
         url: "https://advp.niagads.org",
