@@ -82,11 +82,6 @@
     text-decoration: none;
     overflow-wrap: anywhere;
 }
-
-.contact-link:hover {
-    text-decoration: underline;
-}
-
 /* Help Hours CTA */
 
 .booking-link {
@@ -108,6 +103,7 @@
 .booking-link:hover {
     background: var(--dark-blue);
     color: var(--white);
+    text-decoration: none;
 }
 
 .booking-link svg {
