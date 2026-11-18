@@ -1,17 +1,17 @@
 // "use client";
 
-import { HeroSection } from "@niagads/ui";
 import { RESOURCES, RESOURCE_ECOSYSTEM_OVERVIEW, RESOURCE_GROUPS } from "@/data/resources";
 
+// import { useState } from "react";
+import { HeroQuickLinks } from "./HeroQuickLinks";
+import { HeroScrollCue } from "./HeroScrollCue";
+import { HeroSection } from "@niagads/ui";
+import { HomePageMission } from "./HomePageMission";
+import { LatestNewsTeaser } from "../News/LatestNewsTeaser";
 // import { HeroSectionSearch } from "./HeroSectionSearch";
 import { NewsTeaser } from "./NewsTeaser";
 import { ResourceEcosystemViewer } from "@/components/ResourceEcosystemViewer/ResourceEcosystemViewer";
 import styles from "./home-page.module.css";
-// import { useState } from "react";
-import { HeroQuickLinks } from "./HeroQuickLinks";
-import { HeroScrollCue } from "./HeroScrollCue";
-import { HomePageMission } from "./HomePageMission";
-import { LatestNewsTeaser } from "../News/LatestNewsTeaser";
 
 export const HomePage = () => {
     // const [searchTerm, setSearchTerm] = useState("");
@@ -51,11 +51,7 @@ export const HomePage = () => {
             </HeroSection>
 
             <div id="ecosystem" className={styles["home-page-section"]}>
-                <ResourceEcosystemViewer
-                    overview={RESOURCE_ECOSYSTEM_OVERVIEW}
-                    resources={RESOURCES}
-                    resourceGroups={RESOURCE_GROUPS}
-                />
+                <ResourceEcosystemViewer resources={RESOURCES} resourceGroups={RESOURCE_GROUPS} />
             </div>
             <HomePageMission />
         </div>

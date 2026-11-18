@@ -16,30 +16,6 @@
     isolation: isolate;
 }
 
-.ecosystem-intro {
-    margin-bottom: 32px;
-}
-
-.ecosystem-intro h2 {
-    margin: 0 0 12px;
-    color: var(--primary-blue);
-    font-weight: 700;
-    line-height: 1.25;
-}
-
-.ecosystem-intro p {
-    margin: 0;
-    color: var(--text-primary);
-    font-size: 1rem;
-    line-height: 1.6;
-}
-
-.ecosystem-intro .ecosystem-instruction {
-    margin-top: 8px;
-    color: var(--text-secondary);
-    font-weight: 500;
-}
-
 .resource-detail-slot {
     height: 200px;
     margin: 12px 0 0;

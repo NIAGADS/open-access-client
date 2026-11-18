@@ -79,7 +79,6 @@ export interface ResourceEcosystemOverview {
 }
 
 interface ResourceEcosystemViewerProps {
-    overview: ResourceEcosystemOverview;
     resources: Resource[];
     resourceGroups: ResourceGroup[];
 }
@@ -198,7 +197,7 @@ const conceptById = Object.fromEntries(CONCEPTS.map((concept) => [concept.id, co
     (typeof CONCEPTS)[number]
 >;
 
-export function ResourceEcosystemViewer({ overview, resources, resourceGroups }: ResourceEcosystemViewerProps) {
+export function ResourceEcosystemViewer({ resources, resourceGroups }: ResourceEcosystemViewerProps) {
     // Hovering or focusing a resource selects it persistently; taps/clicks also select it.
     // Concept highlights remain temporary.
     const [hovered, setHovered] = useState<ActiveTarget>(null);
@@ -415,12 +414,6 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
     return (
         <main className={styles.shell} ref={shellRef}>
             <section className={styles.ecosystem} aria-label="NIAGADS homepage resource visualization prototype">
-                <div className={styles["ecosystem-intro"]}>
-                    <h2>{overview.title}</h2>
-                    <p>{overview.description}</p>
-                    <p className={styles["ecosystem-instruction"]}>{overview.instruction}</p>
-                </div>
-
                 <div className={styles["resource-group-labels"]} aria-hidden="true" style={resourceGridStyle}>
                     {resourceGroupLabels.map((groupLabel) => (
                         <span
@@ -845,8 +838,8 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
                             )}
 
                             <div className={styles["resource-detail-content"]}>
-                                <h3>{detailResource?.name ?? overview.defaultDetail.title}</h3>
-                                <p>{detailResource?.description ?? overview.defaultDetail.description}</p>
+                                <h3>{detailResource?.name || ""}</h3>
+                                <p>{detailResource?.description || ""}</p>
                             </div>
                             {detailResource?.url && (
                                 <a
