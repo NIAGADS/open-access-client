@@ -50,7 +50,7 @@ export const HomePage = () => {
                 </div>
             </HeroSection>
 
-            <div id="ecosystem" className={styles["home-page-section"]}>
+            <div id="ecosystem" className={`${styles["home-page-section"]} ${styles["ecosystem-section"]}`}>
                 <ResourceEcosystemViewer
                     title="NIAGADS Open Access Ecosystem"
                     resources={RESOURCES}

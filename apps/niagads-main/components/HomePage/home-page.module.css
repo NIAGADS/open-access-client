@@ -17,6 +17,12 @@
     margin-right: 100px;
 }
 
+@media (max-width: 1000px) {
+    .ecosystem-section {
+        padding-inline: 16px;
+    }
+}
+
 .home-page-content .niagads-hero-section {
     background-color: #ffffff;
     background-image: url("/Minimalist-Wireframe-Brain-Network.jpg");

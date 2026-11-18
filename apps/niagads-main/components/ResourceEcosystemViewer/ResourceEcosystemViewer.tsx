@@ -69,16 +69,6 @@ export interface Resource {
     concepts: ConceptType[];
 }
 
-export interface ResourceEcosystemOverview {
-    title: string;
-    description: string;
-    instruction: string;
-    defaultDetail: {
-        title: string;
-        description: string;
-    };
-}
-
 interface ResourceEcosystemViewerProps {
     title: string;
     resources: Resource[];
@@ -417,13 +407,9 @@ export function ResourceEcosystemViewer({ title, resources, resourceGroups }: Re
             .filter(Boolean)
             .join(" ");
 
-    const classForResource = (id: string, index: number) => {
-        const resource = resourceById[id];
-        const startsGroup = index > 0 && resources[index - 1].groupId !== resource.groupId;
-
+    const classForResource = (id: string) => {
         return [
             styles.resource,
-            startsGroup ? styles["group-start"] : "",
             active && !activeResources.has(id) ? styles.recede : "",
             activeResources.has(id) ? styles.active : "",
         ]
@@ -447,51 +433,55 @@ export function ResourceEcosystemViewer({ title, resources, resourceGroups }: Re
                     <h2>{title}</h2>
                     <VisualizationInfo content={VISUALIZATION_INFO} />
                 </div>
-                <div className={styles["resource-group-labels"]} aria-hidden="true" style={resourceGridStyle}>
-                    {resourceGroupLabels.map((groupLabel) => (
-                        <span
-                            className={`${styles["group-label"]} ${groupLabel.start > 1 ? styles["group-start"] : ""}`}
-                            key={`${groupLabel.label}-${groupLabel.start}`}
-                            style={{ gridColumn: `${groupLabel.start} / span ${groupLabel.span}` }}
-                        >
-                            {groupLabel.label}
-                        </span>
-                    ))}
-                </div>
                 <div
                     className={styles["resource-row"]}
                     aria-label="Resources"
                     ref={resourceRowRef}
                     style={resourceGridStyle}
                 >
-                    {resources.map((resource, resourceIndex) => (
-                        <button
-                            className={classForResource(resource.id, resourceIndex)}
-                            aria-label={resource.name}
-                            data-resource-id={resource.id}
-                            key={resource.id}
+                    {resourceGroupLabels.map((groupLabel) => (
+                        <div
+                            className={styles["resource-group"]}
+                            key={`${groupLabel.label}-${groupLabel.start}`}
                             style={
                                 {
-                                    "--resource-color": resource.badgeColor,
-                                    // Other project buttons must remain clickable while one is selected.
-                                    pointerEvents: "auto",
+                                    "--group-size": groupLabel.span,
                                 } as CSSProperties
                             }
-                            type="button"
-                            aria-pressed={selectedResourceId === resource.id}
-                            onFocus={() => selectResource(resource.id)}
-                            onMouseEnter={() => selectResource(resource.id)}
-                            onClick={() => selectResource(resource.id)}
                         >
-                            <span className={styles.badge}>{resource.name}</span>
-                        </button>
+                            <span className={styles["group-label"]}>{groupLabel.label}</span>
+                            {resources
+                                .slice(groupLabel.start - 1, groupLabel.start - 1 + groupLabel.span)
+                                .map((resource) => (
+                                    <button
+                                        className={classForResource(resource.id)}
+                                        aria-label={resource.name}
+                                        data-resource-id={resource.id}
+                                        key={resource.id}
+                                        style={
+                                            {
+                                                "--resource-color": resource.badgeColor,
+                                                // Other project buttons must remain clickable while one is selected.
+                                                pointerEvents: "auto",
+                                            } as CSSProperties
+                                        }
+                                        type="button"
+                                        aria-pressed={selectedResourceId === resource.id}
+                                        onFocus={() => selectResource(resource.id)}
+                                        onMouseEnter={() => selectResource(resource.id)}
+                                        onClick={() => selectResource(resource.id)}
+                                    >
+                                        <span className={styles.badge}>{resource.name}</span>
+                                    </button>
+                                ))}
+                        </div>
                     ))}
                 </div>
 
                 <svg
                     className={styles.landscape}
                     viewBox={`0 0 ${LANDSCAPE_WIDTH} 340`}
-                    preserveAspectRatio="none"
+                    preserveAspectRatio="xMidYMid meet"
                     role="group"
                     aria-label="NIAGADS Open Access Ecosystem"
                     aria-describedby="ecosystem-desc"
