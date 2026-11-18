@@ -1,6 +1,6 @@
+import { PublicationCollection, PublicationsTableView } from "@/components/PublicationsTableView/PublicationsTableView";
+
 import { Alert } from "@niagads/ui";
-import type { PublicationCollection } from "@/components/Publications/PublicationsTabs";
-import { PublicationsTabs } from "@/components/Publications/PublicationsTabs";
 
 const getCollections = (): PublicationCollection[] =>
     (process.env.ZOTERO_COLLECTIONS || "")
@@ -33,7 +33,7 @@ export default function PublicationsPage() {
                         The Zotero collections are not configured.
                     </Alert>
                 ) : (
-                    <PublicationsTabs collections={collections} />
+                    <PublicationsTableView collections={collections} />
                 )}
             </div>
         </main>

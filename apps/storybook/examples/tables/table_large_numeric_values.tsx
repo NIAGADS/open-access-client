@@ -1,7 +1,6 @@
-// import "../../examples/tables/custom_table_cell_styles.css";
 import "./custom_table_cell_styles.css";
 
-import { getPvalueStyle, getRelativePositionClassName, getImpactClassName } from "./styling_functions";
+import { getImpactClassName, getPvalueStyle, getRelativePositionClassName } from "./styling_functions";
 
 import { TableConfig as Table } from "@niagads/table";
 
@@ -11,6 +10,7 @@ export const TABLE_DEFINITION: Table = {
         initialize: { sort: { pvalue: "asc" }, filter: { pvalue: 5e-8 } },
         enableExport: true,
         enableColumnFilters: true,
+        density: "compact",
         defaultColumns: [
             "relative_position",
             "variant_link",
@@ -29,7 +29,7 @@ export const TABLE_DEFINITION: Table = {
             type: "badge",
             header: "Relative Position",
             styling: { getClassName: getRelativePositionClassName },
-            filterOpts: { filterType: "pie" },
+            filterOpts: { filterType: "pie", isTopic: false },
         },
         {
             id: "variant_link",
@@ -49,7 +49,12 @@ export const TABLE_DEFINITION: Table = {
         },
         { id: "allele", header: "Test Allele", disableColumnFilter: true },
         { id: "track_name_link", header: "Track", type: "link", required: true, disableColumnFilter: true },
-        { id: "track_description", header: "Track Description", disableColumnFilter: true },
+        {
+            id: "track_description",
+            header: "Track Description",
+            disableColumnFilter: true,
+            filterOpts: { isTopic: false },
+        },
         {
             id: "is_adsp_variant",
             header: "ADSP Variant?",
@@ -70,6 +75,7 @@ export const TABLE_DEFINITION: Table = {
             styling: { getClassName: getImpactClassName },
             filterOpts: {
                 filterGroup: "Functional Annotation",
+                isTopic: false,
             },
         },
         {

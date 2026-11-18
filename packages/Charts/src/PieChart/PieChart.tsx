@@ -1,12 +1,13 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
 import * as d3 from "d3";
 
-import { _isNA } from "@niagads/common";
 import { NA_COLOR, PieChartOptions, destroyPieChart, pieChart, updatePieChartSelection } from "./d3PieChart";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import VisualizationInfo, { VisualizationInfoContent } from "../d3/VisualizationInfo";
 
 import { DisplayProps } from "../d3/types";
+import { _isNA } from "@niagads/common";
 import chartStyles from "../styles/Charts.module.css";
-import styles from "./PieChart.module.css";
+import styles from "./pie-chart.module.css";
 
 export interface PieChartDataRow {
     id: string;
@@ -19,27 +20,16 @@ export interface PieChartProps {
     referenceData?: PieChartDataRow[];
     onClick?: (key: string) => void;
     displayOpts?: DisplayProps;
+    maxChartWidth?: number;
+    compactLegend?: boolean;
     legendPosition?: "right" | "bottom" | "none";
     preserveSliceOrder?: boolean;
     title?: string;
+    visualizationInfo?: VisualizationInfoContent;
+    selectedSlice?: string; /* needed so that parent can set default and/or clear selection */
 }
 
-const getCombinedData = (data: PieChartDataRow[], referenceData?: PieChartDataRow[]): PieChartDataRow[] => {
-    const combinedData = new Map<string, PieChartDataRow>();
-
-    referenceData?.forEach((d) => combinedData.set(d.id, d));
-    data.forEach((d) => {
-        if (!combinedData.has(d.id)) {
-            combinedData.set(d.id, d);
-        }
-    });
-
-    return Array.from(combinedData.values());
-};
-
-const Legend = ({ data, referenceData }: { data: PieChartDataRow[]; referenceData?: PieChartDataRow[] }) => {
-    const legendData = useMemo(() => getCombinedData(data, referenceData), [data, referenceData]);
-
+const Legend = ({ legendData, compact }: { legendData: PieChartDataRow[]; compact?: boolean }) => {
     const colorScale = useMemo(() => {
         const scale: Record<string, string> = {};
         legendData.forEach((d, i) => {
@@ -49,7 +39,7 @@ const Legend = ({ data, referenceData }: { data: PieChartDataRow[]; referenceDat
     }, [legendData]);
 
     return (
-        <div className={styles.legend}>
+        <div className={`${styles.legend} ${compact ? styles["legend-compact"] : ""}`}>
             {legendData.map((item) => (
                 <div key={item.id} className={styles["legend-item"]}>
                     <div
@@ -70,16 +60,48 @@ const PieChart = ({
     referenceData,
     onClick,
     displayOpts,
+    maxChartWidth,
+    compactLegend = false,
     title,
     legendPosition = "right",
     preserveSliceOrder = false,
+    visualizationInfo,
+    selectedSlice,
 }: PieChartProps) => {
     const containerRef = useRef<HTMLDivElement | null>(null);
     const chartRef = useRef<HTMLDivElement | null>(null);
-    const [selectedId, setSelectedId] = useState<string | undefined>();
+    const [selectedSliceId, setSelectedSliceId] = useState<string | undefined>(selectedSlice);
+    const requestedWidth = displayOpts?.width || 300;
+    const [measuredWidth, setMeasuredWidth] = useState<number | undefined>();
 
-    const chartWidth = displayOpts?.width || 300;
-    const chartHeight = (chartWidth as number) * (displayOpts?.aspectRatio || 1);
+    useLayoutEffect(() => {
+        if (maxChartWidth) {
+            setMeasuredWidth(undefined);
+            return;
+        }
+
+        const chart = chartRef.current;
+        if (!chart) return;
+
+        const updateMeasuredWidth = () => {
+            const nextWidth = chart.clientWidth || undefined;
+            setMeasuredWidth((currentWidth) => (currentWidth === nextWidth ? currentWidth : nextWidth));
+        };
+
+        updateMeasuredWidth();
+
+        if (typeof ResizeObserver === "undefined") {
+            window.addEventListener("resize", updateMeasuredWidth);
+            return () => window.removeEventListener("resize", updateMeasuredWidth);
+        }
+
+        const resizeObserver = new ResizeObserver(updateMeasuredWidth);
+        resizeObserver.observe(chart);
+        return () => resizeObserver.disconnect();
+    }, [maxChartWidth, requestedWidth]);
+
+    const chartWidth = maxChartWidth ?? measuredWidth ?? (typeof requestedWidth === "number" ? requestedWidth : 300);
+    const chartHeight = maxChartWidth ?? displayOpts?.height ?? chartWidth * (displayOpts?.aspectRatio || 1);
 
     const updatedDisplayOpts = {
         ...displayOpts,
@@ -88,7 +110,7 @@ const PieChart = ({
     };
 
     const handleSelect = (id: string) => {
-        setSelectedId(id);
+        setSelectedSliceId(id);
         onClick?.(id);
     };
 
@@ -102,7 +124,7 @@ const PieChart = ({
             referenceData,
             onClick: handleSelect,
             preserveSliceOrder,
-            selectedId,
+            selectedId: selectedSliceId,
         };
         pieChart(chartRef.current, data, opts);
 
@@ -111,30 +133,47 @@ const PieChart = ({
                 destroyPieChart(chartRef.current);
             }
         };
-    }, [data, referenceData, displayOpts, preserveSliceOrder]);
+    }, [data, referenceData, displayOpts, preserveSliceOrder, chartWidth, chartHeight]);
 
-    // Update selection styling (runs when selectedId changes)
+    // allow selection state to clear if cleared in parent (e.g., table filters)
     useEffect(() => {
-        if (chartRef.current && selectedId !== undefined) {
-            updatePieChartSelection(chartRef.current, selectedId);
+        setSelectedSliceId(selectedSlice ?? "");
+    }, [selectedSlice]);
+
+    // Update selection styling (runs when selectedSliceId changes)
+    useEffect(() => {
+        if (chartRef.current && selectedSliceId !== undefined) {
+            updatePieChartSelection(chartRef.current, selectedSliceId);
         }
-    }, [selectedId]);
+    }, [selectedSliceId]);
 
     return (
         <>
-            {title && <div className={chartStyles["chart-title"]}>{title}</div>}
+            {(title || visualizationInfo) && (
+                <div className={styles["pie-chart-header"]}>
+                    {title && <div className={chartStyles["chart-title"]}>{title}</div>}
+                    {visualizationInfo && <VisualizationInfo content={visualizationInfo} />}
+                </div>
+            )}
             <div
                 ref={containerRef}
-                className={`${styles["pie-chart-wrapper"]} ${styles[`pie-chart-wrapper-${legendPosition}`]}`}
+                className={`${styles["pie-chart-wrapper"]} ${styles[`pie-chart-wrapper-${legendPosition}`]} ${
+                    maxChartWidth ? styles["pie-chart-wrapper-fixed-chart-size"] : ""
+                }`}
+                style={{ width: requestedWidth }}
             >
                 <div
                     ref={chartRef}
-                    style={{ width: `${chartWidth}px`, height: `${chartHeight}px` }}
+                    style={{ width: "100%", maxWidth: maxChartWidth, height: `${chartHeight}px` }}
                     className={styles["pie-container"]}
                 />
                 {legendPosition !== "none" && (
-                    <div className={styles["legend-wrapper"]}>
-                        <Legend data={data} referenceData={referenceData} />
+                    <div
+                        className={`${styles["legend-wrapper"]} ${
+                            compactLegend ? styles["legend-wrapper-compact"] : ""
+                        }`}
+                    >
+                        <Legend legendData={referenceData ? referenceData : data} compact={compactLegend} />
                     </div>
                 )}
             </div>

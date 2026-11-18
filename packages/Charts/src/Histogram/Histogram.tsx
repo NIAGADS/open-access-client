@@ -1,25 +1,39 @@
 import { AxisConfig, DisplayProps } from "../d3/types";
 import { HistogramOptions, destroyHistogram, histogram } from "./histogramChart";
 import React, { CSSProperties, useLayoutEffect, useMemo, useRef, useState } from "react";
+import VisualizationInfo, { VisualizationInfoContent } from "../d3/VisualizationInfo";
 
 import { Range } from "@niagads/common";
 import chartStyles from "../styles/Charts.module.css";
 import styles from "./Histogram.module.css";
 
-type HistogramYAxisScale = "linear" | "log10";
-
 const DEFAULT_HISTOGRAM_WIDTH = 400;
 const DEFAULT_HISTOGRAM_ASPECT_RATIO = 0.66;
 const DEFAULT_RANGE_HISTOGRAM_ASPECT_RATIO = 0.5;
 
-interface HistogramProps extends AxisConfig {
+interface HistogramProps {
     data: number[];
     overlayData?: number[];
     numBins: number;
     title?: string;
     displayOpts?: DisplayProps;
-    yAxisScale?: HistogramYAxisScale;
+    yAxis?: AxisConfig;
+    xAxis?: AxisConfig;
+    visualizationInfo?: VisualizationInfoContent;
 }
+
+const HistogramHeader = ({ title, visualizationInfo }: Pick<HistogramProps, "title" | "visualizationInfo">) => {
+    if (!title && !visualizationInfo) {
+        return null;
+    }
+
+    return (
+        <div className={styles["histogram-header"]}>
+            {title && <div className={chartStyles["chart-title"]}>{title}</div>}
+            {visualizationInfo && <VisualizationInfo content={visualizationInfo} />}
+        </div>
+    );
+};
 
 function useHistogramRender(
     containerRef: React.RefObject<HTMLDivElement | null>,
@@ -124,7 +138,16 @@ function useResolvedHistogramLayout(displayOpts: DisplayProps | undefined, defau
     };
 }
 
-const Histogram = ({ data, overlayData, title, numBins, max, label, displayOpts, yAxisScale }: HistogramProps) => {
+const Histogram = ({
+    data,
+    overlayData,
+    title,
+    numBins,
+    xAxis,
+    yAxis,
+    displayOpts,
+    visualizationInfo,
+}: HistogramProps) => {
     const containerRef = useRef<HTMLDivElement | null>(null);
 
     const { wrapperRef, wrapperStyle, containerStyle, resolvedDisplayOpts } = useResolvedHistogramLayout(
@@ -132,14 +155,16 @@ const Histogram = ({ data, overlayData, title, numBins, max, label, displayOpts,
         DEFAULT_HISTOGRAM_ASPECT_RATIO
     );
 
+    const yAxisScale = yAxis?.scale || "linear";
+
     const opts = useMemo<HistogramOptions>(
         () => ({
             numBins,
             yAxisScale,
-            xAxis: { max, label },
+            xAxis: xAxis,
             displayOpts: resolvedDisplayOpts,
         }),
-        [numBins, max, label, resolvedDisplayOpts, yAxisScale]
+        [numBins, xAxis, yAxisScale, resolvedDisplayOpts]
     );
 
     useHistogramRender(containerRef, data, overlayData, opts);
@@ -150,7 +175,7 @@ const Histogram = ({ data, overlayData, title, numBins, max, label, displayOpts,
 
     return (
         <>
-            {title && <div className={chartStyles["chart-title"]}>{title}</div>}
+            <HistogramHeader title={title} visualizationInfo={visualizationInfo} />
             <div ref={wrapperRef} style={wrapperStyle}>
                 <div ref={containerRef} className={styles["histogram-container"]} style={containerStyle} />
             </div>
@@ -169,13 +194,13 @@ export const RangeSelectHistogram = ({
     data,
     overlayData,
     numBins,
-    max,
-    label,
+    xAxis,
+    yAxis,
     displayOpts,
-    yAxisScale,
     range,
     title,
     onRangeSelect,
+    visualizationInfo,
 }: RangeSelectHistogramProps) => {
     const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -187,12 +212,14 @@ export const RangeSelectHistogram = ({
     const dataMin = useMemo(() => (data.length > 0 ? Math.floor(Math.min(...data)) : 0), [data]);
     const dataMax = useMemo(() => (data.length > 0 ? Math.ceil(Math.max(...data)) : 0), [data]);
 
+    const yAxisScale = yAxis?.scale || "linear";
+
     const opts = useMemo<HistogramOptions>(
         () => ({
             numBins,
             yAxisScale,
             binDomain: { min: dataMin, max: dataMax },
-            xAxis: { max, label },
+            xAxis: xAxis,
             displayOpts: resolvedDisplayOpts,
             selection: {
                 mode: "range",
@@ -200,7 +227,7 @@ export const RangeSelectHistogram = ({
                 onChange: onRangeSelect,
             },
         }),
-        [numBins, dataMin, dataMax, max, label, resolvedDisplayOpts, range, onRangeSelect, yAxisScale]
+        [numBins, dataMin, dataMax, xAxis, resolvedDisplayOpts, onRangeSelect, range, yAxisScale]
     );
 
     useHistogramRender(containerRef, data, overlayData, opts);
@@ -211,7 +238,7 @@ export const RangeSelectHistogram = ({
 
     return (
         <>
-            {title && <div className={chartStyles["chart-title"]}>{title}</div>}
+            <HistogramHeader title={title} visualizationInfo={visualizationInfo} />
             <div ref={wrapperRef} style={wrapperStyle}>
                 <div ref={containerRef} className={styles["histogram-container"]} style={containerStyle} />
             </div>
@@ -231,14 +258,14 @@ export const ThresholdSelectHistogram = ({
     data,
     overlayData,
     numBins,
-    max,
-    label,
     displayOpts,
-    yAxisScale,
+    xAxis,
+    yAxis,
     limit,
     limitType,
     title,
     onRangeSelect,
+    visualizationInfo,
 }: ThresholdSelectHistogramProps) => {
     const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -255,12 +282,14 @@ export const ThresholdSelectHistogram = ({
         [dataMin, dataMax, limit, limitType]
     );
 
+    const yAxisScale = yAxis?.scale || "linear";
+
     const opts = useMemo<HistogramOptions>(
         () => ({
             numBins,
             yAxisScale,
             binDomain: { min: dataMin, max: dataMax },
-            xAxis: { max, label },
+            xAxis: xAxis,
             displayOpts: resolvedDisplayOpts,
             selection: {
                 mode: "threshold",
@@ -269,7 +298,7 @@ export const ThresholdSelectHistogram = ({
                 onChange: onRangeSelect,
             },
         }),
-        [numBins, dataMin, dataMax, max, label, resolvedDisplayOpts, initialRange, limitType, onRangeSelect, yAxisScale]
+        [numBins, dataMin, dataMax, xAxis, resolvedDisplayOpts, initialRange, limitType, onRangeSelect, yAxisScale]
     );
 
     useHistogramRender(containerRef, data, overlayData, opts);
@@ -280,7 +309,7 @@ export const ThresholdSelectHistogram = ({
 
     return (
         <>
-            {title && <div className={chartStyles["chart-title"]}>{title}</div>}
+            <HistogramHeader title={title} visualizationInfo={visualizationInfo} />
             <div ref={wrapperRef} style={wrapperStyle}>
                 <div ref={containerRef} className={styles["histogram-container"]} style={containerStyle} />
             </div>

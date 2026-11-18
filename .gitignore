@@ -1,5 +1,7 @@
 .codex
 
+**/keyphrase-model/**
+
 .env
 .env.local
 build.env

@@ -1,3 +1,11 @@
 .histogram-container {
     position: relative;
 }
+
+.histogram-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+}

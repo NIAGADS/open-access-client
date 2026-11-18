@@ -6,7 +6,7 @@
     position: absolute;
     z-index: 20;
     top: calc(100% + 8px);
-    left: 0;
+    right: 0;
     width: min(420px, calc(100vw - 32px));
     padding: 16px;
     border: 1px solid var(--viz-border, #c9ced6);
@@ -16,6 +16,10 @@
     color: var(--viz-text, #1f2937);
     font-size: 13px;
     line-height: 1.45;
+}
+
+.visualization-info-compact-button {
+    gap: 0px;
 }
 
 .visualization-info-panel p,

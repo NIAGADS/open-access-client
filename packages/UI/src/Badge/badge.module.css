@@ -19,8 +19,12 @@
 }
 
 .badge.pill {
-    border-radius: 12px;
+    border-radius: 999px;
     padding: 0.375rem 0.75rem;
+}
+
+.small {
+    font-size: 0.625rem;
 }
 
 .icon {
@@ -33,4 +37,47 @@
 
 .text {
     display: inline;
+}
+
+/* ── FACET COUNTS ── */
+.facet-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex: 0 0 auto;
+    padding: 0.25rem 0.375rem;
+    border-radius: 0.375rem;
+    background: var(--gray-100, #f1f5f9);
+    font-size: 0.75rem;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.facet-count-pill {
+    border-radius: 999px;
+}
+
+.facet-count-small {
+    font-size: 0.625rem;
+}
+.facet-count-current {
+    display: inline-block;
+    color: var(--primary-blue, #3d5a80);
+    font-weight: 700;
+    text-align: right;
+}
+
+.facet-count-separator {
+    color: var(--gray-400, #94a3b8);
+    font-weight: 400;
+}
+
+.facet-count-total {
+    color: var(--gray-500, #64748b);
+    font-weight: 500;
+}
+.facet-count-disabled .facet-count-current {
+    color: var(--gray-400, #94a3b8);
 }

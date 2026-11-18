@@ -2,9 +2,11 @@ import { Button, FilterChip, FilterChipBar, InlineIcon, StylingProps } from "@ni
 import { Column, ColumnFilter, ColumnFiltersState } from "@tanstack/react-table";
 import React, { useEffect, useMemo, useState } from "react";
 
+import { AGGEGRATE_TOPICS_COLUMN_ID } from "./filters/types";
 import FilterComponent from "./filters/ColumnFilter";
 import { TrashIcon } from "lucide-react";
-import styles from "./ColumnFilterControls.module.css";
+import { fromNegLog10 } from "@niagads/common";
+import styles from "./column-filter-controls.module.css";
 
 interface ColumnFilterControlsProps {
     filterableColumns: Column<any, unknown>[];
@@ -25,29 +27,33 @@ export const ColumnFilterControls = ({
 }: ColumnFilterControlsProps) => {
     const [showAtAGlanceFilters, setShowAtAGlanceFilters] = useState(true);
     const [showAdditionalFilters, setShowAdditionalFilters] = useState(false);
-    const [showTopicFilter, setShowTopicFilter] = useState(true);
 
-    const { visualFilterColumns, additionalFilterColumns, topicFilterColumns } = useMemo(() => {
-        const columns = {
-            visualFilterColumns: [] as Column<any, unknown>[],
-            additionalFilterColumns: [] as Column<any, unknown>[],
-            topicFilterColumns: [] as Column<any, unknown>[],
+    const { visualFilterColumns, additionalFilterColumns, topicFilterColumn } = useMemo(() => {
+        const columns: {
+            visualFilterColumns: Column<any, unknown>[];
+            additionalFilterColumns: Column<any, unknown>[];
+            topicFilterColumn?: Column<any, unknown>;
+        } = {
+            visualFilterColumns: [],
+            additionalFilterColumns: [],
         };
 
-        for (const column of filterableColumns) {
-            switch (column.columnDef.meta?.filterType) {
-                case "histogram":
-                case "pie":
-                    columns.visualFilterColumns.push(column);
-                    break;
-                case "boolean":
-                case "select":
-                case "multiselect":
-                    columns.additionalFilterColumns.push(column);
-                    break;
-                case "topics":
-                    columns.topicFilterColumns.push(column);
-                    break;
+        for (const col of filterableColumns) {
+            const faceted = new Set(col.getAllValues()).size > 1;
+            if (faceted) {
+                // need to apply this logic here, in case visual filters yield no value added
+                switch (col.columnDef.meta?.filterType) {
+                    case "histogram":
+                    case "pie":
+                        columns.visualFilterColumns.push(col);
+                        break;
+                    case "multiselect":
+                        if (col.columnDef.id === AGGEGRATE_TOPICS_COLUMN_ID) columns.topicFilterColumn = col;
+                        else columns.additionalFilterColumns.push(col);
+                        break;
+                    default:
+                        columns.additionalFilterColumns.push(col);
+                }
             }
         }
 
@@ -78,10 +84,7 @@ export const ColumnFilterControls = ({
     );
 
     const hasVisualFilters = visualFilterColumns.length > 0;
-    const hasAdditionalFilters = useMemo(
-        () => additionalFilterColumns.some((column) => new Set(column.getAllValues()).size > 1),
-        [additionalFilterColumns]
-    );
+    const hasAdditionalFilters = additionalFilterColumns.length > 0;
 
     return (
         <div className={styles["filter-controls-container"]}>
@@ -96,20 +99,33 @@ export const ColumnFilterControls = ({
                 }
             >
                 {activeFilters.length > 0 ? (
-                    activeFilters.map((filter) => (
-                        <FilterChip
-                            key={`filter-chip-${filter.id}`}
-                            label={filterableColumns.find((x) => x.id === filter.id)?.columnDef.header as string}
-                            value={`${filter.value}`}
-                            onRemove={() => onRemoveFilter(filter)}
-                        />
-                    ))
+                    activeFilters.map((filter) => {
+                        const col = filterableColumns.find((x) => x.id === filter.id);
+                        let value: any =
+                            col!.columnDef?.meta?.type === "pvalue"
+                                ? `≤ ${fromNegLog10(filter.value as number)}`
+                                : filter.value;
+                        if (typeof value === "object") {
+                            value = value.values;
+                        } else {
+                            value = `${value}`;
+                        }
+
+                        return (
+                            <FilterChip
+                                key={`filter-chip-${filter.id}`}
+                                label={col!.columnDef.header as string}
+                                value={value}
+                                onRemove={() => onRemoveFilter(filter)}
+                            />
+                        );
+                    })
                 ) : (
                     <FilterChip label="None" disabled />
                 )}
             </FilterChipBar>
 
-            {hasVisualFilters && (
+            {(hasVisualFilters || topicFilterColumn) && (
                 <section className={styles["glance-section"]}>
                     <header className={styles["section-header"]}>
                         <span>At a Glance</span>
@@ -121,15 +137,26 @@ export const ColumnFilterControls = ({
                             onClick={() => setShowAtAGlanceFilters((value) => !value)}
                         />
                     </header>
-
                     {showAtAGlanceFilters && (
-                        <div className={styles["visual-filter-grid"]}>
-                            {visualFilterColumns.map((column) => (
-                                <div className={styles["visual-filter-panel"]} key={`visual-filter-panel-${column.id}`}>
-                                    <FilterComponent key={`visual-filter-${column.id}`} column={column} />
+                        <>
+                            {hasVisualFilters && (
+                                <div className={styles["visual-filter-grid"]}>
+                                    {visualFilterColumns.map((column) => (
+                                        <div
+                                            className={styles["visual-filter-panel"]}
+                                            key={`visual-filter-panel-${column.id}`}
+                                        >
+                                            <FilterComponent key={`visual-filter-${column.id}`} column={column} />
+                                        </div>
+                                    ))}
                                 </div>
-                            ))}
-                        </div>
+                            )}
+                            {topicFilterColumn && (
+                                <div className={styles["topic-filter-panel"]}>
+                                    <FilterComponent key={`topic-filter`} column={topicFilterColumn} />
+                                </div>
+                            )}
+                        </>
                     )}
                 </section>
             )}
@@ -200,27 +227,12 @@ interface FilterGroupProps extends StylingProps {
 }
 
 const FilterGroup = ({ title, columns, className, style }: FilterGroupProps) => {
-    const [redundantFilters, setRedundantFilters] = useState<string[]>([]);
-
-    useEffect(() => {
-        const redundantColumnIds = columns
-            .filter((column) => {
-                const allValues = column.getAllValues();
-                return new Set(allValues).size === 1;
-            })
-            .map((column) => column.id);
-
-        setRedundantFilters(redundantColumnIds);
-    }, [columns]);
-
     const renderedFilters = useMemo(
         () =>
-            columns
-                .filter((column) => !redundantFilters.includes(column.id))
-                .map((column) => (
-                    <FilterComponent key={`${column.columnDef.meta?.filterType}-filter-${column.id}`} column={column} />
-                )),
-        [columns, redundantFilters]
+            columns.map((column) => (
+                <FilterComponent key={`${column.columnDef.meta?.filterType}-filter-${column.id}`} column={column} />
+            )),
+        [columns]
     );
 
     const hasFilters = renderedFilters.length > 0;

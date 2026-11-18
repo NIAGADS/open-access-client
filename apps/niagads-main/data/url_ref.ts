@@ -8,4 +8,5 @@ export const URLS: Record<string, string> = {
         "https://niagads.scrollhelp.site/support/acknowledging-and-citing-niagads-and-datasets#AcknowledgingandCitingNIAGADSandDatasets-CitingNIAGADS",
     FAQ: "https://niagads.scrollhelp.site/support",
     NEWS_API: "https://dss.niagads.org/wp-json/wp/v2",
+    MESH: "https://www.ncbi.nlm.nih.gov/mesh",
 };
