@@ -1,0 +1,17 @@
+.linkout {
+    display: inline-flex;
+    align-items: center;
+    margin-inline-start: 0.25em;
+    vertical-align: -0.125em;
+    color: var(--primary-blue);
+    text-decoration: none;
+}
+
+.linkout:hover {
+    color: var(--accent-teal);
+}
+
+.linkout:focus-visible {
+    outline: 2px solid var(--secondary-blue);
+    outline-offset: 2px;
+}
