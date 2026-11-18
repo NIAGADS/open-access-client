@@ -505,24 +505,6 @@
     stroke: transparent;
 }
 
-.sequencing-read {
-    stroke: var(--primary-blue);
-    stroke-width: 2;
-    stroke-linecap: round;
-    opacity: 0.78;
-}
-
-.sequencing-hit-area {
-    fill: transparent;
-    stroke: transparent;
-}
-
-.sequencing-base {
-    stroke: var(--accent-teal);
-    stroke-width: 2;
-    stroke-linecap: round;
-}
-
 .regulatory-hit-area {
     fill: transparent;
     stroke: transparent;

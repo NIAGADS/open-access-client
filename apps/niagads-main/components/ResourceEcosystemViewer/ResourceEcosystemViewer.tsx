@@ -18,18 +18,14 @@ export type ConceptType =
     | "geneticAssociations"
     | "downloads"
     | "apiAccess"
-    | "webAccess"
-    | "sequencing";
+    | "webAccess";
 
 interface Concept {
     id: ConceptType;
     label: string;
 }
 
-type GenomicConceptId = Extract<
-    ConceptType,
-    "genes" | "variants" | "gwas" | "ld" | "qtls" | "regulatory" | "sequencing"
->;
+type GenomicConceptId = Extract<ConceptType, "genes" | "variants" | "gwas" | "ld" | "qtls" | "regulatory">;
 type AccessConceptId = Exclude<ConceptType, GenomicConceptId>;
 
 interface GenomicBandLayout {
@@ -98,7 +94,7 @@ type ActiveTarget = { type: "resource"; id: string } | { type: "concept"; id: Co
 const CONCEPTS: Concept[] = [
     { id: "genes", label: "Genes" },
     { id: "variants", label: "Variants" },
-    { id: "gwas", label: "Genetic associations" },
+    { id: "gwas", label: "GWAS associations" },
     { id: "ld", label: "LD" },
     { id: "qtls", label: "Molecular QTLs" },
     { id: "regulatory", label: "Regulatory elements" },
@@ -109,17 +105,15 @@ const CONCEPTS: Concept[] = [
     { id: "downloads", label: "Downloads" },
     { id: "apiAccess", label: "API" },
     { id: "webAccess", label: "Web" },
-    { id: "sequencing", label: "Sequencing" },
 ];
 
 const GENOMIC_BAND_LAYOUT: GenomicBandLayout[] = [
-    { id: "genes", x: 140, y: 150, labelDx: -29, labelDy: 44, connectorDx: -79, connectorDy: -30 },
-    { id: "variants", x: 310, y: 150, labelDx: 0, labelDy: 26, connectorDx: 0, connectorDy: -18 },
-    { id: "gwas", x: 310, y: 90, labelDx: 0, labelDy: -34, connectorDx: 0, connectorDy: -18 },
-    { id: "ld", x: 310, y: 210, labelDx: 0, labelDy: 54, connectorDx: 0, connectorDy: -18 },
-    { id: "qtls", x: 810, y: 168, labelDx: 30, labelDy: 78, connectorDx: 0, connectorDy: -36 },
-    { id: "regulatory", x: 570, y: 150, labelDx: 0, labelDy: 44, connectorDx: 0, connectorDy: -18 },
-    { id: "sequencing", x: 1160, y: 120, labelDx: 0, labelDy: 56, connectorDx: 0, connectorDy: -36 },
+    { id: "genes", x: 170, y: 150, labelDx: -29, labelDy: 44, connectorDx: -79, connectorDy: -30 },
+    { id: "variants", x: 350, y: 150, labelDx: 0, labelDy: 26, connectorDx: 0, connectorDy: -18 },
+    { id: "gwas", x: 350, y: 90, labelDx: 0, labelDy: -34, connectorDx: 0, connectorDy: -18 },
+    { id: "ld", x: 350, y: 210, labelDx: 0, labelDy: 54, connectorDx: 0, connectorDy: -18 },
+    { id: "qtls", x: 910, y: 168, labelDx: 30, labelDy: 78, connectorDx: 0, connectorDy: -36 },
+    { id: "regulatory", x: 630, y: 150, labelDx: 0, labelDy: 44, connectorDx: 0, connectorDy: -18 },
 ];
 
 const ACCESS_LAYOUT: AccessLayout[] = [
@@ -165,12 +159,12 @@ function getFallbackResourceCenterX(index: number, resourceCount: number) {
 }
 
 const GENE_EXONS: Array<[number, number]> = [
-    [38, 46],
-    [138, 58],
-    [548, 80],
-    [668, 48],
-    [902, 26],
-    [1000, 52],
+    [68, 46],
+    [168, 58],
+    [608, 80],
+    [728, 48],
+    [1002, 26],
+    [1100, 52],
 ];
 
 // Deterministic schematic Manhattan profile; these are not measured association values.
@@ -191,33 +185,6 @@ const LD_VALUES = [
 ] as const;
 
 const LD_COLORS = ["var(--gray-100)", "var(--gray-300)", "var(--secondary-blue)", "var(--primary-blue)"] as const;
-
-const SEQUENCING_READS = [
-    [1052, 24, 101],
-    [1080, 18, 101],
-    [1110, 30, 101],
-    [1148, 20, 101],
-    [1062, 34, 108],
-    [1102, 22, 108],
-    [1132, 28, 108],
-    [1168, 18, 108],
-    [1044, 18, 115],
-    [1070, 26, 115],
-    [1108, 18, 115],
-    [1140, 32, 115],
-    [1050, 28, 122],
-    [1058, 42, 129],
-    [1068, 36, 136],
-    [1078, 52, 143],
-    [1090, 46, 122],
-    [1100, 58, 129],
-    [1112, 34, 136],
-    [1122, 48, 143],
-    [1132, 40, 122],
-    [1144, 54, 129],
-    [1156, 30, 136],
-    [1164, 44, 143],
-] as const;
 
 const conceptById = Object.fromEntries(CONCEPTS.map((concept) => [concept.id, concept])) as Record<
     ConceptType,
@@ -550,13 +517,13 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
                         aria-label="Genetic associations, shown as a schematic Manhattan plot"
                         {...conceptInteractions("gwas")}
                     >
-                        <rect fill="none" pointerEvents="all" x="250" y="42" width="120" height="90" rx="6" />
-                        <path className={styles["association-baseline"]} d="M261 128 H359" />
-                        <path className={styles["association-threshold"]} d="M261 96 H359" />
+                        <rect fill="none" pointerEvents="all" x="290" y="42" width="120" height="90" rx="6" />
+                        <path className={styles["association-baseline"]} d="M301 128 H399" />
+                        <path className={styles["association-threshold"]} d="M301 96 H399" />
                         {ASSOCIATION_POINT_Y.map((y, index) => (
                             <circle
                                 className={`${styles["association-point"]} ${y < 96 ? styles["association-point-significant"] : ""}`}
-                                cx={261 + index * 3.5}
+                                cx={301 + index * 3.5}
                                 cy={y}
                                 r={y < 96 ? 2.2 : 1.7}
                                 key={index}
@@ -574,7 +541,7 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
                     >
                         <rect
                             className={styles["gene-concept-hit-area"]}
-                            x="20"
+                            x="50"
                             y="118"
                             width="180"
                             height="84"
@@ -583,7 +550,7 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
                         {GENE_EXONS.map(([x, width]) => (
                             <rect className={styles["gene-exon"]} x={x} y="142" width={width} height="16" key={x} />
                         ))}
-                        <path className={styles["gene-direction"]} d="M46 142 V132 H66 M61 128 L66 132 L61 136" />
+                        <path className={styles["gene-direction"]} d="M76 142 V132 H96 M91 128 L96 132 L91 136" />
                         <GenomicLabel conceptId="genes" />
                     </g>
 
@@ -594,8 +561,8 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
                         aria-label="Variants"
                         {...conceptInteractions("variants")}
                     >
-                        <rect className={styles["variant-hit-area"]} x="252" y="134" width="116" height="48" rx="5" />
-                        {[268, 282, 296, 310, 324, 338, 352].map((x) => (
+                        <rect className={styles["variant-hit-area"]} x="292" y="134" width="116" height="48" rx="5" />
+                        {[308, 322, 336, 350, 364, 378, 392].map((x) => (
                             <path className={styles.variant} d={`M ${x} 145 l 5 5 l -5 5 l -5 -5 Z`} key={x} />
                         ))}
                         <GenomicLabel conceptId="variants" />
@@ -608,18 +575,18 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
                         aria-label="Linkage disequilibrium, shown as a schematic triangular pairwise matrix"
                         {...conceptInteractions("ld")}
                     >
-                        <rect className={styles["ld-hit-area"]} x="250" y="180" width="120" height="90" rx="6" />
-                        <path className={styles["ld-top-rule"]} d="M261 190 H359" />
+                        <rect className={styles["ld-hit-area"]} x="290" y="180" width="120" height="90" rx="6" />
+                        <path className={styles["ld-top-rule"]} d="M301 190 H399" />
                         {LD_VALUES[0].map((_, index) => (
                             <path
                                 className={styles["ld-tick"]}
-                                d={`M ${268 + index * 14} 182 V190`}
+                                d={`M ${308 + index * 14} 182 V190`}
                                 key={`tick-${index}`}
                             />
                         ))}
                         {LD_VALUES.map((row, rowIndex) =>
                             row.map((value, columnIndex) => {
-                                const cx = 268 + rowIndex * 7 + columnIndex * 14;
+                                const cx = 308 + rowIndex * 7 + columnIndex * 14;
                                 const cy = 197 + rowIndex * 7;
 
                                 return (
@@ -642,57 +609,13 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
                         aria-label="Molecular QTLs, shown as multiple relationships from a variant to genomic targets"
                         {...conceptInteractions("qtls")}
                     >
-                        <rect className={styles["qtl-hit-area"]} x="684" y="108" width="310" height="146" rx="6" />
-                        <path className={styles["qtl-bridge"]} d="M810 150 C798 122 772 122 760 150" />
-                        <path className={styles["qtl-bridge"]} d="M810 150 C785 205 732 205 700 158" />
-                        <path className={styles["qtl-bridge"]} d="M810 150 C835 196 890 196 915 158" />
-                        <path className={styles["qtl-bridge"]} d="M810 150 C850 222 940 222 980 150" />
-                        <path className={styles.variant} d="M810 144 l6 6 l-6 6 l-6 -6 Z" />
+                        <rect className={styles["qtl-hit-area"]} x="784" y="108" width="310" height="146" rx="6" />
+                        <path className={styles["qtl-bridge"]} d="M910 150 C898 122 872 122 860 150" />
+                        <path className={styles["qtl-bridge"]} d="M910 150 C885 205 832 205 800 158" />
+                        <path className={styles["qtl-bridge"]} d="M910 150 C935 196 990 196 1015 158" />
+                        <path className={styles["qtl-bridge"]} d="M910 150 C950 222 1040 222 1080 150" />
+                        <path className={styles.variant} d="M910 144 l6 6 l-6 6 l-6 -6 Z" />
                         <GenomicLabel conceptId="qtls" />
-                    </g>
-
-                    <g
-                        className={classForConcept("sequencing")}
-                        aria-label="Sequencing data, shown as aligned reads"
-                        role="button"
-                        tabIndex={0}
-                        {...conceptInteractions("sequencing")}
-                    >
-                        <rect
-                            className={styles["sequencing-hit-area"]}
-                            x="1070"
-                            y="92"
-                            width="170"
-                            height="110"
-                            rx="6"
-                        />
-                        <g>
-                            {SEQUENCING_READS.map(([x, width, y], index) => {
-                                const readX = 592.5 + x / 2;
-                                const readWidth = width / 2;
-                                const mismatchX = readX + Math.min(readWidth - 4, 14 + (index % 4) * 4.5);
-
-                                return (
-                                    <g key={`${x}-${width}`}>
-                                        <line
-                                            className={styles["sequencing-read"]}
-                                            x1={readX}
-                                            x2={readX + readWidth}
-                                            y1={y}
-                                            y2={y}
-                                        />
-                                        <line
-                                            className={styles["sequencing-base"]}
-                                            x1={mismatchX}
-                                            x2={mismatchX}
-                                            y1={y - 2.5}
-                                            y2={y + 2.5}
-                                        />
-                                    </g>
-                                );
-                            })}
-                        </g>
-                        <GenomicLabel conceptId="sequencing" />
                     </g>
 
                     <g
@@ -704,26 +627,26 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
                     >
                         <rect
                             className={styles["regulatory-hit-area"]}
-                            x="444"
+                            x="504"
                             y="104"
                             width="250"
                             height="94"
                             rx="6"
                         />
-                        <path className={styles["regulatory-loop"]} d="M476 142 C486 110 528 110 538 140" />
-                        <rect className={styles["regulatory-enhancer"]} x="460" y="142" width="32" height="16" rx="2" />
-                        <rect className={styles["regulatory-promoter"]} x="530" y="140" width="16" height="20" rx="2" />
-                        <rect className={styles["regulatory-silencer"]} x="650" y="143" width="28" height="14" rx="2" />
-                        <text className={styles["regulatory-micro-label"]} x="476" y="136" textAnchor="middle">
+                        <path className={styles["regulatory-loop"]} d="M536 142 C546 110 588 110 598 140" />
+                        <rect className={styles["regulatory-enhancer"]} x="520" y="142" width="32" height="16" rx="2" />
+                        <rect className={styles["regulatory-promoter"]} x="590" y="140" width="16" height="20" rx="2" />
+                        <rect className={styles["regulatory-silencer"]} x="710" y="143" width="28" height="14" rx="2" />
+                        <text className={styles["regulatory-micro-label"]} x="536" y="136" textAnchor="middle">
                             Enhancer
                         </text>
-                        <text className={styles["regulatory-micro-label"]} x="538" y="174" textAnchor="middle">
+                        <text className={styles["regulatory-micro-label"]} x="598" y="174" textAnchor="middle">
                             Promoter
                         </text>
-                        <text className={styles["regulatory-micro-label"]} x="588" y="136" textAnchor="middle">
+                        <text className={styles["regulatory-micro-label"]} x="648" y="136" textAnchor="middle">
                             Gene
                         </text>
-                        <text className={styles["regulatory-micro-label"]} x="664" y="136" textAnchor="middle">
+                        <text className={styles["regulatory-micro-label"]} x="724" y="136" textAnchor="middle">
                             Silencer
                         </text>
                         <GenomicLabel conceptId="regulatory" />
