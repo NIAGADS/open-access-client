@@ -546,38 +546,6 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
                     <line className={styles["gene-track-hit"]} x1="0" x2="1240" y1="150" y2="150" />
                     <line className={styles["genome-rail"]} x1="0" x2="1240" y1="150" y2="150" />
 
-                    <g className={styles["link-layer"]} aria-hidden="true">
-                        {resources.flatMap((resource, resourceIndex) =>
-                            resource.concepts.map((conceptId) => {
-                                const start =
-                                    resourceCenterX[resource.id] ??
-                                    getFallbackResourceCenterX(resourceIndex, resources.length);
-                                const connector = getConnectorGeometry(conceptId);
-                                const bend = Math.max(62, connector.anchorY - 58);
-                                const targetX = connector.x;
-                                const targetY = connector.y;
-                                const connectorPath = `M ${start} 42 C ${start} ${bend}, ${targetX} ${bend}, ${targetX} ${targetY}`;
-                                const isActiveLink = activeResources.has(resource.id) && activeConcepts.has(conceptId);
-                                return (
-                                    <g key={`${resource.id}-${conceptId}`}>
-                                        <path
-                                            className={pathClass(resource.id, conceptId)}
-                                            d={connectorPath}
-                                            style={{ stroke: resource.connectionColor }}
-                                        />
-                                        <circle
-                                            className={`${styles["link-target"]} ${isActiveLink ? styles.active : ""}`}
-                                            cx={targetX}
-                                            cy={targetY}
-                                            r="3.5"
-                                            style={{ fill: resource.connectionColor }}
-                                        />
-                                    </g>
-                                );
-                            })
-                        )}
-                    </g>
-
                     <g
                         className={classForConcept("gwas")}
                         tabIndex={0}
@@ -872,6 +840,38 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
                         <rect className={styles["utility-hit-area"]} x="1044" y="282" width="161" height="40" rx="6" />
                         <UtilityGlyph kind="cloud" x={1052} y={288} />
                         <UtilityLabel conceptId="cloudAccess" />
+                    </g>
+
+                    <g className={styles["link-layer"]} aria-hidden="true" pointerEvents="none">
+                        {resources.flatMap((resource, resourceIndex) =>
+                            resource.concepts.map((conceptId) => {
+                                const start =
+                                    resourceCenterX[resource.id] ??
+                                    getFallbackResourceCenterX(resourceIndex, resources.length);
+                                const connector = getConnectorGeometry(conceptId);
+                                const bend = Math.max(62, connector.anchorY - 58);
+                                const targetX = connector.x;
+                                const targetY = connector.y;
+                                const connectorPath = `M ${start} 42 C ${start} ${bend}, ${targetX} ${bend}, ${targetX} ${targetY}`;
+                                const isActiveLink = activeResources.has(resource.id) && activeConcepts.has(conceptId);
+                                return (
+                                    <g key={`${resource.id}-${conceptId}`}>
+                                        <path
+                                            className={pathClass(resource.id, conceptId)}
+                                            d={connectorPath}
+                                            style={{ stroke: resource.connectionColor }}
+                                        />
+                                        <circle
+                                            className={`${styles["link-target"]} ${isActiveLink ? styles.active : ""}`}
+                                            cx={targetX}
+                                            cy={targetY}
+                                            r="3.5"
+                                            style={{ fill: resource.connectionColor }}
+                                        />
+                                    </g>
+                                );
+                            })
+                        )}
                     </g>
                 </svg>
 

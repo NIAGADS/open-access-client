@@ -59,7 +59,7 @@ export const RESOURCES: Resource[] = [
         color: "#087e78",
         connectionColor: "#00b8ad",
         groupId: "knowledgebase",
-        concepts: ["adspData", "qtls", "variants", "genes", "openAccess", "genomicAnnotations"],
+        concepts: ["adspData", "qtls", "variants", "genes", "openAccess", "geneticAssociations"],
     },
     {
         id: "filer",
