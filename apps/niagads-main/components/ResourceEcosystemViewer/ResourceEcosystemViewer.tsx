@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { Card, CardBody, NIAGADSLogo } from "@niagads/ui";
-import { Layers, ChartScatter } from "lucide-react";
+import { Layers, ChartScatter, CodeXml, Globe } from "lucide-react";
 import styles from "./resource-ecosystem.module.css";
 
 export type ConceptType =
@@ -16,10 +16,9 @@ export type ConceptType =
     | "adspData"
     | "genomicAnnotations"
     | "geneticAssociations"
-    | "openAccess"
-    | "restrictedAccess"
     | "downloads"
-    | "cloudAccess"
+    | "apiAccess"
+    | "webAccess"
     | "sequencing";
 
 interface Concept {
@@ -107,10 +106,9 @@ const CONCEPTS: Concept[] = [
     { id: "adspData", label: "ADSP Data" },
     { id: "genomicAnnotations", label: "Genomic Annotations" },
     { id: "geneticAssociations", label: "Genetic Associations" },
-    { id: "openAccess", label: "Open" },
-    { id: "restrictedAccess", label: "Restricted" },
     { id: "downloads", label: "Downloads" },
-    { id: "cloudAccess", label: "API / Cloud" },
+    { id: "apiAccess", label: "API" },
+    { id: "webAccess", label: "Web" },
     { id: "sequencing", label: "Sequencing" },
 ];
 
@@ -125,14 +123,13 @@ const GENOMIC_BAND_LAYOUT: GenomicBandLayout[] = [
 ];
 
 const ACCESS_LAYOUT: AccessLayout[] = [
-    { id: "curatedEvidence", x: 136, y: 300, connectorY: 292, labelX: 97, labelY: 305 },
-    { id: "adspData", x: 266, y: 300, connectorY: 292, labelX: 247, labelY: 305 },
-    { id: "genomicAnnotations", x: 400, y: 300, connectorY: 292, labelX: 357, labelY: 305 },
-    { id: "geneticAssociations", x: 565, y: 300, connectorY: 292, labelX: 522, labelY: 305 },
-    { id: "openAccess", x: 760, y: 300, connectorY: 292, labelX: 760, labelY: 305 },
-    { id: "restrictedAccess", x: 865, y: 300, connectorY: 292, labelX: 850, labelY: 305 },
-    { id: "downloads", x: 982, y: 300, connectorY: 292, labelX: 970, labelY: 305 },
-    { id: "cloudAccess", x: 1124, y: 300, connectorY: 292, labelX: 1084, labelY: 305 },
+    { id: "curatedEvidence", x: 150, y: 300, connectorY: 292, labelX: 107, labelY: 305 },
+    { id: "adspData", x: 300, y: 300, connectorY: 292, labelX: 277, labelY: 305 },
+    { id: "genomicAnnotations", x: 460, y: 300, connectorY: 292, labelX: 407, labelY: 305 },
+    { id: "geneticAssociations", x: 650, y: 300, connectorY: 292, labelX: 597, labelY: 305 },
+    { id: "webAccess", x: 925, y: 300, connectorY: 292, labelX: 922, labelY: 305 },
+    { id: "apiAccess", x: 1013, y: 300, connectorY: 292, labelX: 1017, labelY: 305 },
+    { id: "downloads", x: 1125, y: 300, connectorY: 292, labelX: 1107, labelY: 305 },
 ];
 
 const LANDSCAPE_WIDTH = 1240;
@@ -525,8 +522,8 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
                         <text className={styles["zone-label"]} x="0" y="305">
                             Context
                         </text>
-                        <path className={styles["utility-divider"]} d="M660 286 V316" />
-                        <text className={styles["zone-label"]} x="680" y="305">
+                        <path className={styles["utility-divider"]} d="M760 286 V316" />
+                        <text className={styles["zone-label"]} x="780" y="305">
                             Access
                         </text>
                     </g>
@@ -739,8 +736,8 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
                         aria-label="Curated evidence"
                         {...conceptInteractions("curatedEvidence")}
                     >
-                        <rect className={styles["utility-hit-area"]} x="65" y="282" width="140" height="40" rx="6" />
-                        <UtilityGlyph kind="evidence" x={65} y={288} />
+                        <rect className={styles["utility-hit-area"]} x="75" y="282" width="150" height="40" rx="6" />
+                        <UtilityGlyph kind="evidence" x={75} y={288} />
                         <UtilityLabel conceptId="curatedEvidence" />
                     </g>
 
@@ -751,8 +748,8 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
                         aria-label="ADSP Data"
                         {...conceptInteractions("adspData")}
                     >
-                        <rect className={styles["utility-hit-area"]} x="215" y="282" width="102" height="40" rx="6" />
-                        <UtilityGlyph kind="dna" x={215} y={288} />
+                        <rect className={styles["utility-hit-area"]} x="245" y="282" width="110" height="40" rx="6" />
+                        <UtilityGlyph kind="dna" x={245} y={288} />
                         <UtilityLabel conceptId="adspData" />
                     </g>
 
@@ -763,10 +760,10 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
                         aria-label="Genomic Annotations"
                         {...conceptInteractions("genomicAnnotations")}
                     >
-                        <rect className={styles["utility-hit-area"]} x="325" y="282" width="155" height="40" rx="6" />
+                        <rect className={styles["utility-hit-area"]} x="375" y="282" width="175" height="40" rx="6" />
                         <Layers
                             className={styles["utility-glyph"]}
-                            x={325}
+                            x={375}
                             y={288}
                             width={24}
                             height={24}
@@ -782,10 +779,10 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
                         aria-label="Genetic Associations"
                         {...conceptInteractions("geneticAssociations")}
                     >
-                        <rect className={styles["utility-hit-area"]} x="490" y="282" width="160" height="40" rx="6" />
+                        <rect className={styles["utility-hit-area"]} x="565" y="282" width="175" height="40" rx="6" />
                         <ChartScatter
                             className={styles["utility-glyph"]}
-                            x={490}
+                            x={565}
                             y={288}
                             width={24}
                             height={24}
@@ -795,27 +792,41 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
                     </g>
 
                     <g
-                        className={classForConcept("openAccess")}
+                        className={classForConcept("webAccess")}
                         tabIndex={0}
                         role="button"
-                        aria-label="Open access"
-                        {...conceptInteractions("openAccess")}
+                        aria-label="Web access"
+                        {...conceptInteractions("webAccess")}
                     >
-                        <rect className={styles["utility-hit-area"]} x="720" y="282" width="80" height="40" rx="6" />
-                        <UtilityGlyph kind="openLock" x={728} y={288} />
-                        <UtilityLabel conceptId="openAccess" />
+                        <rect className={styles["utility-hit-area"]} x="890" y="282" width="70" height="40" rx="6" />
+                        <Globe
+                            className={styles["utility-glyph"]}
+                            x={890}
+                            y={288}
+                            width={24}
+                            height={24}
+                            aria-hidden="true"
+                        />
+                        <UtilityLabel conceptId="webAccess" />
                     </g>
 
                     <g
-                        className={classForConcept("restrictedAccess")}
+                        className={classForConcept("apiAccess")}
                         tabIndex={0}
                         role="button"
-                        aria-label="Restricted access"
-                        {...conceptInteractions("restrictedAccess")}
+                        aria-label="API access"
+                        {...conceptInteractions("apiAccess")}
                     >
-                        <rect className={styles["utility-hit-area"]} x="810" y="282" width="110" height="40" rx="6" />
-                        <UtilityGlyph kind="closedLock" x={818} y={288} />
-                        <UtilityLabel conceptId="restrictedAccess" />
+                        <rect className={styles["utility-hit-area"]} x="985" y="282" width="60" height="40" rx="6" />
+                        <CodeXml
+                            className={styles["utility-glyph"]}
+                            x={985}
+                            y={288}
+                            width={24}
+                            height={24}
+                            aria-hidden="true"
+                        />
+                        <UtilityLabel conceptId="apiAccess" />
                     </g>
 
                     <g
@@ -825,21 +836,9 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
                         aria-label="Downloads"
                         {...conceptInteractions("downloads")}
                     >
-                        <rect className={styles["utility-hit-area"]} x="930" y="282" width="104" height="40" rx="6" />
-                        <UtilityGlyph kind="download" x={938} y={288} />
+                        <rect className={styles["utility-hit-area"]} x="1075" y="282" width="110" height="40" rx="6" />
+                        <UtilityGlyph kind="download" x={1075} y={288} />
                         <UtilityLabel conceptId="downloads" />
-                    </g>
-
-                    <g
-                        className={classForConcept("cloudAccess")}
-                        tabIndex={0}
-                        role="button"
-                        aria-label="Programmatic and cloud access"
-                        {...conceptInteractions("cloudAccess")}
-                    >
-                        <rect className={styles["utility-hit-area"]} x="1044" y="282" width="161" height="40" rx="6" />
-                        <UtilityGlyph kind="cloud" x={1052} y={288} />
-                        <UtilityLabel conceptId="cloudAccess" />
                     </g>
 
                     <g className={styles["link-layer"]} aria-hidden="true" pointerEvents="none">
@@ -949,15 +948,7 @@ function UtilityLabel({ conceptId }: { conceptId: AccessConceptId }) {
     );
 }
 
-function UtilityGlyph({
-    kind,
-    x,
-    y,
-}: {
-    kind: "evidence" | "dna" | "download" | "cloud" | "openLock" | "closedLock";
-    x: number;
-    y: number;
-}) {
+function UtilityGlyph({ kind, x, y }: { kind: "evidence" | "dna" | "download"; x: number; y: number }) {
     const glyph = {
         evidence: (
             <>
@@ -973,28 +964,6 @@ function UtilityGlyph({
             </>
         ),
         download: <path d="M12 2 v13 M7 10 l5 5 l5 -5 M4 20 v2 h16 v-2" />,
-        cloud: (
-            <>
-                <path d="M6 19 h12 a4 4 0 0 0 0 -8 a6 6 0 0 0 -11.4 -1.8 A5 5 0 0 0 6 19 Z" />
-                <path d="m10 11 l-2 2 l2 2 M14 11 l2 2 l-2 2" />
-            </>
-        ),
-        openLock: (
-            <>
-                <rect x="5" y="10" width="14" height="12" rx="2" />
-                <path d="M9 10 V7 a4 4 0 0 1 7.5 -2" />
-                <circle cx="12" cy="15" r="1" />
-                <path d="M12 16 v2" />
-            </>
-        ),
-        closedLock: (
-            <>
-                <rect x="5" y="10" width="14" height="12" rx="2" />
-                <path d="M8 10 V7 a4 4 0 0 1 8 0 v3" />
-                <circle cx="12" cy="15" r="1" />
-                <path d="M12 16 v2" />
-            </>
-        ),
     }[kind];
 
     return (

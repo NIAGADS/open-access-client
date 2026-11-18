@@ -288,7 +288,7 @@
 .zone-label {
     fill: var(--text-muted);
     font:
-        720 9px/1 ui-sans-serif,
+        720 10px/1 ui-sans-serif,
         system-ui,
         sans-serif;
     letter-spacing: 0;
@@ -315,7 +315,7 @@
 .utility-label {
     fill: var(--text-secondary);
     font:
-        650 11px/1.1 ui-sans-serif,
+        650 12px/1.1 ui-sans-serif,
         system-ui,
         -apple-system,
         BlinkMacSystemFont,

@@ -40,9 +40,9 @@ export const RESOURCES: Resource[] = [
             "variants",
             "gwas",
             "ld",
-            "cloudAccess",
+            "apiAccess",
             "curatedEvidence",
-            "openAccess",
+            "webAccess",
             "genomicAnnotations",
             "geneticAssociations",
         ],
@@ -59,7 +59,7 @@ export const RESOURCES: Resource[] = [
         color: "#087e78",
         connectionColor: "#00b8ad",
         groupId: "knowledgebase",
-        concepts: ["adspData", "qtls", "variants", "genes", "openAccess", "geneticAssociations"],
+        concepts: ["adspData", "qtls", "variants", "genes", "webAccess", "geneticAssociations", "downloads"],
     },
     {
         id: "filer",
@@ -74,7 +74,7 @@ export const RESOURCES: Resource[] = [
             genomic tracks by biological context and genomic region to investigate regulatory evidence
             and help interpret disease-associated variants and loci.`,
         groupId: "knowledgebase",
-        concepts: ["regulatory", "downloads", "cloudAccess", "openAccess", "genomicAnnotations"],
+        concepts: ["regulatory", "downloads", "apiAccess", "webAccess", "genomicAnnotations"],
     },
 
     {
@@ -88,6 +88,6 @@ export const RESOURCES: Resource[] = [
              for AD and related phenotypes.`,
         url: "https://advp.niagads.org",
         groupId: "partner",
-        concepts: ["gwas", "genes", "variants", "curatedEvidence", "openAccess", "geneticAssociations"],
+        concepts: ["downloads", "gwas", "genes", "variants", "curatedEvidence", "webAccess", "geneticAssociations"],
     },
 ];
