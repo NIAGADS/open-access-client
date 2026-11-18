@@ -1,6 +1,6 @@
 // "use client";
 
-import { RESOURCES, RESOURCE_ECOSYSTEM_OVERVIEW, RESOURCE_GROUPS } from "@/data/resources";
+import { RESOURCES, RESOURCE_GROUPS } from "@/data/resources";
 
 // import { useState } from "react";
 import { HeroQuickLinks } from "./HeroQuickLinks";

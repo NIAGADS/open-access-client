@@ -4,7 +4,6 @@ import type { Resource } from "@/components/ResourceEcosystemViewer/ResourceEcos
 
 export const RESOURCE_GROUPS = [
     { id: "knowledgebase", label: "NIAGADS Resources", color: "var(--accent-teal)" },
-    { id: "access", label: "NIAGADS Resources", color: "var(--warning-amber)" },
     { id: "partner", label: "Partner Resources", color: "var(--text-primary)" },
 ];
 
