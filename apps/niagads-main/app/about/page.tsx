@@ -3,7 +3,7 @@
 import AboutIntro from "@/data/about-intro.mdx";
 import AboutContent from "@/data/about.mdx";
 import { AboutLayout } from "@/components/About/AboutLayout";
-import { Alert } from "@niagads/ui";
+import { Alert, LinkOut } from "@niagads/ui";
 
 export default function AboutPage() {
     return (
@@ -17,7 +17,7 @@ export default function AboutPage() {
                     }
                 >
                     <div className="mdx-content">
-                        <AboutContent components={{ Alert }} />
+                        <AboutContent components={{ Alert, LinkOut }} />
                     </div>
                 </AboutLayout>
             </div>
