@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { Card, CardBody, NIAGADSLogo } from "@niagads/ui";
+import { Layers, ChartScatter } from "lucide-react";
 import styles from "./resource-ecosystem.module.css";
 
 export type ConceptType =
@@ -13,8 +14,8 @@ export type ConceptType =
     | "regulatory"
     | "curatedEvidence"
     | "adspData"
-    | "biosamples"
-    | "phenotypes"
+    | "genomicAnnotations"
+    | "geneticAssociations"
     | "openAccess"
     | "restrictedAccess"
     | "downloads"
@@ -103,8 +104,8 @@ const CONCEPTS: Concept[] = [
     { id: "regulatory", label: "Regulatory elements" },
     { id: "curatedEvidence", label: "Curated evidence" },
     { id: "adspData", label: "ADSP Data" },
-    { id: "biosamples", label: "Biosamples" },
-    { id: "phenotypes", label: "Phenotypes" },
+    { id: "genomicAnnotations", label: "Genomic Annotations" },
+    { id: "geneticAssociations", label: "Genetic Associations" },
     { id: "openAccess", label: "Open" },
     { id: "restrictedAccess", label: "Restricted" },
     { id: "downloads", label: "Downloads" },
@@ -123,10 +124,10 @@ const GENOMIC_BAND_LAYOUT: GenomicBandLayout[] = [
 ];
 
 const ACCESS_LAYOUT: AccessLayout[] = [
-    { id: "curatedEvidence", x: 201, y: 300, connectorY: 292, labelX: 170, labelY: 305 },
-    { id: "adspData", x: 365, y: 300, connectorY: 292, labelX: 330, labelY: 305 },
-    { id: "biosamples", x: 490, y: 300, connectorY: 292, labelX: 464, labelY: 305 },
-    { id: "phenotypes", x: 610, y: 300, connectorY: 292, labelX: 585, labelY: 305 },
+    { id: "curatedEvidence", x: 136, y: 300, connectorY: 292, labelX: 97, labelY: 305 },
+    { id: "adspData", x: 266, y: 300, connectorY: 292, labelX: 247, labelY: 305 },
+    { id: "genomicAnnotations", x: 400, y: 300, connectorY: 292, labelX: 357, labelY: 305 },
+    { id: "geneticAssociations", x: 565, y: 300, connectorY: 292, labelX: 522, labelY: 305 },
     { id: "openAccess", x: 760, y: 300, connectorY: 292, labelX: 760, labelY: 305 },
     { id: "restrictedAccess", x: 865, y: 300, connectorY: 292, labelX: 850, labelY: 305 },
     { id: "downloads", x: 982, y: 300, connectorY: 292, labelX: 970, labelY: 305 },
@@ -520,7 +521,7 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
 
                     <g className={styles["peripheral-frame"]} aria-hidden="true">
                         <path className={styles["utility-rule"]} d="M0 278 H1240" />
-                        <text className={styles["zone-label"]} x="76" y="305">
+                        <text className={styles["zone-label"]} x="0" y="305">
                             Context
                         </text>
                         <path className={styles["utility-divider"]} d="M660 286 V316" />
@@ -769,8 +770,8 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
                         aria-label="Curated evidence"
                         {...conceptInteractions("curatedEvidence")}
                     >
-                        <rect className={styles["utility-hit-area"]} x="130" y="282" width="150" height="40" rx="6" />
-                        <UtilityGlyph kind="evidence" x={138} y={288} />
+                        <rect className={styles["utility-hit-area"]} x="65" y="282" width="140" height="40" rx="6" />
+                        <UtilityGlyph kind="evidence" x={65} y={288} />
                         <UtilityLabel conceptId="curatedEvidence" />
                     </g>
 
@@ -781,33 +782,47 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
                         aria-label="ADSP Data"
                         {...conceptInteractions("adspData")}
                     >
-                        <rect className={styles["utility-hit-area"]} x="290" y="282" width="140" height="40" rx="6" />
-                        <UtilityGlyph kind="dna" x={298} y={288} />
+                        <rect className={styles["utility-hit-area"]} x="215" y="282" width="102" height="40" rx="6" />
+                        <UtilityGlyph kind="dna" x={215} y={288} />
                         <UtilityLabel conceptId="adspData" />
                     </g>
 
                     <g
-                        className={classForConcept("biosamples")}
+                        className={classForConcept("genomicAnnotations")}
                         tabIndex={0}
                         role="button"
-                        aria-label="Biosamples"
-                        {...conceptInteractions("biosamples")}
+                        aria-label="Genomic Annotations"
+                        {...conceptInteractions("genomicAnnotations")}
                     >
-                        <rect className={styles["utility-hit-area"]} x="430" y="282" width="120" height="40" rx="6" />
-                        <UtilityGlyph kind="biosample" x={438} y={288} />
-                        <UtilityLabel conceptId="biosamples" />
+                        <rect className={styles["utility-hit-area"]} x="325" y="282" width="155" height="40" rx="6" />
+                        <Layers
+                            className={styles["utility-glyph"]}
+                            x={325}
+                            y={288}
+                            width={24}
+                            height={24}
+                            aria-hidden="true"
+                        />
+                        <UtilityLabel conceptId="genomicAnnotations" />
                     </g>
 
                     <g
-                        className={classForConcept("phenotypes")}
+                        className={classForConcept("geneticAssociations")}
                         tabIndex={0}
                         role="button"
-                        aria-label="Harmonized phenotypes"
-                        {...conceptInteractions("phenotypes")}
+                        aria-label="Genetic Associations"
+                        {...conceptInteractions("geneticAssociations")}
                     >
-                        <rect className={styles["utility-hit-area"]} x="555" y="282" width="95" height="40" rx="6" />
-                        <UtilityGlyph kind="phenotype" x={563} y={288} />
-                        <UtilityLabel conceptId="phenotypes" />
+                        <rect className={styles["utility-hit-area"]} x="490" y="282" width="160" height="40" rx="6" />
+                        <ChartScatter
+                            className={styles["utility-glyph"]}
+                            x={490}
+                            y={288}
+                            width={24}
+                            height={24}
+                            aria-hidden="true"
+                        />
+                        <UtilityLabel conceptId="geneticAssociations" />
                     </g>
 
                     <g
@@ -938,22 +953,11 @@ function UtilityGlyph({
     x,
     y,
 }: {
-    kind: "biosample" | "phenotype" | "evidence" | "dna" | "download" | "cloud" | "openLock" | "closedLock";
+    kind: "evidence" | "dna" | "download" | "cloud" | "openLock" | "closedLock";
     x: number;
     y: number;
 }) {
     const glyph = {
-        biosample: (
-            <>
-                <path d="M8 2 h8 M9 2 v12 a3 3 0 0 0 6 0 V2 M9 11 h6" />
-            </>
-        ),
-        phenotype: (
-            <>
-                <rect x="4" y="4" width="16" height="18" rx="2" />
-                <path d="M9 4 V2 h6 v2 M8 13 l3 3 l6 -7" />
-            </>
-        ),
         evidence: (
             <>
                 <path d="M5 2 h9 l5 5 v6 M14 2 v5 h5 M5 2 v20 h10" />
