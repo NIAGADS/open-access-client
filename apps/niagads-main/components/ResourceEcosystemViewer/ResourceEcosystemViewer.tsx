@@ -1,17 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
-import {
-    Card,
-    CardBody,
-    NIAGADSLogo,
-    NIAGADSAPILogo,
-    NIAGADSDSSLogo,
-    NIAGADSFilerLogo,
-    NIAGADSGenomicsDBLogo,
-    NIAGADSXQTLLogo,
-    ADVPLogo,
-} from "@niagads/ui";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { Card, CardBody, NIAGADSLogo } from "@niagads/ui";
 import styles from "./resource-ecosystem.module.css";
 
 export type ConceptType =
@@ -66,16 +56,7 @@ export interface ResourceGroup {
     label: string;
     color: string;
 }
-const RESOURCE_LOGOS = {
-    genomicsdb: NIAGADSGenomicsDBLogo,
-    xqtl: NIAGADSXQTLLogo,
-    filer: NIAGADSFilerLogo,
-    dss: NIAGADSDSSLogo,
-    api: NIAGADSAPILogo,
-    advp: ADVPLogo,
-} as const;
-
-export type ResourceLogo = "genomicsdb" | "xqtl" | "filer" | "dss" | "api" | "advp";
+export type ResourceLogo = ReactNode;
 
 export interface Resource {
     id: string;
@@ -84,6 +65,7 @@ export interface Resource {
     description: string;
     url?: string;
     logo?: ResourceLogo;
+    color: string;
     groupId: string;
     concepts: ConceptType[];
 }
@@ -423,7 +405,7 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
 
     const detailResource = active?.type === "resource" ? resourceById[active.id] : undefined;
 
-    const ResourceLogo = detailResource?.logo ? RESOURCE_LOGOS[detailResource.logo] : NIAGADSLogo;
+    const resourceLogo = detailResource?.logo ?? <NIAGADSLogo />;
 
     const classForConcept = (id: ConceptType) =>
         [
@@ -491,7 +473,7 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
                             key={resource.id}
                             style={
                                 {
-                                    "--resource-color": resourceGroupById[resource.groupId].color,
+                                    "--resource-color": resource.color,
                                     // Other project buttons must remain clickable while one is selected.
                                     pointerEvents: "auto",
                                 } as CSSProperties
@@ -579,14 +561,14 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
                                         <path
                                             className={pathClass(resource.id, conceptId)}
                                             d={connectorPath}
-                                            style={{ stroke: resourceGroupById[resource.groupId].color }}
+                                            style={{ stroke: resource.color }}
                                         />
                                         <circle
                                             className={`${styles["link-target"]} ${isActiveLink ? styles.active : ""}`}
                                             cx={targetX}
                                             cy={targetY}
                                             r="3.5"
-                                            style={{ fill: resourceGroupById[resource.groupId].color }}
+                                            style={{ fill: resource.color }}
                                         />
                                     </g>
                                 );
@@ -883,22 +865,18 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
                         className={`${styles["resource-detail"]} ${detailResource ? "" : styles["default-detail"]}`}
                         style={
                             {
-                                "--resource-color": detailResource
-                                    ? resourceGroupById[detailResource.groupId].color
-                                    : "var(--primary-blue)",
+                                "--resource-color": detailResource?.color ?? "var(--primary-blue)",
                             } as CSSProperties
                         }
                     >
                         <CardBody className={styles["resource-detail-body"]}>
                             {detailResource && (
-                                <div className={styles["resource-logo-container"]}>
-                                    <ResourceLogo
-                                        width={180}
-                                        style={{ height: "auto" }}
-                                        className={styles["resource-logo"]}
-                                        role="img"
-                                        aria-label={`${detailResource.name} logo`}
-                                    />
+                                <div
+                                    className={styles["resource-logo-container"]}
+                                    role="img"
+                                    aria-label={`${detailResource.name} logo`}
+                                >
+                                    {resourceLogo}
                                 </div>
                             )}
 

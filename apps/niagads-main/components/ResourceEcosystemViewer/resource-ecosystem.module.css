@@ -89,7 +89,7 @@
     justify-content: center;
 }
 
-.resource-logo {
+.resource-logo-container > svg {
     display: block;
     width: 150px;
     height: auto;

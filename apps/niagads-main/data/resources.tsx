@@ -1,3 +1,5 @@
+import { ADVPLogo, NIAGADSFilerLogo, NIAGADSGenomicsDBLogo, NIAGADSXQTLLogo } from "@niagads/ui";
+
 import type { Resource } from "@/components/ResourceEcosystemViewer/ResourceEcosystemViewer";
 
 export const RESOURCE_ECOSYSTEM_OVERVIEW = {
@@ -28,7 +30,8 @@ export const RESOURCES: Resource[] = [
             Researchers can search, browse, and integrate GWAS and sequencing results to investigate disease-associated loci 
             and their potential functional relevance.`,
         url: "https://www.niagads.org/genomics",
-        logo: "genomicsdb",
+        logo: <NIAGADSGenomicsDBLogo />,
+        color: "#825ea8",
         groupId: "knowledgebase",
         concepts: [
             "adspData",
@@ -50,7 +53,8 @@ export const RESOURCES: Resource[] = [
             in AD-relevant brain tissues and cell types. Researchers can explore how genetic variation affects gene expression 
             and other molecular traits.`,
         url: "https://xqtl.niagads.org",
-        logo: "xqtl",
+        logo: <NIAGADSXQTLLogo />,
+        color: "#2fa696",
         groupId: "knowledgebase",
         concepts: ["adspData", "qtls", "variants", "genes", "biosamples", "openAccess"],
     },
@@ -59,7 +63,8 @@ export const RESOURCES: Resource[] = [
         badge: "FLR",
         name: "FILER",
         url: "https://tf.lisanwanglab.org/FILER/",
-        logo: "filer",
+        logo: <NIAGADSFilerLogo />,
+        color: "#35ad7a",
         description: `FILER is a harmonized, searchable collection of human functional genomics data assembled from major resources including
             ENCODE, Roadmap Epigenomics, and GTEx. Researchers can identify and query functional
             genomic tracks by biological context and genomic region to investigate regulatory evidence
@@ -67,37 +72,13 @@ export const RESOURCES: Resource[] = [
         groupId: "knowledgebase",
         concepts: ["regulatory", "biosamples", "downloads", "cloudAccess", "openAccess"],
     },
-    {
-        id: "dss",
-        badge: "DSS",
-        name: "Data Sharing Service",
-        logo: "dss",
-        description: `The NIAGADS Data Sharing Service (DSS) provides qualified access to genetics, genomics, phenotypic, 
-            and related data from the Alzheimer’s Disease Sequencing Project and other AD/ADRD studies. 
-            Researchers can browse available datasets, review their contents and access requirements, 
-            and apply for controlled access to data appropriate for their research.`,
-        url: "https://dss.niagads.org/datasets/",
-        groupId: "access",
-        concepts: ["adspData", "downloads", "openAccess", "restrictedAccess", "sequencing"],
-    },
-    {
-        id: "api",
-        badge: "API",
-        name: "Open Access API",
-        logo: "api",
-        description: `The NIAGADS Open Access API provides programmatic access to NIAGADS open data, 
-            metadata, annotations, and knowledgebase resources. It enables researchers and developers to search, 
-            retrieve, and integrate information from our knowledgebases into analysis pipelines, 
-            applications, and computational workflows.`,
-        url: "https://api.niagads.org",
-        groupId: "access",
-        concepts: ["adspData", "cloudAccess", "openAccess"],
-    },
+
     {
         id: "advp",
         badge: "ADVP",
         name: "Alzheimer's Disease Variant Portal",
-        logo: "advp",
+        logo: <ADVPLogo />,
+        color: "#d4b000",
         description: `The Alzheimer’s Disease Variant Portal (ADVP) is a curated, harmonized collection of published genetic associations
              for AD and related phenotypes.`,
         url: "https://advp.niagads.org",
