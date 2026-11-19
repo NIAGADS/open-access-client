@@ -20,7 +20,7 @@ interface CacheRevision {
  * containing the upstream revision and a checksum of the saved response.
  */
 export const getCachePaths = (namespace: "publications" | "news", cacheKey: string): CachePaths => {
-    const directory = path.resolve(process.env.CACHE_DIR || "/tmp/next-cache");
+    const directory = process.env.CACHE_DIR || "/tmp/next-cache";
     const key = createHash("sha256").update(cacheKey).digest("hex");
     return {
         directory,
