@@ -1,7 +1,7 @@
 import { URLS } from "@/data/url_ref";
 import { parsePubMedPublications } from "./pubmed";
 import { getCachePaths, readCachedResponse, writeCachedResponse, type CachePaths } from "../../cache";
-import { Publication } from "@/components/Publications/PublicationsTable";
+import { Publication } from "@/components/PublicationsTableView/PublicationsTableView";
 
 const ZOTERO_PAGE_SIZE = 100;
 const PUBMED_BATCH_SIZE = 100;

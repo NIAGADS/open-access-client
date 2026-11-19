@@ -1,5 +1,5 @@
 import { parse, filter, type TNode } from "txml";
-import type { Publication, LinkEntry } from "@/components/Publications/PublicationsTable";
+import type { Publication, LinkEntry } from "@/components/PublicationsTableView/PublicationsTableView";
 import { URLS } from "@/data/url_ref";
 
 const IGNORE_TOPICS = ["Aged", "Middle Aged", "Humans", "Female", "Male", "United States"];
