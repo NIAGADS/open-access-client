@@ -12,4 +12,6 @@ npx lerna run build --concurrency 1
 
 npx lerna publish --canary --dist-tag canary
 
-cd ../.. || exit t-packages-canary
+cd ../.. || exit 1
+
+git worktree remove --force .worktrees/oa-client-packages-canary
