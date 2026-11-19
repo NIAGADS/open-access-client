@@ -4,7 +4,7 @@ CANARY_SHA=$(git commit-tree 'HEAD^{tree}' \
 
 git worktree add --detach .worktrees/oa-client-packages-canary "$CANARY_SHA"
 
-cd .worktrees/oa-api-canary
+cd .worktrees/oa-client-packages-canary
 
 npm ci
 
