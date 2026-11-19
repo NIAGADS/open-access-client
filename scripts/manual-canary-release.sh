@@ -10,7 +10,7 @@ npm ci
 
 npx lerna run build --concurrency 1
 
-npx lerna publish --canary --dist-tag canary
+npx lerna publish --canary --dist-tag canary --force-publish=*
 
 cd ../.. || exit 1
 
