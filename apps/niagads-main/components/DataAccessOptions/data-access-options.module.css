@@ -1,0 +1,130 @@
+.data-access-options {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.intro h2 {
+    margin: 0 0 12px;
+    /*color: var(--primary-blue);*/
+}
+
+.intro p {
+    margin: 0;
+    line-height: 1.6;
+}
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.card {
+    display: grid;
+    grid-template-columns: 52px minmax(0, 1fr);
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    min-height: 134px;
+    padding: 18px 16px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text-primary);
+    text-decoration: none;
+}
+
+.dss {
+    --card-accent: var(--primary-blue);
+}
+
+.api {
+    --card-accent: color-mix(in srgb, var(--warning-amber) 80%, var(--text-primary));
+}
+
+.open-access {
+    --card-accent: color-mix(in srgb, var(--accent-teal) 85%, var(--text-primary));
+}
+
+.icon {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--card-accent) 6%, var(--surface));
+    color: var(--card-accent);
+}
+
+.icon > svg {
+    width: 30px;
+    height: 30px;
+    stroke-width: 1.5;
+}
+
+.icon > .lock {
+    position: absolute;
+    right: 9px;
+    bottom: 12px;
+    width: 16px;
+    height: 18px;
+    background: var(--surface);
+}
+
+.card-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    gap: 6px;
+    padding-left: 14px;
+    border-left: 1px solid var(--border);
+}
+
+.card-text strong {
+    font-size: 0.95rem;
+    line-height: 1.3;
+}
+
+.description {
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    line-height: 1.5;
+}
+
+.action {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--card-accent);
+    font-size: 0.7rem;
+    font-weight: 700;
+    line-height: 1.5;
+}
+
+.action > svg {
+    width: 14px;
+    height: 14px;
+}
+
+.card:hover {
+    border-color: var(--card-accent);
+    text-decoration: none;
+}
+
+.card:focus-visible {
+    outline: 2px solid var(--primary-blue);
+    outline-offset: 2px;
+}
+
+@media (max-width: 840px) {
+    .cards {
+        grid-template-columns: 1fr;
+    }
+
+    .card {
+        min-height: 64px;
+        padding: 12px 16px;
+    }
+}

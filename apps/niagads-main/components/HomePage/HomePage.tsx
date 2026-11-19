@@ -1,17 +1,18 @@
 // "use client";
 
-import { HeroSection } from "@niagads/ui";
-import { RESOURCES, RESOURCE_ECOSYSTEM_OVERVIEW, RESOURCE_GROUPS } from "@/data/resources";
+import { RESOURCES, RESOURCE_GROUPS } from "@/data/resources";
 
+import { DataAccessOptions } from "@/components/DataAccessOptions/DataAccessOptions";
+// import { useState } from "react";
+import { HeroQuickLinks } from "./HeroQuickLinks";
+import { HeroScrollCue } from "./HeroScrollCue";
+import { HeroSection } from "@niagads/ui";
+import { HomePageMission } from "./HomePageMission";
+import { LatestNewsTeaser } from "../News/LatestNewsTeaser";
 // import { HeroSectionSearch } from "./HeroSectionSearch";
 import { NewsTeaser } from "./NewsTeaser";
 import { ResourceEcosystemViewer } from "@/components/ResourceEcosystemViewer/ResourceEcosystemViewer";
 import styles from "./home-page.module.css";
-// import { useState } from "react";
-import { HeroQuickLinks } from "./HeroQuickLinks";
-import { HeroScrollCue } from "./HeroScrollCue";
-import { HomePageMission } from "./HomePageMission";
-import { LatestNewsTeaser } from "../News/LatestNewsTeaser";
 
 export const HomePage = () => {
     // const [searchTerm, setSearchTerm] = useState("");
@@ -50,12 +51,17 @@ export const HomePage = () => {
                 </div>
             </HeroSection>
 
-            <div id="ecosystem" className={styles["home-page-section"]}>
-                <ResourceEcosystemViewer
-                    overview={RESOURCE_ECOSYSTEM_OVERVIEW}
-                    resources={RESOURCES}
-                    resourceGroups={RESOURCE_GROUPS}
-                />
+            <div id="ecosystem" className={`${styles["home-page-section"]} ${styles["ecosystem-section"]}`}>
+                <div className={styles["data-access-layout"]}>
+                    <DataAccessOptions />
+                    <div id="open-access-resources" className={styles["open-access-resources"]}>
+                        <ResourceEcosystemViewer
+                            title="Open Access Ecosystem"
+                            resources={RESOURCES}
+                            resourceGroups={RESOURCE_GROUPS}
+                        />
+                    </div>
+                </div>
             </div>
             <HomePageMission />
         </div>

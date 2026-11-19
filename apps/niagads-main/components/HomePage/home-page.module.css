@@ -11,10 +11,37 @@
     padding-right: 50px;
 }
 
+.open-access-resources {
+    scroll-margin-top: calc(var(--header-height) + 1rem);
+}
+
+.data-access-layout {
+    box-sizing: border-box;
+    width: min(1288px, 100%);
+    min-width: 0;
+    margin-inline: auto;
+    padding: clamp(12px, 2vw, 24px);
+    display: grid;
+    gap: 16px;
+}
+
+@media (max-width: 840px) {
+    .data-access-layout {
+        padding: 12px;
+        gap: 8px;
+    }
+}
+
 .home-page-heading {
     max-width: 60%;
     margin-left: 40px;
     margin-right: 100px;
+}
+
+@media (max-width: 1000px) {
+    .ecosystem-section {
+        padding-inline: 16px;
+    }
 }
 
 .home-page-content .niagads-hero-section {

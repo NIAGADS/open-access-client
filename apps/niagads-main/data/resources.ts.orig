@@ -1,4 +1,4 @@
-import type { Resource } from "@/components/ResourceEcosystemViewer/ResourceEcosystemViewer";
+// import type { Resource } from "@/components/ResourceEcosystemViewer/ResourceEcosystemViewer";
 
 export const RESOURCE_ECOSYSTEM_OVERVIEW = {
     title: "NIAGADS Ecosystem",
@@ -18,7 +18,8 @@ export const RESOURCE_GROUPS = [
     { id: "partner", label: "Partner Resources", color: "var(--text-primary)" },
 ];
 
-export const RESOURCES: Resource[] = [
+// export const RESOURCES: Resource[] = [
+export const RESOURCES = [
     {
         id: "genomicsdb",
         badge: "GDB",

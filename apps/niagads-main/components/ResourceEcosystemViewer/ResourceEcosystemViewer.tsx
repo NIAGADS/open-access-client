@@ -1,17 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
-import {
-    Card,
-    CardBody,
-    NIAGADSLogo,
-    NIAGADSAPILogo,
-    NIAGADSDSSLogo,
-    NIAGADSFilerLogo,
-    NIAGADSGenomicsDBLogo,
-    NIAGADSXQTLLogo,
-    ADVPLogo,
-} from "@niagads/ui";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { Card, CardBody, NIAGADSLogo } from "@niagads/ui";
+import { VisualizationInfo, type VisualizationInfoContent } from "@niagads/charts";
+import { Layers, ChartScatter, CodeXml, Globe } from "lucide-react";
 import styles from "./resource-ecosystem.module.css";
 
 export type ConceptType =
@@ -23,23 +15,18 @@ export type ConceptType =
     | "regulatory"
     | "curatedEvidence"
     | "adspData"
-    | "biosamples"
-    | "phenotypes"
-    | "openAccess"
-    | "restrictedAccess"
+    | "genomicAnnotations"
+    | "geneticAssociations"
     | "downloads"
-    | "cloudAccess"
-    | "sequencing";
+    | "apiAccess"
+    | "webAccess";
 
 interface Concept {
     id: ConceptType;
     label: string;
 }
 
-type GenomicConceptId = Extract<
-    ConceptType,
-    "genes" | "variants" | "gwas" | "ld" | "qtls" | "regulatory" | "sequencing"
->;
+type GenomicConceptId = Extract<ConceptType, "genes" | "variants" | "gwas" | "ld" | "qtls" | "regulatory">;
 type AccessConceptId = Exclude<ConceptType, GenomicConceptId>;
 
 interface GenomicBandLayout {
@@ -66,16 +53,7 @@ export interface ResourceGroup {
     label: string;
     color: string;
 }
-const RESOURCE_LOGOS = {
-    genomicsdb: NIAGADSGenomicsDBLogo,
-    xqtl: NIAGADSXQTLLogo,
-    filer: NIAGADSFilerLogo,
-    dss: NIAGADSDSSLogo,
-    api: NIAGADSAPILogo,
-    advp: ADVPLogo,
-} as const;
-
-export type ResourceLogo = "genomicsdb" | "xqtl" | "filer" | "dss" | "api" | "advp";
+export type ResourceLogo = ReactNode;
 
 export interface Resource {
     id: string;
@@ -84,22 +62,14 @@ export interface Resource {
     description: string;
     url?: string;
     logo?: ResourceLogo;
+    badgeColor: string;
+    connectionColor: string;
+    descriptionHighlightColor: string;
     groupId: string;
     concepts: ConceptType[];
 }
-
-export interface ResourceEcosystemOverview {
-    title: string;
-    description: string;
-    instruction: string;
-    defaultDetail: {
-        title: string;
-        description: string;
-    };
-}
-
 interface ResourceEcosystemViewerProps {
-    overview: ResourceEcosystemOverview;
+    title: string;
     resources: Resource[];
     resourceGroups: ResourceGroup[];
 }
@@ -112,43 +82,65 @@ interface ResourceGroupLabel {
 
 type ActiveTarget = { type: "resource"; id: string } | { type: "concept"; id: ConceptType } | null;
 
+const VISUALIZATION_INFO: VisualizationInfoContent = {
+    description:
+        "Explore how NIAGADS and partner resources connect to genomic features, data context, and access options.",
+    encodings: [
+        {
+            label: "Connections",
+            description: "Colored lines link a NIAGADS resource to its supported data types and access options.",
+        },
+        {
+            label: "Active features",
+            description: "Amber marks identify highlighted features; unrelated features fade.",
+        },
+        {
+            label: "Features",
+            description:
+                "The genomic landscape illustrates types of genomic features and annotations available through NIAGADS Open Access resources.",
+        },
+    ],
+    interactions: [
+        "Hover over, focus, click, or tap a resource to highlight its connections and display its description.",
+        "Click or tap a feature, context, or access layer to highlight connected resources.",
+        "The selected resource remains selected when focus leaves the viewer or you click outside it. Press Escape to clear temporary feature highlights.",
+        "Click `Explore resource` in the description box to open the selected resource in a new tab.",
+    ],
+};
+
 const CONCEPTS: Concept[] = [
     { id: "genes", label: "Genes" },
     { id: "variants", label: "Variants" },
-    { id: "gwas", label: "Genetic associations" },
+    { id: "gwas", label: "GWAS associations" },
     { id: "ld", label: "LD" },
     { id: "qtls", label: "Molecular QTLs" },
     { id: "regulatory", label: "Regulatory elements" },
     { id: "curatedEvidence", label: "Curated evidence" },
     { id: "adspData", label: "ADSP Data" },
-    { id: "biosamples", label: "Biosamples" },
-    { id: "phenotypes", label: "Phenotypes" },
-    { id: "openAccess", label: "Open" },
-    { id: "restrictedAccess", label: "Restricted" },
+    { id: "genomicAnnotations", label: "Genomic Annotations" },
+    { id: "geneticAssociations", label: "Genetic Associations" },
     { id: "downloads", label: "Downloads" },
-    { id: "cloudAccess", label: "API / Cloud" },
-    { id: "sequencing", label: "Sequencing" },
+    { id: "apiAccess", label: "API" },
+    { id: "webAccess", label: "Web" },
 ];
 
 const GENOMIC_BAND_LAYOUT: GenomicBandLayout[] = [
-    { id: "genes", x: 140, y: 150, labelDx: -29, labelDy: 44, connectorDx: -79, connectorDy: -30 },
-    { id: "variants", x: 310, y: 150, labelDx: 0, labelDy: 26, connectorDx: 0, connectorDy: -18 },
-    { id: "gwas", x: 310, y: 90, labelDx: 0, labelDy: -34, connectorDx: 0, connectorDy: -18 },
-    { id: "ld", x: 310, y: 210, labelDx: 0, labelDy: 54, connectorDx: 0, connectorDy: -18 },
-    { id: "qtls", x: 810, y: 168, labelDx: 30, labelDy: 78, connectorDx: 0, connectorDy: -36 },
-    { id: "regulatory", x: 570, y: 150, labelDx: 0, labelDy: 44, connectorDx: 0, connectorDy: -18 },
-    { id: "sequencing", x: 1160, y: 120, labelDx: 0, labelDy: 56, connectorDx: 0, connectorDy: -36 },
+    { id: "genes", x: 170, y: 150, labelDx: -29, labelDy: 44, connectorDx: -79, connectorDy: -30 },
+    { id: "variants", x: 350, y: 150, labelDx: 0, labelDy: 26, connectorDx: 0, connectorDy: -18 },
+    { id: "gwas", x: 350, y: 90, labelDx: 0, labelDy: -34, connectorDx: 0, connectorDy: -18 },
+    { id: "ld", x: 350, y: 210, labelDx: 0, labelDy: 54, connectorDx: 0, connectorDy: -18 },
+    { id: "qtls", x: 910, y: 168, labelDx: 30, labelDy: 78, connectorDx: 0, connectorDy: -36 },
+    { id: "regulatory", x: 630, y: 150, labelDx: 0, labelDy: 44, connectorDx: 0, connectorDy: -18 },
 ];
 
 const ACCESS_LAYOUT: AccessLayout[] = [
-    { id: "curatedEvidence", x: 201, y: 300, connectorY: 292, labelX: 170, labelY: 305 },
-    { id: "adspData", x: 365, y: 300, connectorY: 292, labelX: 330, labelY: 305 },
-    { id: "biosamples", x: 490, y: 300, connectorY: 292, labelX: 464, labelY: 305 },
-    { id: "phenotypes", x: 610, y: 300, connectorY: 292, labelX: 585, labelY: 305 },
-    { id: "openAccess", x: 760, y: 300, connectorY: 292, labelX: 760, labelY: 305 },
-    { id: "restrictedAccess", x: 865, y: 300, connectorY: 292, labelX: 850, labelY: 305 },
-    { id: "downloads", x: 982, y: 300, connectorY: 292, labelX: 970, labelY: 305 },
-    { id: "cloudAccess", x: 1124, y: 300, connectorY: 292, labelX: 1084, labelY: 305 },
+    { id: "curatedEvidence", x: 150, y: 300, connectorY: 292, labelX: 107, labelY: 305 },
+    { id: "adspData", x: 300, y: 300, connectorY: 292, labelX: 277, labelY: 305 },
+    { id: "genomicAnnotations", x: 460, y: 300, connectorY: 292, labelX: 407, labelY: 305 },
+    { id: "geneticAssociations", x: 650, y: 300, connectorY: 292, labelX: 597, labelY: 305 },
+    { id: "webAccess", x: 925, y: 300, connectorY: 292, labelX: 922, labelY: 305 },
+    { id: "apiAccess", x: 1013, y: 300, connectorY: 292, labelX: 1017, labelY: 305 },
+    { id: "downloads", x: 1125, y: 300, connectorY: 292, labelX: 1107, labelY: 305 },
 ];
 
 const LANDSCAPE_WIDTH = 1240;
@@ -184,12 +176,12 @@ function getFallbackResourceCenterX(index: number, resourceCount: number) {
 }
 
 const GENE_EXONS: Array<[number, number]> = [
-    [38, 46],
-    [138, 58],
-    [548, 80],
-    [668, 48],
-    [902, 26],
-    [1000, 52],
+    [68, 46],
+    [168, 58],
+    [608, 80],
+    [728, 48],
+    [1002, 26],
+    [1100, 52],
 ];
 
 // Deterministic schematic Manhattan profile; these are not measured association values.
@@ -210,32 +202,11 @@ const LD_VALUES = [
 ] as const;
 
 const LD_COLORS = ["var(--gray-100)", "var(--gray-300)", "var(--secondary-blue)", "var(--primary-blue)"] as const;
-
-const SEQUENCING_READS = [
-    [1052, 24, 101],
-    [1080, 18, 101],
-    [1110, 30, 101],
-    [1148, 20, 101],
-    [1062, 34, 108],
-    [1102, 22, 108],
-    [1132, 28, 108],
-    [1168, 18, 108],
-    [1044, 18, 115],
-    [1070, 26, 115],
-    [1108, 18, 115],
-    [1140, 32, 115],
-    [1050, 28, 122],
-    [1058, 42, 129],
-    [1068, 36, 136],
-    [1078, 52, 143],
-    [1090, 46, 122],
-    [1100, 58, 129],
-    [1112, 34, 136],
-    [1122, 48, 143],
-    [1132, 40, 122],
-    [1144, 54, 129],
-    [1156, 30, 136],
-    [1164, 44, 143],
+const ACTIVE_LD_COLORS = [
+    "var(--gray-100)",
+    "color-mix(in srgb, var(--active-feature-color) 25%, white)",
+    "color-mix(in srgb, var(--active-feature-color) 60%, white)",
+    "var(--active-feature-color)",
 ] as const;
 
 const conceptById = Object.fromEntries(CONCEPTS.map((concept) => [concept.id, concept])) as Record<
@@ -243,17 +214,23 @@ const conceptById = Object.fromEntries(CONCEPTS.map((concept) => [concept.id, co
     (typeof CONCEPTS)[number]
 >;
 
-export function ResourceEcosystemViewer({ overview, resources, resourceGroups }: ResourceEcosystemViewerProps) {
+export function ResourceEcosystemViewer({ title, resources, resourceGroups }: ResourceEcosystemViewerProps) {
+    const firstResourceId = resources[0]?.id ?? null;
     // Hovering or focusing a resource selects it persistently; taps/clicks also select it.
     // Concept highlights remain temporary.
     const [hovered, setHovered] = useState<ActiveTarget>(null);
-    const [selectedResourceId, setSelectedResourceId] = useState<string | null>(null);
+    const [selectedResourceId, setSelectedResourceId] = useState<string | null>(firstResourceId);
     const active = useMemo<ActiveTarget>(
-        () => (selectedResourceId ? { type: "resource", id: selectedResourceId } : hovered),
+        () =>
+            hovered?.type === "concept"
+                ? hovered
+                : selectedResourceId
+                  ? { type: "resource", id: selectedResourceId }
+                  : null,
         [selectedResourceId, hovered]
     );
     const [resourceCenterX, setResourceCenterX] = useState<Record<string, number>>({});
-    const shellRef = useRef<HTMLElement>(null);
+    const shellRef = useRef<HTMLDivElement>(null);
     const resourceRowRef = useRef<HTMLDivElement>(null);
     const resourceGridStyle = { "--resource-count": resources.length } as CSSProperties;
     const resourceById = useMemo(
@@ -267,7 +244,7 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
     const resourceGroupLabels = useMemo(
         () =>
             resources.reduce<ResourceGroupLabel[]>((labels, resource, index) => {
-                const label = resourceGroupById[resource.groupId].label;
+                const label = resourceGroupById[resource.groupId]?.label ?? "Resources";
                 const previous = labels.at(-1);
 
                 // FIXME: Groups sharing a label are merged only when their resources are adjacent in user-defined order.
@@ -355,8 +332,7 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
         return new Set<string>(conceptToResources[active.id]);
     }, [active, conceptToResources]);
 
-    // Clicking anywhere outside a resource, concept, or detail card clears the selection.
-    // Listen on document so a click outside the graph also dismisses a selection.
+    // Outside clicks clear temporary highlights without changing the selected resource.
     useEffect(() => {
         const handleDocumentPointerDown = (event: PointerEvent) => {
             const target = event.target;
@@ -367,17 +343,16 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
                 shell.contains(target) &&
                 (target.closest("[data-resource-id]") ||
                     target.closest("[data-concept-id]") ||
+                    target.closest(`.${styles["visualization-tools"]}`) ||
                     target.closest(`.${styles["resource-detail"]}`));
 
             if (!isInteractiveTarget) {
-                setSelectedResourceId(null);
                 setHovered(null);
             }
         };
 
         const handleDocumentKeyDown = (event: KeyboardEvent) => {
             if (event.key === "Escape") {
-                setSelectedResourceId(null);
                 setHovered(null);
             }
         };
@@ -400,8 +375,7 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
     };
 
     const activateConcept = (id: ConceptType) => {
-        // Concepts retain their temporary highlight, but do not lock project details.
-        setSelectedResourceId(null);
+        // Concept highlights do not change the selected resource.
         setHovered({ type: "concept", id });
     };
 
@@ -423,7 +397,7 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
 
     const detailResource = active?.type === "resource" ? resourceById[active.id] : undefined;
 
-    const ResourceLogo = detailResource?.logo ? RESOURCE_LOGOS[detailResource.logo] : NIAGADSLogo;
+    const resourceLogo = detailResource?.logo ?? <NIAGADSLogo />;
 
     const classForConcept = (id: ConceptType) =>
         [
@@ -434,13 +408,9 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
             .filter(Boolean)
             .join(" ");
 
-    const classForResource = (id: string, index: number) => {
-        const resource = resourceById[id];
-        const startsGroup = index > 0 && resources[index - 1].groupId !== resource.groupId;
-
+    const classForResource = (id: string) => {
         return [
             styles.resource,
-            startsGroup ? styles["group-start"] : "",
             active && !activeResources.has(id) ? styles.recede : "",
             activeResources.has(id) ? styles.active : "",
         ]
@@ -458,18 +428,30 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
             .join(" ");
 
     return (
-        <main className={styles.shell} ref={shellRef}>
-            <section className={styles.ecosystem} aria-label="NIAGADS homepage resource visualization prototype">
-                <div className={styles["ecosystem-intro"]}>
-                    <h2>{overview.title}</h2>
-                    <p>{overview.description}</p>
-                    <p className={styles["ecosystem-instruction"]}>{overview.instruction}</p>
+        <div
+            className={styles.shell}
+            ref={shellRef}
+            onBlur={(event) => {
+                if (!event.currentTarget.contains(event.relatedTarget)) {
+                    setHovered(null);
+                }
+            }}
+        >
+            <section className={styles.ecosystem} aria-label="NIAGADS homepage resource visualization">
+                <div className={styles["visualization-tools"]}>
+                    <h2>{title}</h2>
+                    <p className={styles["visualization-subtitle"]}>
+                        Select a resource to learn how it supports AD/ADRD genomics research, what data it provides, and
+                        how that data can be accessed.
+                    </p>
+                    <div className={styles["visualization-info"]}>
+                        <VisualizationInfo content={VISUALIZATION_INFO} />
+                    </div>
                 </div>
-
                 <div className={styles["resource-group-labels"]} aria-hidden="true" style={resourceGridStyle}>
                     {resourceGroupLabels.map((groupLabel) => (
                         <span
-                            className={styles["group-label"]}
+                            className={`${styles["group-label"]} ${groupLabel.start > 1 ? styles["group-start"] : ""}`}
                             key={`${groupLabel.label}-${groupLabel.start}`}
                             style={{ gridColumn: `${groupLabel.start} / span ${groupLabel.span}` }}
                         >
@@ -483,17 +465,15 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
                     ref={resourceRowRef}
                     style={resourceGridStyle}
                 >
-                    {resources.map((resource, resourceIndex) => (
+                    {resources.map((resource) => (
                         <button
-                            className={classForResource(resource.id, resourceIndex)}
+                            className={classForResource(resource.id)}
                             aria-label={resource.name}
                             data-resource-id={resource.id}
                             key={resource.id}
                             style={
                                 {
-                                    "--resource-color": resourceGroupById[resource.groupId].color,
-                                    // Other project buttons must remain clickable while one is selected.
-                                    pointerEvents: "auto",
+                                    "--resource-color": resource.badgeColor,
                                 } as CSSProperties
                             }
                             type="button"
@@ -511,43 +491,60 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
                     className={styles.landscape}
                     viewBox={`0 0 ${LANDSCAPE_WIDTH} 340`}
                     preserveAspectRatio="none"
-                    role="img"
-                    aria-labelledby="ecosystem-title ecosystem-desc"
+                    role="group"
+                    aria-label="NIAGADS Open Access Ecosystem"
+                    aria-describedby="ecosystem-desc"
                 >
-                    <title id="ecosystem-title">NIAGADS resource ecosystem concept landscape</title>
                     <desc id="ecosystem-desc">
                         Resources connect to a core genomic landscape plus peripheral context, evidence, download, and
-                        programmatic access zones. Hover or focus a resource or concept to highlight relevant
-                        connections.
+                        access zones. Hover or focus a resource or concept to highlight relevant connections.
                     </desc>
 
                     <defs>
                         <pattern id="regulatoryEnhancerPattern" width="6" height="6" patternUnits="userSpaceOnUse">
                             <rect width="6" height="6" fill="var(--gray-100)" />
-                            <path d="M-1 1 L1 -1 M0 6 L6 0 M5 7 L7 5" stroke="var(--gray-500)" strokeWidth="1" />
+                            <path
+                                d="M-1 1 L1 -1 M0 6 L6 0 M5 7 L7 5"
+                                stroke={
+                                    activeConcepts.has("regulatory") ? "var(--active-feature-color)" : "var(--gray-500)"
+                                }
+                                strokeWidth="1"
+                            />
                         </pattern>
                         <pattern id="regulatoryPromoterPattern" width="5" height="5" patternUnits="userSpaceOnUse">
                             <rect width="5" height="5" fill="var(--gray-100)" />
-                            <path d="M2.5 0 V5" stroke="var(--gray-500)" strokeWidth="1" />
+                            <path
+                                d="M2.5 0 V5"
+                                stroke={
+                                    activeConcepts.has("regulatory") ? "var(--active-feature-color)" : "var(--gray-500)"
+                                }
+                                strokeWidth="1"
+                            />
                         </pattern>
                         <pattern id="regulatorySilencerPattern" width="6" height="6" patternUnits="userSpaceOnUse">
                             <rect width="6" height="6" fill="var(--gray-100)" />
-                            <path d="M-1 5 L1 7 M0 0 L6 6 M5 -1 L7 1" stroke="var(--gray-500)" strokeWidth="1" />
+                            <path
+                                d="M-1 5 L1 7 M0 0 L6 6 M5 -1 L7 1"
+                                stroke={
+                                    activeConcepts.has("regulatory") ? "var(--active-feature-color)" : "var(--gray-500)"
+                                }
+                                strokeWidth="1"
+                            />
                         </pattern>
                     </defs>
 
                     <g className={styles["peripheral-frame"]} aria-hidden="true">
                         <path className={styles["utility-rule"]} d="M0 278 H1240" />
-                        <text className={styles["zone-label"]} x="76" y="305">
+                        <text className={styles["zone-label"]} x="0" y="305">
                             Context
                         </text>
-                        <path className={styles["utility-divider"]} d="M660 286 V316" />
-                        <text className={styles["zone-label"]} x="680" y="305">
+                        <path className={styles["utility-divider"]} d="M760 286 V316" />
+                        <text className={styles["zone-label"]} x="780" y="305">
                             Access
                         </text>
                     </g>
 
-                    <g className={styles["context-layer"]}>
+                    <g>
                         <path
                             className={styles["soft-contour"]}
                             d="M0 126 C235 76 392 95 530 132 S799 185 950 132 1138 100 1240 146"
@@ -562,38 +559,6 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
                     <line className={styles["gene-track-hit"]} x1="0" x2="1240" y1="150" y2="150" />
                     <line className={styles["genome-rail"]} x1="0" x2="1240" y1="150" y2="150" />
 
-                    <g className={styles["link-layer"]} aria-hidden="true">
-                        {resources.flatMap((resource, resourceIndex) =>
-                            resource.concepts.map((conceptId) => {
-                                const start =
-                                    resourceCenterX[resource.id] ??
-                                    getFallbackResourceCenterX(resourceIndex, resources.length);
-                                const connector = getConnectorGeometry(conceptId);
-                                const bend = Math.max(62, connector.anchorY - 58);
-                                const targetX = connector.x;
-                                const targetY = connector.y;
-                                const connectorPath = `M ${start} 42 C ${start} ${bend}, ${targetX} ${bend}, ${targetX} ${targetY}`;
-                                const isActiveLink = activeResources.has(resource.id) && activeConcepts.has(conceptId);
-                                return (
-                                    <g key={`${resource.id}-${conceptId}`}>
-                                        <path
-                                            className={pathClass(resource.id, conceptId)}
-                                            d={connectorPath}
-                                            style={{ stroke: resourceGroupById[resource.groupId].color }}
-                                        />
-                                        <circle
-                                            className={`${styles["link-target"]} ${isActiveLink ? styles.active : ""}`}
-                                            cx={targetX}
-                                            cy={targetY}
-                                            r="3.5"
-                                            style={{ fill: resourceGroupById[resource.groupId].color }}
-                                        />
-                                    </g>
-                                );
-                            })
-                        )}
-                    </g>
-
                     <g
                         className={classForConcept("gwas")}
                         tabIndex={0}
@@ -601,13 +566,13 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
                         aria-label="Genetic associations, shown as a schematic Manhattan plot"
                         {...conceptInteractions("gwas")}
                     >
-                        <rect fill="none" pointerEvents="all" x="250" y="42" width="120" height="90" rx="6" />
-                        <path className={styles["association-baseline"]} d="M261 128 H359" />
-                        <path className={styles["association-threshold"]} d="M261 96 H359" />
+                        <rect fill="none" pointerEvents="all" x="290" y="42" width="120" height="90" rx="6" />
+                        <path className={styles["association-baseline"]} d="M301 128 H399" />
+                        <path className={styles["association-threshold"]} d="M301 96 H399" />
                         {ASSOCIATION_POINT_Y.map((y, index) => (
                             <circle
                                 className={`${styles["association-point"]} ${y < 96 ? styles["association-point-significant"] : ""}`}
-                                cx={261 + index * 3.5}
+                                cx={301 + index * 3.5}
                                 cy={y}
                                 r={y < 96 ? 2.2 : 1.7}
                                 key={index}
@@ -625,7 +590,7 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
                     >
                         <rect
                             className={styles["gene-concept-hit-area"]}
-                            x="20"
+                            x="50"
                             y="118"
                             width="180"
                             height="84"
@@ -634,7 +599,7 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
                         {GENE_EXONS.map(([x, width]) => (
                             <rect className={styles["gene-exon"]} x={x} y="142" width={width} height="16" key={x} />
                         ))}
-                        <path className={styles["gene-direction"]} d="M46 142 V132 H66 M61 128 L66 132 L61 136" />
+                        <path className={styles["gene-direction"]} d="M76 142 V132 H96 M91 128 L96 132 L91 136" />
                         <GenomicLabel conceptId="genes" />
                     </g>
 
@@ -645,8 +610,8 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
                         aria-label="Variants"
                         {...conceptInteractions("variants")}
                     >
-                        <rect className={styles["variant-hit-area"]} x="252" y="134" width="116" height="48" rx="5" />
-                        {[268, 282, 296, 310, 324, 338, 352].map((x) => (
+                        <rect className={styles["variant-hit-area"]} x="292" y="134" width="116" height="48" rx="5" />
+                        {[308, 322, 336, 350, 364, 378, 392].map((x) => (
                             <path className={styles.variant} d={`M ${x} 145 l 5 5 l -5 5 l -5 -5 Z`} key={x} />
                         ))}
                         <GenomicLabel conceptId="variants" />
@@ -659,25 +624,25 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
                         aria-label="Linkage disequilibrium, shown as a schematic triangular pairwise matrix"
                         {...conceptInteractions("ld")}
                     >
-                        <rect className={styles["ld-hit-area"]} x="250" y="180" width="120" height="90" rx="6" />
-                        <path className={styles["ld-top-rule"]} d="M261 190 H359" />
+                        <rect className={styles["ld-hit-area"]} x="290" y="180" width="120" height="90" rx="6" />
+                        <path className={styles["ld-top-rule"]} d="M301 190 H399" />
                         {LD_VALUES[0].map((_, index) => (
                             <path
                                 className={styles["ld-tick"]}
-                                d={`M ${268 + index * 14} 182 V190`}
+                                d={`M ${308 + index * 14} 182 V190`}
                                 key={`tick-${index}`}
                             />
                         ))}
                         {LD_VALUES.map((row, rowIndex) =>
                             row.map((value, columnIndex) => {
-                                const cx = 268 + rowIndex * 7 + columnIndex * 14;
+                                const cx = 308 + rowIndex * 7 + columnIndex * 14;
                                 const cy = 197 + rowIndex * 7;
 
                                 return (
                                     <path
                                         className={styles["ld-cell"]}
                                         d={`M ${cx} ${cy - 7} L ${cx + 7} ${cy} L ${cx} ${cy + 7} L ${cx - 7} ${cy} Z`}
-                                        fill={LD_COLORS[value]}
+                                        fill={activeConcepts.has("ld") ? ACTIVE_LD_COLORS[value] : LD_COLORS[value]}
                                         key={`${rowIndex}-${columnIndex}`}
                                     />
                                 );
@@ -693,57 +658,13 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
                         aria-label="Molecular QTLs, shown as multiple relationships from a variant to genomic targets"
                         {...conceptInteractions("qtls")}
                     >
-                        <rect className={styles["qtl-hit-area"]} x="684" y="108" width="310" height="146" rx="6" />
-                        <path className={styles["qtl-bridge"]} d="M810 150 C798 122 772 122 760 150" />
-                        <path className={styles["qtl-bridge"]} d="M810 150 C785 205 732 205 700 158" />
-                        <path className={styles["qtl-bridge"]} d="M810 150 C835 196 890 196 915 158" />
-                        <path className={styles["qtl-bridge"]} d="M810 150 C850 222 940 222 980 150" />
-                        <path className={styles.variant} d="M810 144 l6 6 l-6 6 l-6 -6 Z" />
+                        <rect className={styles["qtl-hit-area"]} x="784" y="108" width="310" height="146" rx="6" />
+                        <path className={styles["qtl-bridge"]} d="M910 150 C898 122 872 122 860 150" />
+                        <path className={styles["qtl-bridge"]} d="M910 150 C885 205 832 205 800 158" />
+                        <path className={styles["qtl-bridge"]} d="M910 150 C935 196 990 196 1015 158" />
+                        <path className={styles["qtl-bridge"]} d="M910 150 C950 222 1040 222 1080 150" />
+                        <path className={styles.variant} d="M910 144 l6 6 l-6 6 l-6 -6 Z" />
                         <GenomicLabel conceptId="qtls" />
-                    </g>
-
-                    <g
-                        className={classForConcept("sequencing")}
-                        aria-label="Sequencing data, shown as aligned reads"
-                        role="button"
-                        tabIndex={0}
-                        {...conceptInteractions("sequencing")}
-                    >
-                        <rect
-                            className={styles["sequencing-hit-area"]}
-                            x="1070"
-                            y="92"
-                            width="170"
-                            height="110"
-                            rx="6"
-                        />
-                        <g>
-                            {SEQUENCING_READS.map(([x, width, y], index) => {
-                                const readX = 592.5 + x / 2;
-                                const readWidth = width / 2;
-                                const mismatchX = readX + Math.min(readWidth - 4, 14 + (index % 4) * 4.5);
-
-                                return (
-                                    <g key={`${x}-${width}`}>
-                                        <line
-                                            className={styles["sequencing-read"]}
-                                            x1={readX}
-                                            x2={readX + readWidth}
-                                            y1={y}
-                                            y2={y}
-                                        />
-                                        <line
-                                            className={styles["sequencing-base"]}
-                                            x1={mismatchX}
-                                            x2={mismatchX}
-                                            y1={y - 2.5}
-                                            y2={y + 2.5}
-                                        />
-                                    </g>
-                                );
-                            })}
-                        </g>
-                        <GenomicLabel conceptId="sequencing" />
                     </g>
 
                     <g
@@ -755,26 +676,26 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
                     >
                         <rect
                             className={styles["regulatory-hit-area"]}
-                            x="444"
+                            x="504"
                             y="104"
                             width="250"
                             height="94"
                             rx="6"
                         />
-                        <path className={styles["regulatory-loop"]} d="M476 142 C486 110 528 110 538 140" />
-                        <rect className={styles["regulatory-enhancer"]} x="460" y="142" width="32" height="16" rx="2" />
-                        <rect className={styles["regulatory-promoter"]} x="530" y="140" width="16" height="20" rx="2" />
-                        <rect className={styles["regulatory-silencer"]} x="650" y="143" width="28" height="14" rx="2" />
-                        <text className={styles["regulatory-micro-label"]} x="476" y="136" textAnchor="middle">
+                        <path className={styles["regulatory-loop"]} d="M536 142 C546 110 588 110 598 140" />
+                        <rect className={styles["regulatory-enhancer"]} x="520" y="142" width="32" height="16" rx="2" />
+                        <rect className={styles["regulatory-promoter"]} x="590" y="140" width="16" height="20" rx="2" />
+                        <rect className={styles["regulatory-silencer"]} x="710" y="143" width="28" height="14" rx="2" />
+                        <text className={styles["regulatory-micro-label"]} x="536" y="136" textAnchor="middle">
                             Enhancer
                         </text>
-                        <text className={styles["regulatory-micro-label"]} x="538" y="174" textAnchor="middle">
+                        <text className={styles["regulatory-micro-label"]} x="598" y="174" textAnchor="middle">
                             Promoter
                         </text>
-                        <text className={styles["regulatory-micro-label"]} x="588" y="136" textAnchor="middle">
+                        <text className={styles["regulatory-micro-label"]} x="648" y="136" textAnchor="middle">
                             Gene
                         </text>
-                        <text className={styles["regulatory-micro-label"]} x="664" y="136" textAnchor="middle">
+                        <text className={styles["regulatory-micro-label"]} x="724" y="136" textAnchor="middle">
                             Silencer
                         </text>
                         <GenomicLabel conceptId="regulatory" />
@@ -787,8 +708,8 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
                         aria-label="Curated evidence"
                         {...conceptInteractions("curatedEvidence")}
                     >
-                        <rect className={styles["utility-hit-area"]} x="130" y="282" width="150" height="40" rx="6" />
-                        <UtilityGlyph kind="evidence" x={138} y={288} />
+                        <rect className={styles["utility-hit-area"]} x="75" y="282" width="150" height="40" rx="6" />
+                        <UtilityGlyph kind="evidence" x={75} y={288} />
                         <UtilityLabel conceptId="curatedEvidence" />
                     </g>
 
@@ -799,57 +720,85 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
                         aria-label="ADSP Data"
                         {...conceptInteractions("adspData")}
                     >
-                        <rect className={styles["utility-hit-area"]} x="290" y="282" width="140" height="40" rx="6" />
-                        <UtilityGlyph kind="dna" x={298} y={288} />
+                        <rect className={styles["utility-hit-area"]} x="245" y="282" width="110" height="40" rx="6" />
+                        <UtilityGlyph kind="dna" x={245} y={288} />
                         <UtilityLabel conceptId="adspData" />
                     </g>
 
                     <g
-                        className={classForConcept("biosamples")}
+                        className={classForConcept("genomicAnnotations")}
                         tabIndex={0}
                         role="button"
-                        aria-label="Biosamples"
-                        {...conceptInteractions("biosamples")}
+                        aria-label="Genomic Annotations"
+                        {...conceptInteractions("genomicAnnotations")}
                     >
-                        <rect className={styles["utility-hit-area"]} x="430" y="282" width="120" height="40" rx="6" />
-                        <UtilityGlyph kind="biosample" x={438} y={288} />
-                        <UtilityLabel conceptId="biosamples" />
+                        <rect className={styles["utility-hit-area"]} x="375" y="282" width="175" height="40" rx="6" />
+                        <Layers
+                            className={styles["utility-glyph"]}
+                            x={375}
+                            y={288}
+                            width={24}
+                            height={24}
+                            aria-hidden="true"
+                        />
+                        <UtilityLabel conceptId="genomicAnnotations" />
                     </g>
 
                     <g
-                        className={classForConcept("phenotypes")}
+                        className={classForConcept("geneticAssociations")}
                         tabIndex={0}
                         role="button"
-                        aria-label="Harmonized phenotypes"
-                        {...conceptInteractions("phenotypes")}
+                        aria-label="Genetic Associations"
+                        {...conceptInteractions("geneticAssociations")}
                     >
-                        <rect className={styles["utility-hit-area"]} x="555" y="282" width="95" height="40" rx="6" />
-                        <UtilityGlyph kind="phenotype" x={563} y={288} />
-                        <UtilityLabel conceptId="phenotypes" />
+                        <rect className={styles["utility-hit-area"]} x="565" y="282" width="175" height="40" rx="6" />
+                        <ChartScatter
+                            className={styles["utility-glyph"]}
+                            x={565}
+                            y={288}
+                            width={24}
+                            height={24}
+                            aria-hidden="true"
+                        />
+                        <UtilityLabel conceptId="geneticAssociations" />
                     </g>
 
                     <g
-                        className={classForConcept("openAccess")}
+                        className={classForConcept("webAccess")}
                         tabIndex={0}
                         role="button"
-                        aria-label="Open access"
-                        {...conceptInteractions("openAccess")}
+                        aria-label="Web access"
+                        {...conceptInteractions("webAccess")}
                     >
-                        <rect className={styles["utility-hit-area"]} x="720" y="282" width="80" height="40" rx="6" />
-                        <UtilityGlyph kind="openLock" x={728} y={288} />
-                        <UtilityLabel conceptId="openAccess" />
+                        <rect className={styles["utility-hit-area"]} x="890" y="282" width="70" height="40" rx="6" />
+                        <Globe
+                            className={styles["utility-glyph"]}
+                            x={890}
+                            y={288}
+                            width={24}
+                            height={24}
+                            aria-hidden="true"
+                        />
+                        <UtilityLabel conceptId="webAccess" />
                     </g>
 
                     <g
-                        className={classForConcept("restrictedAccess")}
+                        className={classForConcept("apiAccess")}
                         tabIndex={0}
                         role="button"
-                        aria-label="Restricted access"
-                        {...conceptInteractions("restrictedAccess")}
+                        aria-label="API access"
+                        {...conceptInteractions("apiAccess")}
                     >
-                        <rect className={styles["utility-hit-area"]} x="810" y="282" width="110" height="40" rx="6" />
-                        <UtilityGlyph kind="closedLock" x={818} y={288} />
-                        <UtilityLabel conceptId="restrictedAccess" />
+                        <rect className={styles["utility-hit-area"]} x="985" y="282" width="60" height="40" rx="6" />
+                        <CodeXml
+                            className={styles["utility-glyph"]}
+                            x={985}
+                            y={288}
+                            width={24}
+                            height={24}
+                            aria-hidden="true"
+                        />
+                        <UtilityLabel conceptId="apiAccess" />
                     </g>
 
                     <g
@@ -859,57 +808,71 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
                         aria-label="Downloads"
                         {...conceptInteractions("downloads")}
                     >
-                        <rect className={styles["utility-hit-area"]} x="930" y="282" width="104" height="40" rx="6" />
-                        <UtilityGlyph kind="download" x={938} y={288} />
+                        <rect className={styles["utility-hit-area"]} x="1075" y="282" width="110" height="40" rx="6" />
+                        <UtilityGlyph kind="download" x={1075} y={288} />
                         <UtilityLabel conceptId="downloads" />
                     </g>
 
-                    <g
-                        className={classForConcept("cloudAccess")}
-                        tabIndex={0}
-                        role="button"
-                        aria-label="Programmatic and cloud access"
-                        {...conceptInteractions("cloudAccess")}
-                    >
-                        <rect className={styles["utility-hit-area"]} x="1044" y="282" width="161" height="40" rx="6" />
-                        <UtilityGlyph kind="cloud" x={1052} y={288} />
-                        <UtilityLabel conceptId="cloudAccess" />
+                    <g aria-hidden="true" pointerEvents="none">
+                        {resources.flatMap((resource, resourceIndex) =>
+                            resource.concepts.map((conceptId) => {
+                                const start =
+                                    resourceCenterX[resource.id] ??
+                                    getFallbackResourceCenterX(resourceIndex, resources.length);
+                                const connector = getConnectorGeometry(conceptId);
+                                const bend = Math.max(62, connector.anchorY - 58);
+                                const targetX = connector.x;
+                                const targetY = connector.y;
+                                const connectorPath = `M ${start} 42 C ${start} ${bend}, ${targetX} ${bend}, ${targetX} ${targetY}`;
+                                const isActiveLink = activeResources.has(resource.id) && activeConcepts.has(conceptId);
+                                return (
+                                    <g key={`${resource.id}-${conceptId}`}>
+                                        <path
+                                            className={pathClass(resource.id, conceptId)}
+                                            d={connectorPath}
+                                            style={{ stroke: resource.connectionColor }}
+                                        />
+                                        <circle
+                                            className={`${styles["link-target"]} ${isActiveLink ? styles.active : ""}`}
+                                            cx={targetX}
+                                            cy={targetY}
+                                            r="3.5"
+                                            style={{ fill: resource.connectionColor }}
+                                        />
+                                    </g>
+                                );
+                            })
+                        )}
                     </g>
                 </svg>
 
                 <div className={styles["resource-detail-slot"]}>
                     <Card
+                        outline={false}
                         aria-label={`${detailResource?.name ?? "NIAGADS resource ecosystem"} description`}
                         className={`${styles["resource-detail"]} ${detailResource ? "" : styles["default-detail"]}`}
                         style={
                             {
-                                "--resource-color": detailResource
-                                    ? resourceGroupById[detailResource.groupId].color
-                                    : "var(--primary-blue)",
+                                "--description-highlight-color":
+                                    detailResource?.descriptionHighlightColor ?? "var(--accent-teal)",
                             } as CSSProperties
                         }
                     >
                         <CardBody className={styles["resource-detail-body"]}>
                             {detailResource && (
-                                <div className={styles["resource-logo-container"]}>
-                                    <ResourceLogo
-                                        width={180}
-                                        style={{ height: "auto" }}
-                                        className={styles["resource-logo"]}
-                                        role="img"
-                                        aria-label={`${detailResource.name} logo`}
-                                    />
+                                <div
+                                    className={styles["resource-logo-container"]}
+                                    role="img"
+                                    aria-label={`${detailResource.name} logo`}
+                                >
+                                    {resourceLogo}
                                 </div>
                             )}
 
                             <div className={styles["resource-detail-content"]}>
-                                <div className={styles["resource-detail-header"]}>
-                                    <h2>{detailResource?.name ?? overview.defaultDetail.title}</h2>
-                                </div>
-
-                                <p>{detailResource?.description ?? overview.defaultDetail.description}</p>
+                                <h4>{detailResource?.name ?? ""}</h4>
+                                <p>{detailResource?.description ?? ""}</p>
                             </div>
-
                             {detailResource?.url && (
                                 <a
                                     className={styles["resource-detail-action"]}
@@ -924,7 +887,7 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
                     </Card>
                 </div>
             </section>
-        </main>
+        </div>
     );
 }
 
@@ -955,27 +918,8 @@ function UtilityLabel({ conceptId }: { conceptId: AccessConceptId }) {
     );
 }
 
-function UtilityGlyph({
-    kind,
-    x,
-    y,
-}: {
-    kind: "biosample" | "phenotype" | "evidence" | "dna" | "download" | "cloud" | "openLock" | "closedLock";
-    x: number;
-    y: number;
-}) {
+function UtilityGlyph({ kind, x, y }: { kind: "evidence" | "dna" | "download"; x: number; y: number }) {
     const glyph = {
-        biosample: (
-            <>
-                <path d="M8 2 h8 M9 2 v12 a3 3 0 0 0 6 0 V2 M9 11 h6" />
-            </>
-        ),
-        phenotype: (
-            <>
-                <rect x="4" y="4" width="16" height="18" rx="2" />
-                <path d="M9 4 V2 h6 v2 M8 13 l3 3 l6 -7" />
-            </>
-        ),
         evidence: (
             <>
                 <path d="M5 2 h9 l5 5 v6 M14 2 v5 h5 M5 2 v20 h10" />
@@ -990,28 +934,6 @@ function UtilityGlyph({
             </>
         ),
         download: <path d="M12 2 v13 M7 10 l5 5 l5 -5 M4 20 v2 h16 v-2" />,
-        cloud: (
-            <>
-                <path d="M6 19 h12 a4 4 0 0 0 0 -8 a6 6 0 0 0 -11.4 -1.8 A5 5 0 0 0 6 19 Z" />
-                <path d="m10 11 l-2 2 l2 2 M14 11 l2 2 l-2 2" />
-            </>
-        ),
-        openLock: (
-            <>
-                <rect x="5" y="10" width="14" height="12" rx="2" />
-                <path d="M9 10 V7 a4 4 0 0 1 7.5 -2" />
-                <circle cx="12" cy="15" r="1" />
-                <path d="M12 16 v2" />
-            </>
-        ),
-        closedLock: (
-            <>
-                <rect x="5" y="10" width="14" height="12" rx="2" />
-                <path d="M8 10 V7 a4 4 0 0 1 8 0 v3" />
-                <circle cx="12" cy="15" r="1" />
-                <path d="M12 16 v2" />
-            </>
-        ),
     }[kind];
 
     return (
