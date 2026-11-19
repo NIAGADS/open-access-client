@@ -1,11 +1,13 @@
+import { URLS } from "./url_ref";
+
 ## Data Repository and Access
 
 NIAGADS houses genomic, multi-omics, phenotypic, and related research data contributed by AD/ADRD
-studies and research programs. Controlled-access datasets, which require a <a href="https://niagads.scrollhelp.site/support/application-instructions" rel="noopener noreferrer" target="_blank">data access request</a>,
+studies and research programs. Controlled-access datasets, which require a <a href={URLS.DATA_ACCESS_REQUEST_INSTRUCTIONS} rel="noopener noreferrer" target="_blank">data access request</a>,
 include whole-genome and whole-exome sequencing, genotype data, functional genomic and other omics data, and associated phenotype
 information.
 
-Access is managed through the <a href="https://dss.niagads.org">NIAGADS Data Sharing Service</a> (DSS), with data shared according to NIH
+Access is managed through the <a href={URLS.DATA_SHARING_SERVICE}>NIAGADS Data Sharing Service</a> (DSS), with data shared according to NIH
 policy and the data-use limitations established by the contributing studies and institutions.
 Researchers can discover available datasets, submit Data Access Requests, and access approved data
 through the DSS.
@@ -15,16 +17,16 @@ through the DSS.
 NIAGADS also develops and maintains public resources that make AD/ADRD genomic data and knowledge
 available without a Data Access Request. Major resources include:
 
-- **NIAGADS GenomicsDB** <LinkOut href="https://www.niagads.org/genomics" label="Visit NIAGADS GenomicsDB" /> — integrates AD/ADRD GWAS summary statistics, ADSP sequence-derived
+- **NIAGADS GenomicsDB** <LinkOut href={URLS.GENOMICSDB} label="Visit NIAGADS GenomicsDB" /> — integrates AD/ADRD GWAS summary statistics, ADSP sequence-derived
   variants and annotations, and other genomic evidence, with gene-, variant-, and region-based
   exploration.
-- **FILER** <LinkOut href="https://filer2.niagads.org/" label="Visit FILER" /> — provides harmonized functional genomics and annotation datasets across human genome
+- **FILER** <LinkOut href={URLS.FILER} label="Visit FILER" /> — provides harmonized functional genomics and annotation datasets across human genome
   assemblies.
-- **ADSP FunGen xQTL Browser** <LinkOut href="https://xqtl.niagads.org" label="Visit ADSP FunGen xQTL Browser" /> — provides access to AD/ADRD-relevant expression and other molecular
+- **ADSP FunGen xQTL Browser** <LinkOut href={URLS.XQTL} label="Visit ADSP FunGen xQTL Browser" /> — provides access to AD/ADRD-relevant expression and other molecular
   QTL results.
-- **NIAGADS Open Access Data** <LinkOut href="https://dss.niagads.org/open-access-data-portal/" label="Visit NIAGADS Open Access Data" /> — provides downloadable datasets that can be distributed without
+- **NIAGADS Open Access Data** <LinkOut href={URLS.OPEN_ACCESS_DATA_PORTAL} label="Visit NIAGADS Open Access Data" /> — provides downloadable datasets that can be distributed without
   controlled-access authorization.
-- **NIAGADS Open Access API** <LinkOut href="https://api.niagads.org" label="Visit NIAGADS Open Access API" /> — provides programmatic access to NIAGADS open-access resources,
+- **NIAGADS Open Access API** <LinkOut href={URLS.OPEN_ACCESS_API} label="Visit NIAGADS Open Access API" /> — provides programmatic access to NIAGADS open-access resources,
   including GenomicsDB, FILER, and partner sites like ADVP.
 
 Together, these resources support finding relevant datasets to examining
@@ -33,7 +35,7 @@ into computational analyses.
 
 ## Alzheimer’s Disease Sequencing Project
 
-NIAGADS has served as the Data Coordinating Center for the <a href="https://adseq.org/" rel="noopener noreferrer" target="_blank">Alzheimer’s Disease Sequencing Project
+NIAGADS has served as the Data Coordinating Center for the <a href={URLS.ADSP} rel="noopener noreferrer" target="_blank">Alzheimer’s Disease Sequencing Project
 (ADSP)</a> since 2012. NIAGADS supports the organization, harmonization, distribution, and long-term
 stewardship of ADSP genomic data and associated resources.
 
@@ -42,7 +44,7 @@ stewardship of ADSP genomic data and associated resources.
 NIAGADS is happy to provide expertise and guidance to researchers working with AD/ADRD genomic data. This
 includes assistance with data discovery and access, data-sharing plans, letters of support for grant
 applications, identification of appropriate external repositories and resources, and technical
-guidance for the analysis and interpretation of datasets housed at NIAGADS. If you have questions for our team, please email <a href="mailto:help@niagads.org">help@niagads.org</a>.
+guidance for the analysis and interpretation of datasets housed at NIAGADS. If you have questions for our team, please email <a href={URLS.HELP_EMAIL}>help@niagads.org</a>.
 
 ## Funding
 
@@ -51,8 +53,4 @@ NIAGADS is supported by an NIH/NIA cooperative agreement (U24-AG041689).
 ## How to Cite
 
 For information on how to cite NIAGADS, data obtained from either the NIAGADS repository, or our
-Open Access Ecosystem, please see our <a
-href={
-"https://niagads.scrollhelp.site/support/acknowledging-and-citing-niagads-and-datasets" +
-"#AcknowledgingandCitingNIAGADSandDatasets-CitingNIAGADS"
-}>FAQ</a>.
+Open Access Ecosystem, please see our <a href={URLS.HOW_TO_CITE_FAQ}>FAQ</a>.

@@ -1,35 +1,7 @@
-import { ADVPLogo, NIAGADSFilerLogo, NIAGADSGenomicsDBLogo, NIAGADSXQTLLogo, NIAGADSDSSLogo, NIAGADSAPILogo, } from "@niagads/ui";
+import { ADVPLogo, NIAGADSFilerLogo, NIAGADSGenomicsDBLogo, NIAGADSXQTLLogo } from "@niagads/ui";
 
 import type { Resource } from "@/components/ResourceEcosystemViewer/ResourceEcosystemViewer";
-
-export const RESOURCE_ECOSYSTEM_OVERVIEW = {
-    title: "NIAGADS Ecosystem",
-    description: `Together with partner offerings, NIAGADS provides an integrated suite of resources for discovering, exploring, and accessing Alzheimer’s disease and related dementia genetics and genomics data.`,
-    instruction: "Explore the ecosystem through the resources below.",
-    defaultDetail: {
-        title: "Explore Open Access Ecosystem",
-        description:
-            "Select a resource to discover its genomic connections, available data, and access options.",
-    },
-};
-export const ECOSYSTEM_ACCESS_RESOURCES = [
-    {
-        id: "dss",
-        title: "Data Sharing Service",
-        description:
-            "Discover and request access to controlled-access genetic, genomic, and phenotypic datasets from AD/ADRD studies.",
-        url: "https://dss.niagads.org/datasets/",
-        logo: <NIAGADSDSSLogo />,
-    },
-    {
-        id: "api",
-        title: "Open Access API",
-        description:
-            "Programmatically search, retrieve, and integrate NIAGADS open-access data, metadata, and annotations.",
-        url: "https://api.niagads.org",
-        logo: <NIAGADSAPILogo />,
-    },
-] as const;
+import { URLS } from "@/data/url_ref";
 
 export const RESOURCE_GROUPS = [
     { id: "knowledgebase", label: "NIAGADS Resources", color: "var(--accent-teal)" },
@@ -45,7 +17,7 @@ export const RESOURCES: Resource[] = [
             ADSP variants, and functional annotations in the context of genes, variants, and genomic regions. 
             Researchers can search, browse, and integrate GWAS and sequencing results to investigate disease-associated loci 
             and their potential functional relevance.`,
-        url: "https://www.niagads.org/genomics",
+        url: URLS.GENOMICSDB,
         logo: <NIAGADSGenomicsDBLogo />,
         badgeColor: "#087e78",
         connectionColor: "#00b8ad",
@@ -71,7 +43,7 @@ export const RESOURCES: Resource[] = [
         description: `The ADSP FunGen xQTL Browser provides access to harmonized molecular QTL and fine-mapping results 
             in AD-relevant brain tissues and cell types. Researchers can explore how genetic variation affects gene expression 
             and other molecular traits.`,
-        url: "https://xqtl.niagads.org",
+        url: URLS.XQTL,
         logo: <NIAGADSXQTLLogo />,
         badgeColor: "#087e78",
         connectionColor: "#00b8ad",
@@ -83,7 +55,7 @@ export const RESOURCES: Resource[] = [
         id: "filer",
         badge: "FLR",
         name: "FILER",
-        url: "https://tf.lisanwanglab.org/FILER/",
+        url: URLS.FILER,
         logo: <NIAGADSFilerLogo />,
         badgeColor: "#087e78",
         connectionColor: "#00b8ad",
@@ -114,7 +86,7 @@ export const RESOURCES: Resource[] = [
         descriptionHighlightColor: "#FFCD05",
         description: `The Alzheimer’s Disease Variant Portal (ADVP) is a curated, harmonized collection of published genetic associations
              for AD and related phenotypes.`,
-        url: "https://advp.niagads.org",
+        url: URLS.ADVP,
         groupId: "partner",
         concepts: ["downloads", "gwas", "genes", "variants", "curatedEvidence", "webAccess", "geneticAssociations"],
     },
