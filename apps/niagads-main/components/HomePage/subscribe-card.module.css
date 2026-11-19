@@ -50,6 +50,7 @@
     background: var(--gray-50);
     border-color: var(--site-primary);
     color: var(--site-primary);
+    text-decoration: none;
 }
 
 .subscribe-button:focus-visible {

@@ -103,7 +103,6 @@
 
 .resource-detail-action:hover {
     background: color-mix(in srgb, var(--description-highlight-color) 55%, black);
-    text-decoration: none;
 }
 
 .resource-detail-action:focus-visible {

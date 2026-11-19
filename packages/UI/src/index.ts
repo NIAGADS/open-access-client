@@ -10,6 +10,7 @@ export * from "./Select";
 export * from "./TextInput";
 export * from "./LoadingSpinner";
 export * from "./InlineIcon";
+export * from "./LinkOut";
 export * from "./Badge";
 export * from "./Toggle";
 export * from "./FilterChip";
