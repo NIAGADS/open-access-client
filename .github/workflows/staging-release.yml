@@ -9,6 +9,13 @@ on:
     types:
       - closed
 
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  INSTANCE_ID: ${{ secrets.INSTANCE_ID }}
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  ECR_REGISTRY: ${{ vars.ECR_REGISTRY }}
+
 permissions:
   id-token: write # for OIDC for npm trusted publishers
   contents: read
