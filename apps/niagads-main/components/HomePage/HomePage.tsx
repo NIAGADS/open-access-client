@@ -1,6 +1,6 @@
 // "use client";
 
-import { RESOURCES, RESOURCE_GROUPS } from "@/data/resources";
+import { RESOURCES, RESOURCE_GROUPS, RESOURCE_ECOSYSTEM_OVERVIEW} from "@/data/resources";
 
 // import { useState } from "react";
 import { HeroQuickLinks } from "./HeroQuickLinks";
@@ -52,7 +52,7 @@ export const HomePage = () => {
 
             <div id="ecosystem" className={`${styles["home-page-section"]} ${styles["ecosystem-section"]}`}>
                 <ResourceEcosystemViewer
-                    title="NIAGADS Open Access Ecosystem"
+                    overview={RESOURCE_ECOSYSTEM_OVERVIEW}
                     resources={RESOURCES}
                     resourceGroups={RESOURCE_GROUPS}
                 />

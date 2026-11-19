@@ -1,6 +1,35 @@
-import { ADVPLogo, NIAGADSFilerLogo, NIAGADSGenomicsDBLogo, NIAGADSXQTLLogo } from "@niagads/ui";
+import { ADVPLogo, NIAGADSFilerLogo, NIAGADSGenomicsDBLogo, NIAGADSXQTLLogo, NIAGADSDSSLogo, NIAGADSAPILogo, } from "@niagads/ui";
 
 import type { Resource } from "@/components/ResourceEcosystemViewer/ResourceEcosystemViewer";
+
+export const RESOURCE_ECOSYSTEM_OVERVIEW = {
+    title: "NIAGADS Ecosystem",
+    description: `Together with partner offerings, NIAGADS provides an integrated suite of resources for discovering, exploring, and accessing Alzheimer’s disease and related dementia genetics and genomics data.`,
+    instruction: "Explore the ecosystem through the resources below.",
+    defaultDetail: {
+        title: "Explore Open Access Ecosystem",
+        description:
+            "Select a resource to discover its genomic connections, available data, and access options.",
+    },
+};
+export const ECOSYSTEM_ACCESS_RESOURCES = [
+    {
+        id: "dss",
+        title: "Data Sharing Service",
+        description:
+            "Discover and request access to controlled-access genetic, genomic, and phenotypic datasets from AD/ADRD studies.",
+        url: "https://dss.niagads.org/datasets/",
+        logo: <NIAGADSDSSLogo />,
+    },
+    {
+        id: "api",
+        title: "Open Access API",
+        description:
+            "Programmatically search, retrieve, and integrate NIAGADS open-access data, metadata, and annotations.",
+        url: "https://api.niagads.org",
+        logo: <NIAGADSAPILogo />,
+    },
+] as const;
 
 export const RESOURCE_GROUPS = [
     { id: "knowledgebase", label: "NIAGADS Resources", color: "var(--accent-teal)" },
