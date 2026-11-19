@@ -1,6 +1,6 @@
 # this Dockerfile uses conditional targets to build production, development, and staging deployments
 
-FROM node:24.15-bookworm-slim AS build-tools
+FROM node:24.15.0-trixie-slim AS build-tools
 
 ARG BUILD=production
 
@@ -59,7 +59,7 @@ COPY apps/${APP_DIR}/prod.build.env.local .env.local
 RUN npm run build-app \
     && npm prune --omit=dev
 
-FROM node:24.15-bookworm-slim AS base-runner
+FROM node:24.15.0-trixie-slim AS base-runner
 
 # 1. force update the OS packages to pull down newest security patches to 
 #    migitgate legacy CVEs since last image build
