@@ -1,15 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
-import { ECOSYSTEM_ACCESS_RESOURCES } from "@/data/resources";
 import { Card, CardBody, NIAGADSLogo } from "@niagads/ui";
 import { VisualizationInfo, type VisualizationInfoContent } from "@niagads/charts";
-import { Layers, ChartScatter, CodeXml, Globe, Database, Network } from "lucide-react";
+import { Layers, ChartScatter, CodeXml, Globe } from "lucide-react";
 import styles from "./resource-ecosystem.module.css";
-
-type EcosystemSection = "dss" | "api" | "open-access";
-
-const ECOSYSTEM_SECTIONS: EcosystemSection[] = ["dss", "api", "open-access"];
 
 export type ConceptType =
     | "genes"
@@ -73,17 +68,8 @@ export interface Resource {
     groupId: string;
     concepts: ConceptType[];
 }
-export interface ResourceEcosystemOverview {
-    title: string;
-    description: string;
-    instruction: string;
-    defaultDetail: {
-        title: string;
-        description: string;
-    };
-}
 interface ResourceEcosystemViewerProps {
-    overview: ResourceEcosystemOverview;
+    title: string;
     resources: Resource[];
     resourceGroups: ResourceGroup[];
 }
@@ -98,7 +84,7 @@ type ActiveTarget = { type: "resource"; id: string } | { type: "concept"; id: Co
 
 const VISUALIZATION_INFO: VisualizationInfoContent = {
     description:
-        "Explore how NIAGADS and partner resources connect to genomic features, data context, and access options. The genomic drawings are schematic, not measured data.",
+        "Explore how NIAGADS and partner resources connect to genomic features, data context, and access options.",
     encodings: [
         {
             label: "Connections",
@@ -117,7 +103,7 @@ const VISUALIZATION_INFO: VisualizationInfoContent = {
     interactions: [
         "Hover over, focus, click, or tap a resource to highlight its connections and display its description.",
         "Click or tap a feature, context, or access layer to highlight connected resources.",
-        "Press Escape or click outside the resource, feature, or description to clear the selection.",
+        "The selected resource remains selected when focus leaves the viewer or you click outside it. Press Escape to clear temporary feature highlights.",
         "Click `Explore resource` in the description box to open the selected resource in a new tab.",
     ],
 };
@@ -228,14 +214,19 @@ const conceptById = Object.fromEntries(CONCEPTS.map((concept) => [concept.id, co
     (typeof CONCEPTS)[number]
 >;
 
-export function ResourceEcosystemViewer({ overview, resources, resourceGroups }: ResourceEcosystemViewerProps) {
-    const [activeSection, setActiveSection] = useState<EcosystemSection>("open-access");
+export function ResourceEcosystemViewer({ title, resources, resourceGroups }: ResourceEcosystemViewerProps) {
+    const firstResourceId = resources[0]?.id ?? null;
     // Hovering or focusing a resource selects it persistently; taps/clicks also select it.
     // Concept highlights remain temporary.
     const [hovered, setHovered] = useState<ActiveTarget>(null);
-    const [selectedResourceId, setSelectedResourceId] = useState<string | null>("genomicsdb");
+    const [selectedResourceId, setSelectedResourceId] = useState<string | null>(firstResourceId);
     const active = useMemo<ActiveTarget>(
-        () => (selectedResourceId ? { type: "resource", id: selectedResourceId } : hovered),
+        () =>
+            hovered?.type === "concept"
+                ? hovered
+                : selectedResourceId
+                  ? { type: "resource", id: selectedResourceId }
+                  : null,
         [selectedResourceId, hovered]
     );
     const [resourceCenterX, setResourceCenterX] = useState<Record<string, number>>({});
@@ -271,7 +262,7 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
     useEffect(() => {
         const resourceRow = resourceRowRef.current;
 
-        if (activeSection !== "open-access" || !resourceRow) {
+        if (!resourceRow) {
             return;
         }
 
@@ -306,7 +297,7 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
         });
 
         return () => resizeObserver.disconnect();
-    }, [activeSection, resources]);
+    }, [resources]);
 
     const conceptToResources = useMemo(() => {
         return Object.fromEntries(
@@ -341,8 +332,7 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
         return new Set<string>(conceptToResources[active.id]);
     }, [active, conceptToResources]);
 
-    // Clicking anywhere outside a resource, concept, or detail card clears the selection.
-    // Listen on document so a click outside the graph also dismisses a selection.
+    // Outside clicks clear temporary highlights without changing the selected resource.
     useEffect(() => {
         const handleDocumentPointerDown = (event: PointerEvent) => {
             const target = event.target;
@@ -353,18 +343,16 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
                 shell.contains(target) &&
                 (target.closest("[data-resource-id]") ||
                     target.closest("[data-concept-id]") ||
-                    target.closest(`.${styles["open-access-tools"]}`) ||
+                    target.closest(`.${styles["visualization-tools"]}`) ||
                     target.closest(`.${styles["resource-detail"]}`));
 
             if (!isInteractiveTarget) {
-                setSelectedResourceId(null);
                 setHovered(null);
             }
         };
 
         const handleDocumentKeyDown = (event: KeyboardEvent) => {
             if (event.key === "Escape") {
-                setSelectedResourceId(null);
                 setHovered(null);
             }
         };
@@ -387,8 +375,7 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
     };
 
     const activateConcept = (id: ConceptType) => {
-        // Concepts retain their temporary highlight, but do not lock project details.
-        setSelectedResourceId(null);
+        // Concept highlights do not change the selected resource.
         setHovered({ type: "concept", id });
     };
 
@@ -407,33 +394,6 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
             }
         },
     });
-
-    const handleSectionKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>, section: EcosystemSection) => {
-        const currentIndex = ECOSYSTEM_SECTIONS.indexOf(section);
-        let nextIndex = currentIndex;
-
-        switch (event.key) {
-            case "ArrowRight":
-                nextIndex = (currentIndex + 1) % ECOSYSTEM_SECTIONS.length;
-                break;
-            case "ArrowLeft":
-                nextIndex = (currentIndex - 1 + ECOSYSTEM_SECTIONS.length) % ECOSYSTEM_SECTIONS.length;
-                break;
-            case "Home":
-                nextIndex = 0;
-                break;
-            case "End":
-                nextIndex = ECOSYSTEM_SECTIONS.length - 1;
-                break;
-            default:
-                return;
-        }
-
-        event.preventDefault();
-        const nextSection = ECOSYSTEM_SECTIONS[nextIndex];
-        setActiveSection(nextSection);
-        document.getElementById(`ecosystem-${nextSection}-tab`)?.focus();
-    };
 
     const detailResource = active?.type === "resource" ? resourceById[active.id] : undefined;
 
@@ -468,550 +428,463 @@ export function ResourceEcosystemViewer({ overview, resources, resourceGroups }:
             .join(" ");
 
     return (
-        <div className={styles.shell} ref={shellRef}>
-            <section className={styles.ecosystem} aria-labelledby="niagads-ecosystem-title">
-                <div className={styles["ecosystem-intro"]}>
-                    <h2 id="niagads-ecosystem-title">{overview.title}</h2>
-                    <p>{overview.description}</p>
+        <div
+            className={styles.shell}
+            ref={shellRef}
+            onBlur={(event) => {
+                if (!event.currentTarget.contains(event.relatedTarget)) {
+                    setHovered(null);
+                }
+            }}
+        >
+            <section className={styles.ecosystem} aria-label="NIAGADS homepage resource visualization">
+                <div className={styles["visualization-tools"]}>
+                    <h2>{title}</h2>
+                    <p className={styles["visualization-subtitle"]}>
+                        Select a resource to learn how it supports AD/ADRD genomics research, what data it provides, and
+                        how that data can be accessed.
+                    </p>
+                    <div className={styles["visualization-info"]}>
+                        <VisualizationInfo content={VISUALIZATION_INFO} />
+                    </div>
+                </div>
+                <div className={styles["resource-group-labels"]} aria-hidden="true" style={resourceGridStyle}>
+                    {resourceGroupLabels.map((groupLabel) => (
+                        <span
+                            className={`${styles["group-label"]} ${groupLabel.start > 1 ? styles["group-start"] : ""}`}
+                            key={`${groupLabel.label}-${groupLabel.start}`}
+                            style={{ gridColumn: `${groupLabel.start} / span ${groupLabel.span}` }}
+                        >
+                            {groupLabel.label}
+                        </span>
+                    ))}
+                </div>
+                <div
+                    className={styles["resource-row"]}
+                    aria-label="Resources"
+                    ref={resourceRowRef}
+                    style={resourceGridStyle}
+                >
+                    {resources.map((resource) => (
+                        <button
+                            className={classForResource(resource.id)}
+                            aria-label={resource.name}
+                            data-resource-id={resource.id}
+                            key={resource.id}
+                            style={
+                                {
+                                    "--resource-color": resource.badgeColor,
+                                } as CSSProperties
+                            }
+                            type="button"
+                            aria-pressed={selectedResourceId === resource.id}
+                            onFocus={() => selectResource(resource.id)}
+                            onMouseEnter={() => selectResource(resource.id)}
+                            onClick={() => selectResource(resource.id)}
+                        >
+                            <span className={styles.badge}>{resource.name}</span>
+                        </button>
+                    ))}
                 </div>
 
-                <div className={styles["ecosystem-tab-list"]} role="tablist" aria-label="NIAGADS ecosystem sections">
-                    {ECOSYSTEM_ACCESS_RESOURCES.map((resource) => {
-                        const sectionId: EcosystemSection = resource.id;
-                        const isActive = activeSection === sectionId;
+                <svg
+                    className={styles.landscape}
+                    viewBox={`0 0 ${LANDSCAPE_WIDTH} 340`}
+                    preserveAspectRatio="none"
+                    role="group"
+                    aria-label="NIAGADS Open Access Ecosystem"
+                    aria-describedby="ecosystem-desc"
+                >
+                    <desc id="ecosystem-desc">
+                        Resources connect to a core genomic landscape plus peripheral context, evidence, download, and
+                        access zones. Hover or focus a resource or concept to highlight relevant connections.
+                    </desc>
 
-                        return (
-                            <button
-                                key={resource.id}
-                                id={`ecosystem-${resource.id}-tab`}
-                                className={styles["ecosystem-tab"]}
-                                type="button"
-                                role="tab"
-                                aria-selected={isActive}
-                                aria-controls={`ecosystem-${resource.id}-panel`}
-                                tabIndex={isActive ? 0 : -1}
-                                data-active={isActive}
-                                onClick={() => setActiveSection(sectionId)}
-                                onKeyDown={(event: React.KeyboardEvent<HTMLButtonElement>) =>
-                                    handleSectionKeyDown(event, sectionId)
+                    <defs>
+                        <pattern id="regulatoryEnhancerPattern" width="6" height="6" patternUnits="userSpaceOnUse">
+                            <rect width="6" height="6" fill="var(--gray-100)" />
+                            <path
+                                d="M-1 1 L1 -1 M0 6 L6 0 M5 7 L7 5"
+                                stroke={
+                                    activeConcepts.has("regulatory") ? "var(--active-feature-color)" : "var(--gray-500)"
                                 }
-                            >
-                                {resource.id === "dss" ? <Database aria-hidden="true" /> : <CodeXml aria-hidden="true" />}
-                                <span className={styles["ecosystem-tab-text"]}>
-                                    <strong>{resource.title}</strong>
-                                    <span>{resource.id === "dss" ? "Controlled-access data" : "Programmatic data access"}</span>
-                                </span>
-                            </button>
-                        );
-                    })}
-                    <button
-                        id="ecosystem-open-access-tab"
-                        className={styles["ecosystem-tab"]}
-                        type="button"
-                        role="tab"
-                        aria-selected={activeSection === "open-access"}
-                        aria-controls="ecosystem-open-access-panel"
-                        tabIndex={activeSection === "open-access" ? 0 : -1}
-                        data-active={activeSection === "open-access"}
-                        onClick={() => setActiveSection("open-access")}
-                        onKeyDown={(event: React.KeyboardEvent<HTMLButtonElement>) =>
-                            handleSectionKeyDown(event, "open-access")
+                                strokeWidth="1"
+                            />
+                        </pattern>
+                        <pattern id="regulatoryPromoterPattern" width="5" height="5" patternUnits="userSpaceOnUse">
+                            <rect width="5" height="5" fill="var(--gray-100)" />
+                            <path
+                                d="M2.5 0 V5"
+                                stroke={
+                                    activeConcepts.has("regulatory") ? "var(--active-feature-color)" : "var(--gray-500)"
+                                }
+                                strokeWidth="1"
+                            />
+                        </pattern>
+                        <pattern id="regulatorySilencerPattern" width="6" height="6" patternUnits="userSpaceOnUse">
+                            <rect width="6" height="6" fill="var(--gray-100)" />
+                            <path
+                                d="M-1 5 L1 7 M0 0 L6 6 M5 -1 L7 1"
+                                stroke={
+                                    activeConcepts.has("regulatory") ? "var(--active-feature-color)" : "var(--gray-500)"
+                                }
+                                strokeWidth="1"
+                            />
+                        </pattern>
+                    </defs>
+
+                    <g className={styles["peripheral-frame"]} aria-hidden="true">
+                        <path className={styles["utility-rule"]} d="M0 278 H1240" />
+                        <text className={styles["zone-label"]} x="0" y="305">
+                            Context
+                        </text>
+                        <path className={styles["utility-divider"]} d="M760 286 V316" />
+                        <text className={styles["zone-label"]} x="780" y="305">
+                            Access
+                        </text>
+                    </g>
+
+                    <g>
+                        <path
+                            className={styles["soft-contour"]}
+                            d="M0 126 C235 76 392 95 530 132 S799 185 950 132 1138 100 1240 146"
+                        />
+                        <path
+                            className={styles["soft-contour"]}
+                            d="M0 265 C274 216 410 254 556 242 S785 204 910 249 1082 286 1240 244"
+                        />
+                        <line className={styles["resource-rail"]} x1="0" x2="1240" y1="32" y2="32" />
+                    </g>
+
+                    <line className={styles["gene-track-hit"]} x1="0" x2="1240" y1="150" y2="150" />
+                    <line className={styles["genome-rail"]} x1="0" x2="1240" y1="150" y2="150" />
+
+                    <g
+                        className={classForConcept("gwas")}
+                        tabIndex={0}
+                        role="button"
+                        aria-label="Genetic associations, shown as a schematic Manhattan plot"
+                        {...conceptInteractions("gwas")}
+                    >
+                        <rect fill="none" pointerEvents="all" x="290" y="42" width="120" height="90" rx="6" />
+                        <path className={styles["association-baseline"]} d="M301 128 H399" />
+                        <path className={styles["association-threshold"]} d="M301 96 H399" />
+                        {ASSOCIATION_POINT_Y.map((y, index) => (
+                            <circle
+                                className={`${styles["association-point"]} ${y < 96 ? styles["association-point-significant"] : ""}`}
+                                cx={301 + index * 3.5}
+                                cy={y}
+                                r={y < 96 ? 2.2 : 1.7}
+                                key={index}
+                            />
+                        ))}
+                        <GenomicLabel conceptId="gwas" />
+                    </g>
+
+                    <g
+                        className={classForConcept("genes")}
+                        tabIndex={0}
+                        role="button"
+                        aria-label="Genes"
+                        {...conceptInteractions("genes")}
+                    >
+                        <rect
+                            className={styles["gene-concept-hit-area"]}
+                            x="50"
+                            y="118"
+                            width="180"
+                            height="84"
+                            rx="6"
+                        />
+                        {GENE_EXONS.map(([x, width]) => (
+                            <rect className={styles["gene-exon"]} x={x} y="142" width={width} height="16" key={x} />
+                        ))}
+                        <path className={styles["gene-direction"]} d="M76 142 V132 H96 M91 128 L96 132 L91 136" />
+                        <GenomicLabel conceptId="genes" />
+                    </g>
+
+                    <g
+                        className={classForConcept("variants")}
+                        tabIndex={0}
+                        role="button"
+                        aria-label="Variants"
+                        {...conceptInteractions("variants")}
+                    >
+                        <rect className={styles["variant-hit-area"]} x="292" y="134" width="116" height="48" rx="5" />
+                        {[308, 322, 336, 350, 364, 378, 392].map((x) => (
+                            <path className={styles.variant} d={`M ${x} 145 l 5 5 l -5 5 l -5 -5 Z`} key={x} />
+                        ))}
+                        <GenomicLabel conceptId="variants" />
+                    </g>
+
+                    <g
+                        className={classForConcept("ld")}
+                        tabIndex={0}
+                        role="button"
+                        aria-label="Linkage disequilibrium, shown as a schematic triangular pairwise matrix"
+                        {...conceptInteractions("ld")}
+                    >
+                        <rect className={styles["ld-hit-area"]} x="290" y="180" width="120" height="90" rx="6" />
+                        <path className={styles["ld-top-rule"]} d="M301 190 H399" />
+                        {LD_VALUES[0].map((_, index) => (
+                            <path
+                                className={styles["ld-tick"]}
+                                d={`M ${308 + index * 14} 182 V190`}
+                                key={`tick-${index}`}
+                            />
+                        ))}
+                        {LD_VALUES.map((row, rowIndex) =>
+                            row.map((value, columnIndex) => {
+                                const cx = 308 + rowIndex * 7 + columnIndex * 14;
+                                const cy = 197 + rowIndex * 7;
+
+                                return (
+                                    <path
+                                        className={styles["ld-cell"]}
+                                        d={`M ${cx} ${cy - 7} L ${cx + 7} ${cy} L ${cx} ${cy + 7} L ${cx - 7} ${cy} Z`}
+                                        fill={activeConcepts.has("ld") ? ACTIVE_LD_COLORS[value] : LD_COLORS[value]}
+                                        key={`${rowIndex}-${columnIndex}`}
+                                    />
+                                );
+                            })
+                        )}
+                        <GenomicLabel conceptId="ld" />
+                    </g>
+
+                    <g
+                        className={classForConcept("qtls")}
+                        tabIndex={0}
+                        role="button"
+                        aria-label="Molecular QTLs, shown as multiple relationships from a variant to genomic targets"
+                        {...conceptInteractions("qtls")}
+                    >
+                        <rect className={styles["qtl-hit-area"]} x="784" y="108" width="310" height="146" rx="6" />
+                        <path className={styles["qtl-bridge"]} d="M910 150 C898 122 872 122 860 150" />
+                        <path className={styles["qtl-bridge"]} d="M910 150 C885 205 832 205 800 158" />
+                        <path className={styles["qtl-bridge"]} d="M910 150 C935 196 990 196 1015 158" />
+                        <path className={styles["qtl-bridge"]} d="M910 150 C950 222 1040 222 1080 150" />
+                        <path className={styles.variant} d="M910 144 l6 6 l-6 6 l-6 -6 Z" />
+                        <GenomicLabel conceptId="qtls" />
+                    </g>
+
+                    <g
+                        className={classForConcept("regulatory")}
+                        tabIndex={0}
+                        role="button"
+                        aria-label="Regulatory elements"
+                        {...conceptInteractions("regulatory")}
+                    >
+                        <rect
+                            className={styles["regulatory-hit-area"]}
+                            x="504"
+                            y="104"
+                            width="250"
+                            height="94"
+                            rx="6"
+                        />
+                        <path className={styles["regulatory-loop"]} d="M536 142 C546 110 588 110 598 140" />
+                        <rect className={styles["regulatory-enhancer"]} x="520" y="142" width="32" height="16" rx="2" />
+                        <rect className={styles["regulatory-promoter"]} x="590" y="140" width="16" height="20" rx="2" />
+                        <rect className={styles["regulatory-silencer"]} x="710" y="143" width="28" height="14" rx="2" />
+                        <text className={styles["regulatory-micro-label"]} x="536" y="136" textAnchor="middle">
+                            Enhancer
+                        </text>
+                        <text className={styles["regulatory-micro-label"]} x="598" y="174" textAnchor="middle">
+                            Promoter
+                        </text>
+                        <text className={styles["regulatory-micro-label"]} x="648" y="136" textAnchor="middle">
+                            Gene
+                        </text>
+                        <text className={styles["regulatory-micro-label"]} x="724" y="136" textAnchor="middle">
+                            Silencer
+                        </text>
+                        <GenomicLabel conceptId="regulatory" />
+                    </g>
+
+                    <g
+                        className={classForConcept("curatedEvidence")}
+                        tabIndex={0}
+                        role="button"
+                        aria-label="Curated evidence"
+                        {...conceptInteractions("curatedEvidence")}
+                    >
+                        <rect className={styles["utility-hit-area"]} x="75" y="282" width="150" height="40" rx="6" />
+                        <UtilityGlyph kind="evidence" x={75} y={288} />
+                        <UtilityLabel conceptId="curatedEvidence" />
+                    </g>
+
+                    <g
+                        className={classForConcept("adspData")}
+                        tabIndex={0}
+                        role="button"
+                        aria-label="ADSP Data"
+                        {...conceptInteractions("adspData")}
+                    >
+                        <rect className={styles["utility-hit-area"]} x="245" y="282" width="110" height="40" rx="6" />
+                        <UtilityGlyph kind="dna" x={245} y={288} />
+                        <UtilityLabel conceptId="adspData" />
+                    </g>
+
+                    <g
+                        className={classForConcept("genomicAnnotations")}
+                        tabIndex={0}
+                        role="button"
+                        aria-label="Genomic Annotations"
+                        {...conceptInteractions("genomicAnnotations")}
+                    >
+                        <rect className={styles["utility-hit-area"]} x="375" y="282" width="175" height="40" rx="6" />
+                        <Layers
+                            className={styles["utility-glyph"]}
+                            x={375}
+                            y={288}
+                            width={24}
+                            height={24}
+                            aria-hidden="true"
+                        />
+                        <UtilityLabel conceptId="genomicAnnotations" />
+                    </g>
+
+                    <g
+                        className={classForConcept("geneticAssociations")}
+                        tabIndex={0}
+                        role="button"
+                        aria-label="Genetic Associations"
+                        {...conceptInteractions("geneticAssociations")}
+                    >
+                        <rect className={styles["utility-hit-area"]} x="565" y="282" width="175" height="40" rx="6" />
+                        <ChartScatter
+                            className={styles["utility-glyph"]}
+                            x={565}
+                            y={288}
+                            width={24}
+                            height={24}
+                            aria-hidden="true"
+                        />
+                        <UtilityLabel conceptId="geneticAssociations" />
+                    </g>
+
+                    <g
+                        className={classForConcept("webAccess")}
+                        tabIndex={0}
+                        role="button"
+                        aria-label="Web access"
+                        {...conceptInteractions("webAccess")}
+                    >
+                        <rect className={styles["utility-hit-area"]} x="890" y="282" width="70" height="40" rx="6" />
+                        <Globe
+                            className={styles["utility-glyph"]}
+                            x={890}
+                            y={288}
+                            width={24}
+                            height={24}
+                            aria-hidden="true"
+                        />
+                        <UtilityLabel conceptId="webAccess" />
+                    </g>
+
+                    <g
+                        className={classForConcept("apiAccess")}
+                        tabIndex={0}
+                        role="button"
+                        aria-label="API access"
+                        {...conceptInteractions("apiAccess")}
+                    >
+                        <rect className={styles["utility-hit-area"]} x="985" y="282" width="60" height="40" rx="6" />
+                        <CodeXml
+                            className={styles["utility-glyph"]}
+                            x={985}
+                            y={288}
+                            width={24}
+                            height={24}
+                            aria-hidden="true"
+                        />
+                        <UtilityLabel conceptId="apiAccess" />
+                    </g>
+
+                    <g
+                        className={classForConcept("downloads")}
+                        tabIndex={0}
+                        role="button"
+                        aria-label="Downloads"
+                        {...conceptInteractions("downloads")}
+                    >
+                        <rect className={styles["utility-hit-area"]} x="1075" y="282" width="110" height="40" rx="6" />
+                        <UtilityGlyph kind="download" x={1075} y={288} />
+                        <UtilityLabel conceptId="downloads" />
+                    </g>
+
+                    <g aria-hidden="true" pointerEvents="none">
+                        {resources.flatMap((resource, resourceIndex) =>
+                            resource.concepts.map((conceptId) => {
+                                const start =
+                                    resourceCenterX[resource.id] ??
+                                    getFallbackResourceCenterX(resourceIndex, resources.length);
+                                const connector = getConnectorGeometry(conceptId);
+                                const bend = Math.max(62, connector.anchorY - 58);
+                                const targetX = connector.x;
+                                const targetY = connector.y;
+                                const connectorPath = `M ${start} 42 C ${start} ${bend}, ${targetX} ${bend}, ${targetX} ${targetY}`;
+                                const isActiveLink = activeResources.has(resource.id) && activeConcepts.has(conceptId);
+                                return (
+                                    <g key={`${resource.id}-${conceptId}`}>
+                                        <path
+                                            className={pathClass(resource.id, conceptId)}
+                                            d={connectorPath}
+                                            style={{ stroke: resource.connectionColor }}
+                                        />
+                                        <circle
+                                            className={`${styles["link-target"]} ${isActiveLink ? styles.active : ""}`}
+                                            cx={targetX}
+                                            cy={targetY}
+                                            r="3.5"
+                                            style={{ fill: resource.connectionColor }}
+                                        />
+                                    </g>
+                                );
+                            })
+                        )}
+                    </g>
+                </svg>
+
+                <div className={styles["resource-detail-slot"]}>
+                    <Card
+                        outline={false}
+                        aria-label={`${detailResource?.name ?? "NIAGADS resource ecosystem"} description`}
+                        className={`${styles["resource-detail"]} ${detailResource ? "" : styles["default-detail"]}`}
+                        style={
+                            {
+                                "--description-highlight-color":
+                                    detailResource?.descriptionHighlightColor ?? "var(--accent-teal)",
+                            } as CSSProperties
                         }
                     >
-                        <Network aria-hidden="true" />
-                        <span className={styles["ecosystem-tab-text"]}>
-                            <strong>Open Access</strong>
-                            <span>Explore genomic resources</span>
-                        </span>
-                    </button>
-                </div>
-
-                <div className={styles["ecosystem-content"]}>
-                    {ECOSYSTEM_ACCESS_RESOURCES.map((resource) => (
-                        <section
-                            key={resource.id}
-                            id={`ecosystem-${resource.id}-panel`}
-                            role="tabpanel"
-                            aria-labelledby={`ecosystem-${resource.id}-tab`}
-                            tabIndex={0}
-                            hidden={activeSection !== resource.id}
-                            className={styles["ecosystem-access-panel"]}
-                        >
-                            <div className={styles["ecosystem-access-content"]}>
-                                <div className={styles["ecosystem-access-logo"]} aria-hidden="true">
-                                    {resource.logo}
-                                </div>
-                                <div>
-                                    <h3>{resource.title}</h3>
-                                    <p>{resource.description}</p>
-                                    <a
-                                        className={styles["ecosystem-access-link"]}
-                                        href={resource.url}
-                                        rel="noopener noreferrer"
-                                        target="_blank"
-                                    >
-                                        Explore resource <span aria-hidden="true">→</span>
-                                    </a>
-                                </div>
-                            </div>
-                        </section>
-                    ))}
-                    <section
-                        id="ecosystem-open-access-panel"
-                        role="tabpanel"
-                        aria-labelledby="ecosystem-open-access-tab"
-                        tabIndex={0}
-                        hidden={activeSection !== "open-access"}
-                        className={styles["ecosystem-open-access-panel"]}
-                    >
-                        <div className={styles["open-access-tools"]}>
-                             <p>{overview.defaultDetail.description}</p>
-                             <div className={styles["open-access-info"]}>
-                                <VisualizationInfo content={VISUALIZATION_INFO} />
-                            </div>
-                        </div>
-                        <div
-                            className={styles["resource-group-labels"]}
-                            aria-hidden="true"
-                            style={resourceGridStyle}
-                        >
-                            {resourceGroupLabels.map((groupLabel) => (
-                                <span
-                                    className={`${styles["group-label"]} ${groupLabel.start > 1 ? styles["group-start"] : ""}`}
-                                    key={`${groupLabel.label}-${groupLabel.start}`}
-                                    style={{ gridColumn: `${groupLabel.start} / span ${groupLabel.span}` }}
+                        <CardBody className={styles["resource-detail-body"]}>
+                            {detailResource && (
+                                <div
+                                    className={styles["resource-logo-container"]}
+                                    role="img"
+                                    aria-label={`${detailResource.name} logo`}
                                 >
-                                    {groupLabel.label}
-                                </span>
-                            ))}
-                        </div>
-                        <div
-                            className={styles["resource-row"]}
-                            aria-label="Resources"
-                            ref={resourceRowRef}
-                            style={resourceGridStyle}
-                        >
-                            {resources.map((resource) => (
-                                <button
-                                    className={classForResource(resource.id)}   
-                                    aria-label={resource.name}
-                                    data-resource-id={resource.id}
-                                    key={resource.id}
-                                    style={
-                                        {
-                                            "--resource-color": resource.badgeColor,
-                                        } as CSSProperties
-                                    }
-                                    type="button"
-                                    aria-pressed={selectedResourceId === resource.id}
-                                    onFocus={() => selectResource(resource.id)}
-                                    onMouseEnter={() => selectResource(resource.id)}
-                                    onClick={() => selectResource(resource.id)}
+                                    {resourceLogo}
+                                </div>
+                            )}
+
+                            <div className={styles["resource-detail-content"]}>
+                                <h4>{detailResource?.name ?? ""}</h4>
+                                <p>{detailResource?.description ?? ""}</p>
+                            </div>
+                            {detailResource?.url && (
+                                <a
+                                    className={styles["resource-detail-action"]}
+                                    href={detailResource.url}
+                                    rel="noopener noreferrer"
+                                    target="_blank"
                                 >
-                                    <span className={styles.badge}>{resource.name}</span>
-                                </button>
-                            ))}
-                        </div>
-
-                        <svg
-                            className={styles.landscape}
-                            viewBox={`0 0 ${LANDSCAPE_WIDTH} 340`}
-                            preserveAspectRatio="none"
-                            role="group"
-                            aria-label="NIAGADS Open Access Ecosystem"
-                            aria-describedby="ecosystem-desc"
-                        >
-                            <desc id="ecosystem-desc">
-                                Resources connect to a core genomic landscape plus peripheral context, evidence, download, and
-                                access zones. Hover or focus a resource or concept to highlight relevant connections.
-                            </desc>
-
-                            <defs>
-                                <pattern id="regulatoryEnhancerPattern" width="6" height="6" patternUnits="userSpaceOnUse">
-                                    <rect width="6" height="6" fill="var(--gray-100)" />
-                                    <path
-                                        d="M-1 1 L1 -1 M0 6 L6 0 M5 7 L7 5"
-                                        stroke={
-                                            activeConcepts.has("regulatory") ? "var(--active-feature-color)" : "var(--gray-500)"
-                                        }
-                                        strokeWidth="1"
-                                    />
-                                </pattern>
-                                <pattern id="regulatoryPromoterPattern" width="5" height="5" patternUnits="userSpaceOnUse">
-                                    <rect width="5" height="5" fill="var(--gray-100)" />
-                                    <path
-                                        d="M2.5 0 V5"
-                                        stroke={
-                                            activeConcepts.has("regulatory") ? "var(--active-feature-color)" : "var(--gray-500)"
-                                        }
-                                        strokeWidth="1"
-                                    />
-                                </pattern>
-                                <pattern id="regulatorySilencerPattern" width="6" height="6" patternUnits="userSpaceOnUse">
-                                    <rect width="6" height="6" fill="var(--gray-100)" />
-                                    <path
-                                        d="M-1 5 L1 7 M0 0 L6 6 M5 -1 L7 1"
-                                        stroke={
-                                            activeConcepts.has("regulatory") ? "var(--active-feature-color)" : "var(--gray-500)"
-                                        }
-                                        strokeWidth="1"
-                                    />
-                                </pattern>
-                            </defs>
-
-                            <g className={styles["peripheral-frame"]} aria-hidden="true">
-                                <path className={styles["utility-rule"]} d="M0 278 H1240" />
-                                <text className={styles["zone-label"]} x="0" y="305">
-                                    Context
-                                </text>
-                                <path className={styles["utility-divider"]} d="M760 286 V316" />
-                                <text className={styles["zone-label"]} x="780" y="305">
-                                    Access
-                                </text>
-                            </g>
-
-                            <g>
-                                <path
-                                    className={styles["soft-contour"]}
-                                    d="M0 126 C235 76 392 95 530 132 S799 185 950 132 1138 100 1240 146"
-                                />
-                                <path
-                                    className={styles["soft-contour"]}
-                                    d="M0 265 C274 216 410 254 556 242 S785 204 910 249 1082 286 1240 244"
-                                />
-                                <line className={styles["resource-rail"]} x1="0" x2="1240" y1="32" y2="32" />
-                            </g>
-
-                            <line className={styles["gene-track-hit"]} x1="0" x2="1240" y1="150" y2="150" />
-                            <line className={styles["genome-rail"]} x1="0" x2="1240" y1="150" y2="150" />
-
-                            <g
-                                className={classForConcept("gwas")}
-                                tabIndex={0}
-                                role="button"
-                                aria-label="Genetic associations, shown as a schematic Manhattan plot"
-                                {...conceptInteractions("gwas")}
-                            >
-                                <rect fill="none" pointerEvents="all" x="290" y="42" width="120" height="90" rx="6" />
-                                <path className={styles["association-baseline"]} d="M301 128 H399" />
-                                <path className={styles["association-threshold"]} d="M301 96 H399" />
-                                {ASSOCIATION_POINT_Y.map((y, index) => (
-                                    <circle
-                                        className={`${styles["association-point"]} ${y < 96 ? styles["association-point-significant"] : ""}`}
-                                        cx={301 + index * 3.5}
-                                        cy={y}
-                                        r={y < 96 ? 2.2 : 1.7}
-                                        key={index}
-                                    />
-                                ))}
-                                <GenomicLabel conceptId="gwas" />
-                            </g>
-
-                            <g
-                                className={classForConcept("genes")}
-                                tabIndex={0}
-                                role="button"
-                                aria-label="Genes"
-                                {...conceptInteractions("genes")}
-                            >
-                                <rect
-                                    className={styles["gene-concept-hit-area"]}
-                                    x="50"
-                                    y="118"
-                                    width="180"
-                                    height="84"
-                                    rx="6"
-                                />
-                                {GENE_EXONS.map(([x, width]) => (
-                                    <rect className={styles["gene-exon"]} x={x} y="142" width={width} height="16" key={x} />
-                                ))}
-                                <path className={styles["gene-direction"]} d="M76 142 V132 H96 M91 128 L96 132 L91 136" />
-                                <GenomicLabel conceptId="genes" />
-                            </g>
-
-                            <g
-                                className={classForConcept("variants")}
-                                tabIndex={0}
-                                role="button"
-                                aria-label="Variants"
-                                {...conceptInteractions("variants")}
-                            >
-                                <rect className={styles["variant-hit-area"]} x="292" y="134" width="116" height="48" rx="5" />
-                                {[308, 322, 336, 350, 364, 378, 392].map((x) => (
-                                    <path className={styles.variant} d={`M ${x} 145 l 5 5 l -5 5 l -5 -5 Z`} key={x} />
-                                ))}
-                                <GenomicLabel conceptId="variants" />
-                            </g>
-
-                            <g
-                                className={classForConcept("ld")}
-                                tabIndex={0}
-                                role="button"
-                                aria-label="Linkage disequilibrium, shown as a schematic triangular pairwise matrix"
-                                {...conceptInteractions("ld")}
-                            >
-                                <rect className={styles["ld-hit-area"]} x="290" y="180" width="120" height="90" rx="6" />
-                                <path className={styles["ld-top-rule"]} d="M301 190 H399" />
-                                {LD_VALUES[0].map((_, index) => (
-                                    <path
-                                        className={styles["ld-tick"]}
-                                        d={`M ${308 + index * 14} 182 V190`}
-                                        key={`tick-${index}`}
-                                    />
-                                ))}
-                                {LD_VALUES.map((row, rowIndex) =>
-                                    row.map((value, columnIndex) => {
-                                        const cx = 308 + rowIndex * 7 + columnIndex * 14;
-                                        const cy = 197 + rowIndex * 7;
-
-                                        return (
-                                            <path
-                                                className={styles["ld-cell"]}
-                                                d={`M ${cx} ${cy - 7} L ${cx + 7} ${cy} L ${cx} ${cy + 7} L ${cx - 7} ${cy} Z`}
-                                                fill={activeConcepts.has("ld") ? ACTIVE_LD_COLORS[value] : LD_COLORS[value]}
-                                                key={`${rowIndex}-${columnIndex}`}
-                                            />
-                                        );
-                                    })
-                                )}
-                                <GenomicLabel conceptId="ld" />
-                            </g>
-
-                            <g
-                                className={classForConcept("qtls")}
-                                tabIndex={0}
-                                role="button"
-                                aria-label="Molecular QTLs, shown as multiple relationships from a variant to genomic targets"
-                                {...conceptInteractions("qtls")}
-                            >
-                                <rect className={styles["qtl-hit-area"]} x="784" y="108" width="310" height="146" rx="6" />
-                                <path className={styles["qtl-bridge"]} d="M910 150 C898 122 872 122 860 150" />
-                                <path className={styles["qtl-bridge"]} d="M910 150 C885 205 832 205 800 158" />
-                                <path className={styles["qtl-bridge"]} d="M910 150 C935 196 990 196 1015 158" />
-                                <path className={styles["qtl-bridge"]} d="M910 150 C950 222 1040 222 1080 150" />
-                                <path className={styles.variant} d="M910 144 l6 6 l-6 6 l-6 -6 Z" />
-                                <GenomicLabel conceptId="qtls" />
-                            </g>
-
-                            <g
-                                className={classForConcept("regulatory")}
-                                tabIndex={0}
-                                role="button"
-                                aria-label="Regulatory elements"
-                                {...conceptInteractions("regulatory")}
-                            >
-                                <rect
-                                    className={styles["regulatory-hit-area"]}
-                                    x="504"
-                                    y="104"
-                                    width="250"
-                                    height="94"
-                                    rx="6"
-                                />
-                                <path className={styles["regulatory-loop"]} d="M536 142 C546 110 588 110 598 140" />
-                                <rect className={styles["regulatory-enhancer"]} x="520" y="142" width="32" height="16" rx="2" />
-                                <rect className={styles["regulatory-promoter"]} x="590" y="140" width="16" height="20" rx="2" />
-                                <rect className={styles["regulatory-silencer"]} x="710" y="143" width="28" height="14" rx="2" />
-                                <text className={styles["regulatory-micro-label"]} x="536" y="136" textAnchor="middle">
-                                    Enhancer
-                                </text>
-                                <text className={styles["regulatory-micro-label"]} x="598" y="174" textAnchor="middle">
-                                    Promoter
-                                </text>
-                                <text className={styles["regulatory-micro-label"]} x="648" y="136" textAnchor="middle">
-                                    Gene
-                                </text>
-                                <text className={styles["regulatory-micro-label"]} x="724" y="136" textAnchor="middle">
-                                    Silencer
-                                </text>
-                                <GenomicLabel conceptId="regulatory" />
-                            </g>
-
-                            <g
-                                className={classForConcept("curatedEvidence")}
-                                tabIndex={0}
-                                role="button"
-                                aria-label="Curated evidence"
-                                {...conceptInteractions("curatedEvidence")}
-                            >
-                                <rect className={styles["utility-hit-area"]} x="75" y="282" width="150" height="40" rx="6" />
-                                <UtilityGlyph kind="evidence" x={75} y={288} />
-                                <UtilityLabel conceptId="curatedEvidence" />
-                            </g>
-
-                            <g
-                                className={classForConcept("adspData")}
-                                tabIndex={0}
-                                role="button"
-                                aria-label="ADSP Data"
-                                {...conceptInteractions("adspData")}
-                            >
-                                <rect className={styles["utility-hit-area"]} x="245" y="282" width="110" height="40" rx="6" />
-                                <UtilityGlyph kind="dna" x={245} y={288} />
-                                <UtilityLabel conceptId="adspData" />
-                            </g>
-
-                            <g
-                                className={classForConcept("genomicAnnotations")}
-                                tabIndex={0}
-                                role="button"
-                                aria-label="Genomic Annotations"
-                                {...conceptInteractions("genomicAnnotations")}
-                            >
-                                <rect className={styles["utility-hit-area"]} x="375" y="282" width="175" height="40" rx="6" />
-                                <Layers
-                                    className={styles["utility-glyph"]}
-                                    x={375}
-                                    y={288}
-                                    width={24}
-                                    height={24}
-                                    aria-hidden="true"
-                                />
-                                <UtilityLabel conceptId="genomicAnnotations" />
-                            </g>
-
-                            <g
-                                className={classForConcept("geneticAssociations")}
-                                tabIndex={0}
-                                role="button"
-                                aria-label="Genetic Associations"
-                                {...conceptInteractions("geneticAssociations")}
-                            >
-                                <rect className={styles["utility-hit-area"]} x="565" y="282" width="175" height="40" rx="6" />
-                                <ChartScatter
-                                    className={styles["utility-glyph"]}
-                                    x={565}
-                                    y={288}
-                                    width={24}
-                                    height={24}
-                                    aria-hidden="true"
-                                />
-                                <UtilityLabel conceptId="geneticAssociations" />
-                            </g>
-
-                            <g
-                                className={classForConcept("webAccess")}
-                                tabIndex={0}
-                                role="button"
-                                aria-label="Web access"
-                                {...conceptInteractions("webAccess")}
-                            >
-                                <rect className={styles["utility-hit-area"]} x="890" y="282" width="70" height="40" rx="6" />
-                                <Globe
-                                    className={styles["utility-glyph"]}
-                                    x={890}
-                                    y={288}
-                                    width={24}
-                                    height={24}
-                                    aria-hidden="true"
-                                />
-                                <UtilityLabel conceptId="webAccess" />
-                            </g>
-
-                            <g
-                                className={classForConcept("apiAccess")}
-                                tabIndex={0}
-                                role="button"
-                                aria-label="API access"
-                                {...conceptInteractions("apiAccess")}
-                            >
-                                <rect className={styles["utility-hit-area"]} x="985" y="282" width="60" height="40" rx="6" />
-                                <CodeXml
-                                    className={styles["utility-glyph"]}
-                                    x={985}
-                                    y={288}
-                                    width={24}
-                                    height={24}
-                                    aria-hidden="true"
-                                />
-                                <UtilityLabel conceptId="apiAccess" />
-                            </g>
-
-                            <g
-                                className={classForConcept("downloads")}
-                                tabIndex={0}
-                                role="button"
-                                aria-label="Downloads"
-                                {...conceptInteractions("downloads")}
-                            >
-                                <rect className={styles["utility-hit-area"]} x="1075" y="282" width="110" height="40" rx="6" />
-                                <UtilityGlyph kind="download" x={1075} y={288} />
-                                <UtilityLabel conceptId="downloads" />
-                            </g>
-
-                            <g aria-hidden="true" pointerEvents="none">
-                                {resources.flatMap((resource, resourceIndex) =>
-                                    resource.concepts.map((conceptId) => {
-                                        const start =
-                                            resourceCenterX[resource.id] ??
-                                            getFallbackResourceCenterX(resourceIndex, resources.length);
-                                        const connector = getConnectorGeometry(conceptId);
-                                        const bend = Math.max(62, connector.anchorY - 58);
-                                        const targetX = connector.x;
-                                        const targetY = connector.y;
-                                        const connectorPath = `M ${start} 42 C ${start} ${bend}, ${targetX} ${bend}, ${targetX} ${targetY}`;
-                                        const isActiveLink = activeResources.has(resource.id) && activeConcepts.has(conceptId);
-                                        return (
-                                            <g key={`${resource.id}-${conceptId}`}>
-                                                <path
-                                                    className={pathClass(resource.id, conceptId)}
-                                                    d={connectorPath}
-                                                    style={{ stroke: resource.connectionColor }}
-                                                />
-                                                <circle
-                                                    className={`${styles["link-target"]} ${isActiveLink ? styles.active : ""}`}
-                                                    cx={targetX}
-                                                    cy={targetY}
-                                                    r="3.5"
-                                                    style={{ fill: resource.connectionColor }}
-                                                />
-                                            </g>
-                                        );
-                                    })
-                                )}
-                            </g>
-                        </svg>
-
-                        <div className={styles["resource-detail-slot"]}>
-                            <Card
-                                outline={false}
-                                aria-label={`${detailResource?.name ?? "NIAGADS resource ecosystem"} description`}
-                                className={`${styles["resource-detail"]} ${detailResource ? "" : styles["default-detail"]}`}
-                                style={
-                                    {
-                                        "--description-highlight-color": detailResource?.descriptionHighlightColor ?? "var(--accent-teal)",
-                                    } as CSSProperties
-                                }
-                            >
-                                <CardBody className={styles["resource-detail-body"]}>
-                                    {detailResource && (
-                                        <div
-                                            className={styles["resource-logo-container"]}
-                                            role="img"
-                                            aria-label={`${detailResource.name} logo`}
-                                        >
-                                            {resourceLogo}
-                                        </div>
-                                    )}
-
-                                    <div className={styles["resource-detail-content"]}>
-                                        <h4>{detailResource?.name ?? overview.defaultDetail.title}</h4>
-                                        <p>{detailResource?.description ?? overview.defaultDetail.description}</p>
-                                    </div>
-                                    {detailResource?.url && (
-                                        <a
-                                            className={styles["resource-detail-action"]}
-                                            href={detailResource.url}
-                                            rel="noopener noreferrer"
-                                            target="_blank"
-                                        >
-                                            Explore resource <span aria-hidden="true">→</span>
-                                        </a>
-                                    )}
-                                </CardBody>
-                            </Card>
-                        </div>
-                    </section>
+                                    Explore resource <span aria-hidden="true">→</span>
+                                </a>
+                            )}
+                        </CardBody>
+                    </Card>
                 </div>
             </section>
         </div>
