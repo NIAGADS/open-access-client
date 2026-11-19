@@ -59,6 +59,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: publish-canary
     steps:
+      - name: Check out PR head
+        uses: actions/checkout@v6
       - name: build image and push to ECR
         run: ./scripts/build-docker.sh adsp staging
       - name: Pull and run image on staging server via SSM
@@ -89,6 +91,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: publish-canary
     steps:
+      - name: Check out PR head
+        uses: actions/checkout@v6
       - name: build image and push to ECR
         run: ./scripts/build-docker.sh niagads-main staging
       - name: Pull and run image on staging server via SSM
