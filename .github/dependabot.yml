@@ -1,0 +1,20 @@
+version: 2
+
+updates:
+  - package-ecosystem: npm
+    directory: 
+        - "/apps/*"
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 0
+    allow:
+      - dependency-name: next
+      - dependency-name: react
+      - dependency-name: react-dom
+    groups:
+      next-react-security:
+        applies-to: security-updates
+        patterns:
+          - next
+          - react
+          - react-dom
