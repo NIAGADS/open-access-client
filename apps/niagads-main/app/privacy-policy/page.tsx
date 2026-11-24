@@ -2,7 +2,7 @@
 "use client";
 
 import PrivacyPolicyContent from "@/data/privacy-policy.mdx";
-import { TextContentLayout } from "@niagads/ui";
+import { TextContentLayout } from "@niagads/ui/client";
 
 export default function PrivacyPolicyPage() {
     return (
