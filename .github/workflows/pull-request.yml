@@ -9,6 +9,7 @@ on:
 
 jobs:
   lint-and-build:
+    name: Lint and Build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -20,5 +21,104 @@ jobs:
       - run: npm ci
       - run: npx prettier . --check
       - run: npm run build
+      - uses: actions/cache@v4
+        with:
+          path: |
+            **/dist
+          # Include OS and Node version because node_modules contains compiled binaries
+          key: ${{ runner.os }}-node-${{ env.NODE_VERSION }}-modules-${{ hashFiles('**/package-lock.json') }}
+
+  build-genomics-db:
+    name: Build GenomicsDB
+    runs-on: ubuntu-latest
+    needs: lint-and-build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'npm'
+      - uses: actions/cache@v4
+        with:
+          path: |
+            **/dist
+          # Include OS and Node version because node_modules contains compiled binaries
+          key: ${{ runner.os }}-node-${{ env.NODE_VERSION }}-modules-${{ hashFiles('**/package-lock.json') }}
+      - run: mv apps/genomicsdb/dev.build.env.local apps/genomicsdb/.env.local
+      - run: npm run genomicsdb-build
+
+  build-niagads-main:
+    name: Build NIAGADS Main
+    runs-on: ubuntu-latest
+    needs: lint-and-build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'npm'
+      - uses: actions/cache@v4
+        with:
+          path: |
+            **/dist
+          # Include OS and Node version because node_modules contains compiled binaries
+          key: ${{ runner.os }}-node-${{ env.NODE_VERSION }}-modules-${{ hashFiles('**/package-lock.json') }}
+      - run: mv apps/genomicsdb/dev.build.env.local apps/genomicsdb/.env.local
+      - run: npm run genomicsdb-build
+
+  build-adsp:
+    name: Build ADSP
+    runs-on: ubuntu-latest
+    needs: lint-and-build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'npm'
+      - uses: actions/cache@v4
+        with:
+          path: |
+            **/dist
+          # Include OS and Node version because node_modules contains compiled binaries
+          key: ${{ runner.os }}-node-${{ env.NODE_VERSION }}-modules-${{ hashFiles('**/package-lock.json') }}
+      - run: mv apps/genomicsdb/dev.build.env.local apps/genomicsdb/.env.local
+      - run: npm run genomicsdb-build
+
+  build-open-access-api-client:
+    name: Build Open Access API Client
+    runs-on: ubuntu-latest
+    needs: lint-and-build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'npm'
+      - uses: actions/cache@v4
+        with:
+          path: |
+            **/dist
+          # Include OS and Node version because node_modules contains compiled binaries
+          key: ${{ runner.os }}-node-${{ env.NODE_VERSION }}-modules-${{ hashFiles('**/package-lock.json') }}
+      - run: mv apps/genomicsdb/dev.build.env.local apps/genomicsdb/.env.local
+      - run: npm run genomicsdb-build
+
+  build-igv-browser:
+    name: Build IGV Browser
+    runs-on: ubuntu-latest
+    needs: lint-and-build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'npm'
+      - uses: actions/cache@v4
+        with:
+          path: |
+            **/dist
+          # Include OS and Node version because node_modules contains compiled binaries
+          key: ${{ runner.os }}-node-${{ env.NODE_VERSION }}-modules-${{ hashFiles('**/package-lock.json') }}
       - run: mv apps/genomicsdb/dev.build.env.local apps/genomicsdb/.env.local
       - run: npm run genomicsdb-build
