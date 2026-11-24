@@ -44,6 +44,11 @@ jobs:
           key: package-dists
       - run: npm install -g npm@latest
       - run: npm ci
+      - uses: actions/cache@v4
+        with:
+          path: |
+            **/node_modules
+          key: ${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('**/package-lock.json') }}
       - run: mv apps/genomicsdb/dev.build.env.local apps/genomicsdb/.env.local
       - run: npx lerna run build-genomicsdb
 
@@ -60,10 +65,14 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: |
+            **/node_modules
+          key: ${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('**/package-lock.json') }}
+      - uses: actions/cache@v4
+        with:
+          path: |
             **/dist
           key: package-dists
       - run: npm install -g npm@latest
-      - run: npm ci
       - run: npx lerna run build-niagads-main
 
   build-adsp:
@@ -79,10 +88,14 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: |
+            **/node_modules
+          key: ${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('**/package-lock.json') }}
+      - uses: actions/cache@v4
+        with:
+          path: |
             **/dist
           key: package-dists
       - run: npm install -g npm@latest
-      - run: npm ci
       - run: npx lerna run build-adsp
 
   build-open-access-api-client:
@@ -98,10 +111,14 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: |
+            **/node_modules
+          key: ${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('**/package-lock.json') }}
+      - uses: actions/cache@v4
+        with:
+          path: |
             **/dist
           key: package-dists
       - run: npm install -g npm@latest
-      - run: npm ci
       - run: npx lerna run build-open-access-api-client
 
   build-igv-browser:
@@ -117,8 +134,12 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: |
+            **/node_modules
+          key: ${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('**/package-lock.json') }}
+      - uses: actions/cache@v4
+        with:
+          path: |
             **/dist
           key: package-dists
       - run: npm install -g npm@latest
-      - run: npm ci
       - run: npx lerna run build-genome-browser
