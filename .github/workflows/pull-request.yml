@@ -44,6 +44,7 @@ jobs:
             **/dist
           # Include OS and Node version because node_modules contains compiled binaries
           key: ${{ runner.os }}-node-${{ env.NODE_VERSION }}-modules-${{ hashFiles('**/package-lock.json') }}
+      - run: npm install -g npm@latest
       - run: npm ci
       - run: mv apps/genomicsdb/dev.build.env.local apps/genomicsdb/.env.local
       - run: npx lerna run build-genomicsdb
@@ -64,6 +65,7 @@ jobs:
             **/dist
           # Include OS and Node version because node_modules contains compiled binaries
           key: ${{ runner.os }}-node-${{ env.NODE_VERSION }}-modules-${{ hashFiles('**/package-lock.json') }}
+      - run: npm install -g npm@latest
       - run: npm ci
       - run: npx lerna run niagads-main
 
@@ -83,6 +85,7 @@ jobs:
             **/dist
           # Include OS and Node version because node_modules contains compiled binaries
           key: ${{ runner.os }}-node-${{ env.NODE_VERSION }}-modules-${{ hashFiles('**/package-lock.json') }}
+      - run: npm install -g npm@latest
       - run: npm ci
       - run: npx lerna run build-adsp
 
@@ -102,6 +105,7 @@ jobs:
             **/dist
           # Include OS and Node version because node_modules contains compiled binaries
           key: ${{ runner.os }}-node-${{ env.NODE_VERSION }}-modules-${{ hashFiles('**/package-lock.json') }}
+      - run: npm install -g npm@latest
       - run: npm ci
       - run: npx lerna run build-open-access-api-client
 
@@ -121,5 +125,6 @@ jobs:
             **/dist
           # Include OS and Node version because node_modules contains compiled binaries
           key: ${{ runner.os }}-node-${{ env.NODE_VERSION }}-modules-${{ hashFiles('**/package-lock.json') }}
+      - run: npm install -g npm@latest
       - run: npm ci
       - run: npx lerna run build-genome-browser
