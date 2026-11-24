@@ -9,7 +9,7 @@ on:
 
 jobs:
   lint-and-build:
-    name: Lint and Build
+    name: Lint and Build Packages
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -44,8 +44,9 @@ jobs:
             **/dist
           # Include OS and Node version because node_modules contains compiled binaries
           key: ${{ runner.os }}-node-${{ env.NODE_VERSION }}-modules-${{ hashFiles('**/package-lock.json') }}
+      - run: npm ci
       - run: mv apps/genomicsdb/dev.build.env.local apps/genomicsdb/.env.local
-      - run: npm run genomicsdb-build
+      - run: npx lerna run build-genomicsdb
 
   build-niagads-main:
     name: Build NIAGADS Main
@@ -63,8 +64,8 @@ jobs:
             **/dist
           # Include OS and Node version because node_modules contains compiled binaries
           key: ${{ runner.os }}-node-${{ env.NODE_VERSION }}-modules-${{ hashFiles('**/package-lock.json') }}
-      - run: mv apps/genomicsdb/dev.build.env.local apps/genomicsdb/.env.local
-      - run: npx lerna run build-genomicsdb
+      - run: npm ci
+      - run: npx lerna run niagads-main
 
   build-adsp:
     name: Build ADSP
@@ -82,7 +83,7 @@ jobs:
             **/dist
           # Include OS and Node version because node_modules contains compiled binaries
           key: ${{ runner.os }}-node-${{ env.NODE_VERSION }}-modules-${{ hashFiles('**/package-lock.json') }}
-      - run: mv apps/genomicsdb/dev.build.env.local apps/genomicsdb/.env.local
+      - run: npm ci
       - run: npx lerna run build-adsp
 
   build-open-access-api-client:
@@ -101,7 +102,7 @@ jobs:
             **/dist
           # Include OS and Node version because node_modules contains compiled binaries
           key: ${{ runner.os }}-node-${{ env.NODE_VERSION }}-modules-${{ hashFiles('**/package-lock.json') }}
-      - run: mv apps/genomicsdb/dev.build.env.local apps/genomicsdb/.env.local
+      - run: npm ci
       - run: npx lerna run build-open-access-api-client
 
   build-igv-browser:
@@ -120,5 +121,5 @@ jobs:
             **/dist
           # Include OS and Node version because node_modules contains compiled binaries
           key: ${{ runner.os }}-node-${{ env.NODE_VERSION }}-modules-${{ hashFiles('**/package-lock.json') }}
-      - run: mv apps/genomicsdb/dev.build.env.local apps/genomicsdb/.env.local
+      - run: npm ci
       - run: npx lerna run build-genome-browser
