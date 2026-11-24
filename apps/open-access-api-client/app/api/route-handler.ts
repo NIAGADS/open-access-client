@@ -6,7 +6,10 @@ const _build_headers = (request: NextRequest, headers: HeadersInit | undefined) 
     const forwardedFor = request.headers.get("x-forwarded-for");
     if (!forwardedFor) throw new Error("X-Forwarded-For is missing.");
 
-    const secret: string = process.env.API_SIGNING_SECRET!;
+    const secret = process.env.API_SIGNING_SECRET;
+    if (!secret) {
+        throw new Error("API_SIGNING_SECRET is not configured.");
+    }
     const clientIP = forwardedFor.split(",", 1)[0].trim();
     upstreamHeaders.set("X-Client-IP", clientIP);
     upstreamHeaders.set("X-Client-IP-Signature", createHmac("sha256", secret).update(forwardedFor).digest("hex"));
