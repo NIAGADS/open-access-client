@@ -20,7 +20,7 @@
         "@niagads/ui": "^0.2.1",
         "@scalar/api-reference-react": "^0.9.81",
         "ai": "^7.0.143",
-        "next": "16.3.1",
+        "next": "16.4.6",
         "react": "19.2.8",
         "react-dom": "19.2.8",
         "react-markdown": "10.1.0",
