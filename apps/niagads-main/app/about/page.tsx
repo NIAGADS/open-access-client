@@ -2,14 +2,14 @@
 
 import AboutIntro from "@/data/about-intro.mdx";
 import AboutContent from "@/data/about.mdx";
-import { AboutLayout } from "@/components/About/AboutLayout";
 import { Alert, LinkOut } from "@niagads/ui";
+import { TextContentLayout } from "@niagads/ui/client";
 
 export default function AboutPage() {
     return (
         <main>
             <div className="content-section content-section-centered">
-                <AboutLayout
+                <TextContentLayout
                     intro={
                         <div className="mdx-content">
                             <AboutIntro />
@@ -19,7 +19,7 @@ export default function AboutPage() {
                     <div className="mdx-content">
                         <AboutContent components={{ Alert, LinkOut }} />
                     </div>
-                </AboutLayout>
+                </TextContentLayout>
             </div>
         </main>
     );
