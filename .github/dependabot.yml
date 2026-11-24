@@ -5,7 +5,7 @@ updates:
     directory: 
         - "/apps/*"
     schedule:
-      interval: daily
+      interval: weekly
     open-pull-requests-limit: 0
     allow:
       - dependency-name: next
@@ -18,3 +18,7 @@ updates:
           - next
           - react
           - react-dom
+    # Blocks security update PRs for every other package
+    ignore:
+      - dependency-name: "*"
+

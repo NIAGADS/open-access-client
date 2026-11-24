@@ -98,6 +98,8 @@ docker run -d \
   <image>:<tag>
 ```
 
+docker --context chertan run -d --name niagads-main-client --restart unless-stopped --network oa-network -p 3001:3000 --group-add 1004 -v /mnt/www/logs:/var/log/app  --env-file apps/niagads-main/runtime.env client-app-niagads-main:staging
+
 Use the image tag appropriate to the intended mode. `runtime.env` must be secured on the deployment host and must not be incorporated into the image. Use separate container names and host ports where environments coexist on one host. The default container naming convention is `<application>-client`.
 
 If `oa-network` does not already exist, create it before running the container:
