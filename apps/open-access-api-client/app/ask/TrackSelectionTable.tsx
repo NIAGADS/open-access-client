@@ -93,6 +93,7 @@ export default function TrackSelectionTable({ config }: { config: TableConfig })
             enableMultiSelect: true,
             rowUniqueKey: "id",
             maxSelectedRows: MAX_SELECTED_TRACKS,
+            onRowSelectionChange: setSelection,
         },
     };
 
@@ -168,12 +169,7 @@ export default function TrackSelectionTable({ config }: { config: TableConfig })
                 aria-label="Select tracks; scroll horizontally on narrow screens"
             >
                 <div className={styles.tableContent}>
-                    <EvidenceTable
-                        {...config}
-                        options={options}
-                        rowSelection={selection}
-                        onRowSelectionChange={setSelection}
-                    />
+                    <EvidenceTable {...config} options={options} rowSelection={selection} />
                 </div>
             </div>
             <p role="status">
