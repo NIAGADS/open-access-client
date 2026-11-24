@@ -1,4 +1,3 @@
-
 "use client";
 
 import PrivacyPolicyContent from "@/data/privacy-policy.mdx";
