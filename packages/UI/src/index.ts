@@ -7,7 +7,6 @@ export * from "./Card";
 export * from "./Checkbox";
 export * from "./Skeleton";
 export * from "./Select";
-export * from "./TextContentLayout";
 export * from "./TextInput";
 export * from "./LoadingSpinner";
 export * from "./InlineIcon";

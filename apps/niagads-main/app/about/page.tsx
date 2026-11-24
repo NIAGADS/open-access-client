@@ -3,7 +3,8 @@
 
 import AboutIntro from "@/data/about-intro.mdx";
 import AboutContent from "@/data/about.mdx";
-import { Alert, LinkOut, TextContentLayout } from "@niagads/ui";
+import { Alert, LinkOut } from "@niagads/ui";
+import { TextContentLayout } from "@niagads/ui/client";
 
 export default function AboutPage() {
     return (

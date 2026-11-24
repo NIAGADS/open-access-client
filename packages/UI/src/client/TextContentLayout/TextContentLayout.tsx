@@ -25,6 +25,7 @@ export function TextContentLayout({
 }: TextContentLayoutProps) {
     const articleRef = useRef<HTMLElement>(null);
     const [detectedSections, setDetectedSections] = useState<TextContentSection[]>([]);
+    const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
 
     useEffect(() => {
         if (!showTableOfContents || tableOfContents !== undefined) {
@@ -77,6 +78,54 @@ export function TextContentLayout({
     }, [tableOfContents, showTableOfContents]);
 
     const sections = tableOfContents ?? detectedSections;
+    useEffect(() => {
+        if (!showTableOfContents || sections.length === 0) return;
+
+        const article = articleRef.current;
+        if (!article) return;
+
+        const sectionIds = new Set(sections.map((section) => section.id));
+
+        const headings = Array.from(
+            article.querySelectorAll<HTMLHeadingElement>("h2[id]")
+        ).filter((heading) => sectionIds.has(heading.id));
+
+        if (headings.length === 0) return;
+
+        const updateActiveSection = () => {
+            const activationLine = window.innerHeight * 0.2;
+
+            // Find the last heading that passed the activation line.
+            const activeHeading =
+                headings
+                    .slice()
+                    .reverse()
+                    .find(
+                        (heading) =>
+                            heading.getBoundingClientRect().top <= activationLine
+                    ) ?? headings[0];
+
+            if (activeHeading) {
+                setActiveSectionId(activeHeading.id);
+            }
+        };
+
+        const observer = new IntersectionObserver(
+            updateActiveSection,
+            {
+                rootMargin: "-20% 0px -60% 0px",
+                threshold: 0,
+            }
+        );
+
+        headings.forEach((heading) => observer.observe(heading));
+
+        // Set the active section on initial load.
+        updateActiveSection();
+
+        return () => observer.disconnect();
+    }, [sections, showTableOfContents]);
+
     const hasSidebar = showTableOfContents && sections.length > 0;
 
     const layoutClassName = [
@@ -103,7 +152,10 @@ export function TextContentLayout({
                             <ul>
                                 {sections.map((section) => (
                                     <li key={section.id}>
-                                        <a href={`#${section.id}`}>
+                                        <a
+                                            href={`#${section.id}`}
+                                            aria-current={activeSectionId === section.id ? "location" : undefined}
+                                        >
                                             {section.label}
                                         </a>
                                     </li>
