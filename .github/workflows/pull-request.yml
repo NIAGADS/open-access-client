@@ -64,7 +64,7 @@ jobs:
           key: package-dists
       - run: npm install -g npm@latest
       - run: npm ci
-      - run: npx lerna run niagads-main
+      - run: npx lerna run build-niagads-main
 
   build-adsp:
     name: Build ADSP
