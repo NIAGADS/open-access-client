@@ -98,6 +98,11 @@
     outline-offset: 2px;
 }
 
+/* Active section in sidebar navigation */
+.text-content-sidebar a[aria-current="location"] {
+    box-shadow: inset 2px 0 0 currentColor;
+}
+
 /* Article */
 
 .text-content-article {

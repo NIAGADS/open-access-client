@@ -13,3 +13,4 @@ export * from "./Header";
 export * from "./BackToTop";
 export * from "./NewsBrowser";
 export * from "./PillSelect";
+export * from "./TextContentLayout";
