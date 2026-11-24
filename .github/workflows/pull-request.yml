@@ -25,8 +25,7 @@ jobs:
         with:
           path: |
             **/dist
-          # Include OS and Node version because node_modules contains compiled binaries
-          key: ${{ runner.os }}-node-${{ env.NODE_VERSION }}-modules-${{ hashFiles('**/package-lock.json') }}
+          key: package-dists
 
   build-genomics-db:
     name: Build GenomicsDB
@@ -42,8 +41,7 @@ jobs:
         with:
           path: |
             **/dist
-          # Include OS and Node version because node_modules contains compiled binaries
-          key: ${{ runner.os }}-node-${{ env.NODE_VERSION }}-modules-${{ hashFiles('**/package-lock.json') }}
+          key: package-dists
       - run: npm install -g npm@latest
       - run: npm ci
       - run: mv apps/genomicsdb/dev.build.env.local apps/genomicsdb/.env.local
@@ -63,8 +61,7 @@ jobs:
         with:
           path: |
             **/dist
-          # Include OS and Node version because node_modules contains compiled binaries
-          key: ${{ runner.os }}-node-${{ env.NODE_VERSION }}-modules-${{ hashFiles('**/package-lock.json') }}
+          key: package-dists
       - run: npm install -g npm@latest
       - run: npm ci
       - run: npx lerna run niagads-main
@@ -83,8 +80,7 @@ jobs:
         with:
           path: |
             **/dist
-          # Include OS and Node version because node_modules contains compiled binaries
-          key: ${{ runner.os }}-node-${{ env.NODE_VERSION }}-modules-${{ hashFiles('**/package-lock.json') }}
+          key: package-dists
       - run: npm install -g npm@latest
       - run: npm ci
       - run: npx lerna run build-adsp
@@ -103,8 +99,7 @@ jobs:
         with:
           path: |
             **/dist
-          # Include OS and Node version because node_modules contains compiled binaries
-          key: ${{ runner.os }}-node-${{ env.NODE_VERSION }}-modules-${{ hashFiles('**/package-lock.json') }}
+          key: package-dists
       - run: npm install -g npm@latest
       - run: npm ci
       - run: npx lerna run build-open-access-api-client
@@ -123,8 +118,7 @@ jobs:
         with:
           path: |
             **/dist
-          # Include OS and Node version because node_modules contains compiled binaries
-          key: ${{ runner.os }}-node-${{ env.NODE_VERSION }}-modules-${{ hashFiles('**/package-lock.json') }}
+          key: package-dists
       - run: npm install -g npm@latest
       - run: npm ci
       - run: npx lerna run build-genome-browser
