@@ -9,6 +9,7 @@ on:
 
 jobs:
   lint-and-build:
+    name: Lint and Build Packages
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -18,7 +19,136 @@ jobs:
           cache: 'npm'
       - run: npm install -g npm@latest
       - run: npm ci
+      - uses: actions/cache@v4
+        with:
+          path: |
+            **/node_modules
+          key: ${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('**/package-lock.json') }}
       - run: npx prettier . --check
       - run: npm run build
+      - uses: actions/cache@v4
+        with:
+          path: |
+            **/dist
+          key: package-dists
+
+  build-genomics-db:
+    name: Build GenomicsDB
+    runs-on: ubuntu-latest
+    needs: lint-and-build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'npm'
+      - uses: actions/cache@v4
+        with:
+          path: |
+            **/dist
+          key: package-dists
+      - run: npm install -g npm@latest
+      - uses: actions/cache@v4
+        with:
+          path: |
+            **/node_modules
+          key: ${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('**/package-lock.json') }}
+      - run: npm install -g npm@latest
+      - run: npm i
       - run: mv apps/genomicsdb/dev.build.env.local apps/genomicsdb/.env.local
-      - run: npm run genomicsdb-build
+      - run: npx lerna run build-genomicsdb
+
+  build-niagads-main:
+    name: Build NIAGADS Main
+    runs-on: ubuntu-latest
+    needs: lint-and-build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'npm'
+      - uses: actions/cache@v4
+        with:
+          path: |
+            **/node_modules
+          key: ${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('**/package-lock.json') }}
+      - uses: actions/cache@v4
+        with:
+          path: |
+            **/dist
+          key: package-dists
+      - run: npm install -g npm@latest
+      - run: npm i
+      - run: npx lerna run build-niagads-main
+
+  build-adsp:
+    name: Build ADSP
+    runs-on: ubuntu-latest
+    needs: lint-and-build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'npm'
+      - uses: actions/cache@v4
+        with:
+          path: |
+            **/node_modules
+          key: ${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('**/package-lock.json') }}
+      - uses: actions/cache@v4
+        with:
+          path: |
+            **/dist
+          key: package-dists
+      - run: npm install -g npm@latest
+      - run: npm i
+      - run: npx lerna run build-adsp
+
+  build-open-access-api-client:
+    name: Build Open Access API Client
+    runs-on: ubuntu-latest
+    needs: lint-and-build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'npm'
+      - uses: actions/cache@v4
+        with:
+          path: |
+            **/node_modules
+          key: ${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('**/package-lock.json') }}
+      - uses: actions/cache@v4
+        with:
+          path: |
+            **/dist
+          key: package-dists
+      - run: npm install -g npm@latest
+      - run: npx lerna run build-open-access-api-client
+
+  build-igv-browser:
+    name: Build IGV Browser
+    runs-on: ubuntu-latest
+    needs: lint-and-build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'npm'
+      - uses: actions/cache@v4
+        with:
+          path: |
+            **/node_modules
+          key: ${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('**/package-lock.json') }}
+      - uses: actions/cache@v4
+        with:
+          path: |
+            **/dist
+          key: package-dists
+      - run: npm install -g npm@latest
+      - run: npm i
+      - run: npx lerna run build-genome-browser
