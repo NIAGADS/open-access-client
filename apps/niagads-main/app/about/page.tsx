@@ -1,4 +1,3 @@
-
 "use client";
 
 import AboutIntro from "@/data/about-intro.mdx";

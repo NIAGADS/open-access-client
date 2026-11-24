@@ -51,11 +51,7 @@ export function TextContentLayout({
                     previous.every((section, index) => {
                         const next = nextSections[index];
 
-                        return (
-                            next !== undefined &&
-                            section.id === next.id &&
-                            section.label === next.label
-                        );
+                        return next !== undefined && section.id === next.id && section.label === next.label;
                     });
 
                 return unchanged ? previous : nextSections;
@@ -86,9 +82,9 @@ export function TextContentLayout({
 
         const sectionIds = new Set(sections.map((section) => section.id));
 
-        const headings = Array.from(
-            article.querySelectorAll<HTMLHeadingElement>("h2[id]")
-        ).filter((heading) => sectionIds.has(heading.id));
+        const headings = Array.from(article.querySelectorAll<HTMLHeadingElement>("h2[id]")).filter((heading) =>
+            sectionIds.has(heading.id)
+        );
 
         if (headings.length === 0) return;
 
@@ -100,23 +96,17 @@ export function TextContentLayout({
                 headings
                     .slice()
                     .reverse()
-                    .find(
-                        (heading) =>
-                            heading.getBoundingClientRect().top <= activationLine
-                    ) ?? headings[0];
+                    .find((heading) => heading.getBoundingClientRect().top <= activationLine) ?? headings[0];
 
             if (activeHeading) {
                 setActiveSectionId(activeHeading.id);
             }
         };
 
-        const observer = new IntersectionObserver(
-            updateActiveSection,
-            {
-                rootMargin: "-20% 0px -60% 0px",
-                threshold: 0,
-            }
-        );
+        const observer = new IntersectionObserver(updateActiveSection, {
+            rootMargin: "-20% 0px -60% 0px",
+            threshold: 0,
+        });
 
         headings.forEach((heading) => observer.observe(heading));
 
@@ -137,11 +127,7 @@ export function TextContentLayout({
 
     return (
         <div className={styles["text-content-page"]}>
-            {intro != null && (
-                <header className={styles["text-content-intro"]}>
-                    {intro}
-                </header>
-            )}
+            {intro != null && <header className={styles["text-content-intro"]}>{intro}</header>}
 
             <div className={layoutClassName}>
                 {hasSidebar && (
@@ -165,10 +151,7 @@ export function TextContentLayout({
                     </aside>
                 )}
 
-                <article
-                    ref={articleRef}
-                    className={styles["text-content-article"]}
-                >
+                <article ref={articleRef} className={styles["text-content-article"]}>
                     {children}
                 </article>
             </div>
