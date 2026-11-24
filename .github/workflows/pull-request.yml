@@ -64,7 +64,7 @@ jobs:
           # Include OS and Node version because node_modules contains compiled binaries
           key: ${{ runner.os }}-node-${{ env.NODE_VERSION }}-modules-${{ hashFiles('**/package-lock.json') }}
       - run: mv apps/genomicsdb/dev.build.env.local apps/genomicsdb/.env.local
-      - run: npm run genomicsdb-build
+      - run: npx lerna run build-genomicsdb
 
   build-adsp:
     name: Build ADSP
@@ -83,7 +83,7 @@ jobs:
           # Include OS and Node version because node_modules contains compiled binaries
           key: ${{ runner.os }}-node-${{ env.NODE_VERSION }}-modules-${{ hashFiles('**/package-lock.json') }}
       - run: mv apps/genomicsdb/dev.build.env.local apps/genomicsdb/.env.local
-      - run: npm run genomicsdb-build
+      - run: npx lerna run build-adsp
 
   build-open-access-api-client:
     name: Build Open Access API Client
@@ -102,7 +102,7 @@ jobs:
           # Include OS and Node version because node_modules contains compiled binaries
           key: ${{ runner.os }}-node-${{ env.NODE_VERSION }}-modules-${{ hashFiles('**/package-lock.json') }}
       - run: mv apps/genomicsdb/dev.build.env.local apps/genomicsdb/.env.local
-      - run: npm run genomicsdb-build
+      - run: npx lerna run build-open-access-api-client
 
   build-igv-browser:
     name: Build IGV Browser
@@ -121,4 +121,4 @@ jobs:
           # Include OS and Node version because node_modules contains compiled binaries
           key: ${{ runner.os }}-node-${{ env.NODE_VERSION }}-modules-${{ hashFiles('**/package-lock.json') }}
       - run: mv apps/genomicsdb/dev.build.env.local apps/genomicsdb/.env.local
-      - run: npm run genomicsdb-build
+      - run: npx lerna run build-genome-browser
