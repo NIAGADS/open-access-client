@@ -44,7 +44,7 @@
         "@nivo/pie": "^0.99.0",
         "d3": "^7.8.0",
         "export-from-json": "git+https://github.com/NIAGADS/export-from-json.git#niagads",
-        "plotly.js": "^3.0.1",
+        "plotly.js": "^4.3.0",
         "react-plotly.js": "^2.6.0",
         "swr": "^2.3.6",
         "tslib": "^2"
